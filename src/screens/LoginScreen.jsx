@@ -27,7 +27,7 @@ const LoginScreen = () => {
                 resizeMode='contain'
             />
             <LinearGradient
-                colors={['white', 'rgba(255, 255, 255, 0)']}
+                colors={['#5381ff', 'rgba(255, 255, 255, 0)']}
                 style={styles.gradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 0.6 }}
@@ -90,12 +90,13 @@ const styles = StyleSheet.create({
     title: {
         textAlign: 'center',
         fontSize: 32,
-        color: '#5381ff',
+        color: 'white',
         fontWeight: 'bold'
     },
     welcomeText: {
         paddingTop: 16,
-        fontSize: 20
+        fontSize: 20,
+        color: 'white'
     },
     inputView: {
         width: '100%',
@@ -110,11 +111,12 @@ const styles = StyleSheet.create({
     icon: {
         paddingRight: 8,
         fontSize: 20,
-        color: '#5381ff'
+        color: 'white'
     },
     textInput: {
         paddingVertical: 4,
-        flex: 1
+        flex: 1,
+        color: 'white'
     },
     button: {
         marginVertical: 16,
