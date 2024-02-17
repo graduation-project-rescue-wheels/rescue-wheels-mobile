@@ -7,8 +7,8 @@ import SignupScreen from './src/screens/SignupScreen';
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      {/* <LoginScreen /> */}
-      <SignupScreen />
+      <LoginScreen />
+      {/* <SignupScreen /> */}
       <StatusBar style="auto" />
     </SafeAreaView>
   );
