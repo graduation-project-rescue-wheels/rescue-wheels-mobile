@@ -1,81 +1,117 @@
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { Fontisto, MaterialIcons } from '@expo/vector-icons'
+import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
-import { LinearGradient } from 'expo-linear-gradient'
+import PoppinsText from '../components/PoppinsText'
 
 const LoginScreen = () => {
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
+    const [email, setEmail] = useState({
+        value: "",
+        isFocused: false
+    })
+    const [password, setPassword] = useState({
+        value: "",
+        isFocused: false
+    })
 
     const handleSignInBtn = () => {
         //TODO
     }
 
-    const handleForgotPassword = () => {
+    const handleSignInWithGoogleBtn = () => {
+
+    }
+
+    const handleForgotPasswordOnPress = () => {
         //TODO
     }
 
-    const handleSignUpBtn = () => {
+    const handleSignUpOnPress = () => {
         //TODO
     }
 
     return (
         <View style={styles.container}>
-            <Image
-                source={require('../assets/car-towing.png')}
-                style={styles.image}
-                resizeMode='contain'
-            />
-            <LinearGradient
-                colors={['#5381ff', 'rgba(255, 255, 255, 0)']}
-                style={styles.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 0.6 }}
+            <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
+                style={{ color: '#E48700' }}
             >
-                <Text style={styles.title}>Rescue Wheels</Text>
-                <Text style={styles.welcomeText}>Please enter your credentials:</Text>
-                <View style={styles.inputView}>
-                    <Fontisto name='email' style={styles.icon} />
-                    <TextInput
-                        placeholder='Enter your E-mail'
-                        keyboardType='email-address'
-                        value={email}
-                        onChangeText={e => setEmail(e)}
-                        style={styles.textInput}
-                        placeholderTextColor={'white'}
-                    />
-                </View>
-                <View style={styles.inputView}>
-                    <MaterialIcons name='password' style={styles.icon} />
-                    <TextInput
-                        placeholder='Enter your password'
-                        secureTextEntry={true}
-                        value={password}
-                        onChangeText={e => setPassword(e)}
-                        style={styles.textInput}
-                        placeholderTextColor={'white'}
-                    />
-                </View>
-                <Text
-                    style={styles.forgotPasswordText}
-                    onPress={handleForgotPassword}
-                >
-                    Forgot password?
-                </Text>
-                <TouchableOpacity
-                    style={{ ...styles.button, backgroundColor: '#5381ff' }}
-                    onPress={handleSignInBtn}
-                >
-                    <Text style={{ ...styles.buttonText, color: 'white' }}>Sign in</Text>
-                </TouchableOpacity>
-                <Text style={styles.signUpText}>Don't have an account?</Text>
-                <TouchableOpacity
-                    style={{ ...styles.button, backgroundColor: 'white' }}
-                    onPress={handleSignUpBtn}
-                >
-                    <Text style={{ ...styles.buttonText, color: '#5381ff' }}>Sign up</Text>
-                </TouchableOpacity>
-            </LinearGradient>
+                Rescue Wheels
+            </PoppinsText>
+            </PoppinsText>
+            <PoppinsText style={styles.title}>Sign In</PoppinsText>
+            <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
+            <View style={{
+                ...styles.inputView,
+                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
+            }}>
+                <Fontisto
+                    name='email'
+                    style={{
+                        ...styles.icon,
+                        color: email.isFocused ? '#E48700' : '#ADADAD'
+                    }} />
+                <TextInput
+                    placeholder='Username or E-mail'
+                    keyboardType='email-address'
+                    value={email.value}
+                    onChangeText={e => setEmail(prev => ({ ...prev, value: e }))}
+                    style={styles.textInput}
+                    placeholderTextColor={'#ADADAD'}
+                    onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
+                    onBlur={() => setEmail(prev => ({ ...prev, isFocused: false }))}
+                />
+            </View>
+            <PoppinsText style={styles.label}>Enter your password</PoppinsText>
+            <View style={{
+                ...styles.inputView,
+                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
+            }}>
+                <MaterialIcons
+                    name='password'
+                    style={{
+                        ...styles.icon,
+                        color: password.isFocused ? '#E48700' : '#ADADAD'
+                    }}
+                />
+                <TextInput
+                    placeholder='Password'
+                    secureTextEntry={true}
+                    value={password.value}
+                    onChangeText={e => setPassword(prev => ({ ...prev, value: e }))}
+                    style={styles.textInput}
+                    placeholderTextColor={'#ADADAD'}
+                    onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
+                    onBlur={() => setPassword(prev => ({ ...prev, isFocused: false }))}
+                />
+            </View>
+            <PoppinsText
+                style={styles.forgotPasswordText}
+                onPress={handleForgotPasswordOnPress}
+            >
+                Forgot password?
+            </PoppinsText>
+            <TouchableOpacity
+                style={{ ...styles.button, backgroundColor: '#E48700' }}
+                onPress={handleSignInBtn}
+            >
+                <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Sign in</PoppinsText>
+            </TouchableOpacity>
+            <PoppinsText style={styles.orText}>or</PoppinsText>
+            <TouchableOpacity
+                style={{ ...styles.button, backgroundColor: '#FFF4E3', flexDirection: 'row' }}
+                onPress={handleSignInWithGoogleBtn}
+            >
+                <AntDesign name='google' style={styles.googleIcon} />
+                <PoppinsText style={styles.googleText}>Sign in with Google</PoppinsText>
+            </TouchableOpacity>
+            <PoppinsText style={styles.signUpText}>Don't have an account? <PoppinsText
+                style={{
+                    color: '#E48700'
+                }}
+                onPress={handleSignUpOnPress}
+            >
+                Sign Up
+            </PoppinsText>
+            </PoppinsText>
         </View>
     )
 }
@@ -86,42 +122,42 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: '100%',
+        paddingHorizontal: 16,
+        paddingBottom: 16,
     },
     title: {
-        textAlign: 'center',
         fontSize: 32,
-        color: 'white',
-        fontWeight: 'bold'
+    },
+    welcomeView: {
+        width: '100%',
+        flexDirection: 'row'
     },
     welcomeText: {
-        paddingTop: 16,
-        fontSize: 20,
-        color: 'white'
+        fontSize: 16,
     },
     inputView: {
         width: '100%',
         borderWidth: 1,
-        marginTop: 16,
+        marginVertical: 16,
         borderRadius: 16,
-        borderColor: 'white',
         padding: 8,
         flexDirection: 'row',
         alignItems: 'center',
     },
     icon: {
         paddingRight: 8,
-        fontSize: 20,
-        color: 'white'
+        fontSize: 20
     },
     textInput: {
         paddingVertical: 4,
         flex: 1,
-        color: 'white'
+        fontFamily: 'Poppins-Medium'
     },
     button: {
         marginVertical: 16,
         padding: 8,
-        borderRadius: 16
+        borderRadius: 16,
+        alignItems: 'center'
     },
     buttonText: {
         textAlign: 'center',
@@ -129,8 +165,6 @@ const styles = StyleSheet.create({
     },
     signUpText: {
         fontSize: 16,
-        color: 'white',
-        textAlign: 'center'
     },
     image: {
         position: 'absolute',
@@ -143,8 +177,25 @@ const styles = StyleSheet.create({
     },
     forgotPasswordText: {
         textDecorationLine: 'underline',
-        color: 'white',
         fontSize: 16,
         marginTop: 16
+    },
+    label: {
+        fontSize: 14
+    },
+    orText: {
+        textAlign: 'center',
+        fontSize: 20
+    },
+    googleIcon: {
+        fontSize: 20,
+        color: '#E48700',
+        marginVertical: 8
+    },
+    googleText: {
+        fontSize: 20,
+        color: '#E48700',
+        textAlign: 'center',
+        width: '100%'
     }
 })
