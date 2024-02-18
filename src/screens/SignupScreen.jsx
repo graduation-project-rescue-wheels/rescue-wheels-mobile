@@ -265,9 +265,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
     },
-    welcomeView: {
-        flexDirection: 'row'
-    },
     welcomeText: {
         fontSize: 16,
     },
