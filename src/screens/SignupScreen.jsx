@@ -1,11 +1,12 @@
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Fontisto, MaterialIcons } from '@expo/vector-icons';
 import PoppinsText from '../components/PoppinsText'
 import DatePicker from '@react-native-community/datetimepicker'
+import BackButton from '../components/BackButton';
 
 
-const SignupScreen = () => {
+const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
         isFocused: false
@@ -45,15 +46,17 @@ const SignupScreen = () => {
     }
 
     const handleSignUpBtn = () => {
-
+        //TODO: Register user first
+        navigation.popToTop()
     }
 
     const handleSignInOnPress = () => {
-        //TODO
+        navigation.popToTop()
     }
 
     return (
-        <View style={styles.container} >
+        <View style={styles.container}>
+            <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
                 style={{ color: '#E48700' }}
             >
@@ -63,14 +66,12 @@ const SignupScreen = () => {
 
             <View style={{
                 ...styles.flexRow,
-                marginVertical: 15
+                marginVertical: 8
             }}>
-                <View>
-                    <PoppinsText style={styles.title}>Sign Up</PoppinsText>
-                </View>
+                <PoppinsText style={styles.title}>Sign Up</PoppinsText>
 
                 <View>
-                    <PoppinsText style={styles.label}>Don't have an account?</PoppinsText>
+                    <PoppinsText style={styles.label}>Already have an account?</PoppinsText>
                     <PoppinsText
                         style={{
                             color: '#E48700'
@@ -159,7 +160,7 @@ const SignupScreen = () => {
             </View>
 
             <View style={styles.flexRow}>
-                <View style={{ width: "48%" }}>
+                <View style={{ width: "48%", justifyContent: 'space-between' }}>
                     <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
                     <View
                         style={{
@@ -186,7 +187,7 @@ const SignupScreen = () => {
                     </View>
                 </View>
 
-                <View style={{ width: "48%" }}>
+                <View style={{ width: "48%", justifyContent: 'space-between' }}>
                     <PoppinsText style={styles.label}>Enter your Birth Date</PoppinsText>
                     <TouchableOpacity
                         style={{
@@ -262,6 +263,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         paddingBottom: 16,
+        backgroundColor: 'white'
     },
     title: {
         fontSize: 32,

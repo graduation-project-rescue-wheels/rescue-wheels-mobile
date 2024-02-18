@@ -3,7 +3,7 @@ import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
         isFocused: false
@@ -18,15 +18,15 @@ const LoginScreen = () => {
     }
 
     const handleSignInWithGoogleBtn = () => {
-
+        //TODO
     }
 
     const handleForgotPasswordOnPress = () => {
-        //TODO
+        navigation.navigate('Forgot password')
     }
 
     const handleSignUpOnPress = () => {
-        //TODO
+        navigation.navigate('Sign up')
     }
 
     return (
@@ -37,7 +37,27 @@ const LoginScreen = () => {
                 Rescue Wheels
             </PoppinsText>
             </PoppinsText>
-            <PoppinsText style={styles.title}>Sign In</PoppinsText>
+            <View
+                style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginVertical: 8
+                }}
+            >
+                <PoppinsText style={styles.title}>Sign In</PoppinsText>
+                <View style={{ width: '53%' }}>
+                    <PoppinsText style={styles.signUpText}>Don't have an account?</PoppinsText>
+                    <PoppinsText
+                        style={{
+                            color: '#E48700'
+                        }}
+                        onPress={handleSignUpOnPress}
+                    >
+                        Sign Up
+                    </PoppinsText>
+                </View>
+            </View>
             <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
             <View style={{
                 ...styles.inputView,
@@ -103,15 +123,6 @@ const LoginScreen = () => {
                 <AntDesign name='google' style={styles.googleIcon} />
                 <PoppinsText style={styles.googleText}>Sign in with Google</PoppinsText>
             </TouchableOpacity>
-            <PoppinsText style={styles.signUpText}>Don't have an account? <PoppinsText
-                style={{
-                    color: '#E48700'
-                }}
-                onPress={handleSignUpOnPress}
-            >
-                Sign Up
-            </PoppinsText>
-            </PoppinsText>
         </View>
     )
 }
@@ -124,6 +135,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingHorizontal: 16,
         paddingBottom: 16,
+        backgroundColor: 'white'
     },
     title: {
         fontSize: 32,
@@ -164,7 +176,7 @@ const styles = StyleSheet.create({
         fontSize: 20
     },
     signUpText: {
-        fontSize: 16,
+        fontSize: 14,
     },
     image: {
         position: 'absolute',

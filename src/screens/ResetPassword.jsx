@@ -2,8 +2,9 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
+import BackButton from '../components/BackButton'
 
-const ResetPassword = () => {
+const ResetPassword = ({ navigation }) => {
     const [password, setPassword] = useState({
         value: "",
         isFocused: false
@@ -14,11 +15,13 @@ const ResetPassword = () => {
     })
 
     const handleResetPasswordBtn = () => {
-        //TODO
+        //TODO: Update password
+        navigation.popToTop()
     }
 
     return (
         <View style={styles.container}>
+            <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
                 style={{ color: '#E48700' }}
             >
@@ -26,7 +29,7 @@ const ResetPassword = () => {
             </PoppinsText>
             </PoppinsText>
             <PoppinsText style={styles.title}>Reset Password</PoppinsText>
-            
+
             <PoppinsText style={styles.label}>Enter Your New Password</PoppinsText>
             <View style={{
                 ...styles.inputView,
@@ -91,6 +94,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingHorizontal: 16,
         paddingBottom: 16,
+        backgroundColor: 'white'
     },
     title: {
         fontSize: 32,

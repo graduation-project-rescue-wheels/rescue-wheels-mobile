@@ -1,20 +1,23 @@
 import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
-import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
+import { Fontisto, Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
+import BackButton from '../components/BackButton'
 
-const ForgotPassword = () => {
+const ForgotPassword = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
         isFocused: false
     })
 
     const handleForgotPassowrdBtn = () => {
-        //TODO
+        //TODO: Send E-mail
+        navigation.navigate('Reset password')
     }
 
     return (
         <View style={styles.container}>
+            <BackButton navigation={navigation}/>
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
                 style={{ color: '#E48700' }}
             >
@@ -63,6 +66,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingHorizontal: 16,
         paddingBottom: 16,
+        backgroundColor: 'white'
     },
     title: {
         fontSize: 32,
