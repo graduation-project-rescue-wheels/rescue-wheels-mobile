@@ -1,12 +1,11 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useMemo, useState } from 'react'
 import { Fontisto, MaterialIcons } from '@expo/vector-icons';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import PoppinsText from '../components/PoppinsText'
+import DatePicker from '@react-native-community/datetimepicker'
 
 
 const SignupScreen = () => {
-
     const [email, setEmail] = useState({
         value: "",
         isFocused: false
@@ -30,17 +29,8 @@ const SignupScreen = () => {
     const [dob, setDob] = useState({
         value: new Date(),
         initValue: true,
-        isFocused: false
     })
-
-    const [user, setUser] = useState({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        phoneNumber: "",
-        dob: { date: new Date(), initValue: true }
-    })
+    const [showDatePicker, setShowDatePicker] = useState(false)
 
     const date = useMemo(() => {
         const birthDate = dob.value
@@ -48,23 +38,11 @@ const SignupScreen = () => {
     }, [dob])
 
     const onChange = (e, selectedDate) => {
+        setShowDatePicker(false)
         setDob({
             ...dob, value: selectedDate, initValue: false
         })
     }
-
-    const showMode = (currentMode) => {
-        DateTimePickerAndroid.open({
-            value: dob.value,
-            onChange,
-            mode: currentMode,
-            is24Hour: true,
-        });
-    };
-
-    const showDatepicker = () => {
-        showMode('date');
-    };
 
     const handleSignUpBtn = () => {
 
@@ -111,14 +89,16 @@ const SignupScreen = () => {
                         ...styles.inputView,
                         borderColor: firstName.isFocused ? '#E48700' : '#ADADAD'
                     }}>
-                        <MaterialIcons name="drive-file-rename-outline"
+                        <MaterialIcons
+                            name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
                                 color: firstName.isFocused ? '#E48700' : '#ADADAD'
-                            }} />
+                            }}
+                        />
                         <TextInput
                             placeholder='First Name'
-                            value={firstName}
+                            value={firstName.value}
                             onChangeText={e => setFirstName({ ...firstName, value: e })}
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
@@ -141,7 +121,7 @@ const SignupScreen = () => {
                             }} />
                         <TextInput
                             placeholder='Last Name'
-                            value={lastName}
+                            value={lastName.value}
                             onChangeText={e => setLastName({ ...lastName, value: e })}
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
@@ -153,19 +133,23 @@ const SignupScreen = () => {
             </View>
 
             <PoppinsText style={styles.label}>Enter your E-mail</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
-            }}>
-                <Fontisto name="email"
+            <View
+                style={{
+                    ...styles.inputView,
+                    borderColor: email.isFocused ? '#E48700' : '#ADADAD'
+                }}
+            >
+                <Fontisto
+                    name="email"
                     style={{
                         ...styles.icon,
                         color: email.isFocused ? '#E48700' : '#ADADAD'
-                    }} />
+                    }}
+                />
                 <TextInput
                     placeholder='E-mail'
                     keyboardType='email-address'
-                    value={email}
+                    value={email.value}
                     onChangeText={e => setEmail({ ...email, value: e })}
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
@@ -177,48 +161,57 @@ const SignupScreen = () => {
             <View style={styles.flexRow}>
                 <View style={{ width: "48%" }}>
                     <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
-                    <View style={{
-                        ...styles.inputView,
-                        borderColor: phoneNumber.isFocused ? '#E48700' : '#ADADAD'
-                    }}>
-                        <MaterialIcons name="local-phone"
+                    <View
+                        style={{
+                            ...styles.inputView,
+                            borderColor: phoneNumber.isFocused ? '#E48700' : '#ADADAD'
+                        }}>
+                        <MaterialIcons
+                            name="local-phone"
                             style={{
                                 ...styles.icon,
                                 color: phoneNumber.isFocused ? '#E48700' : '#ADADAD'
-                            }} />
+                            }}
+                        />
                         <TextInput
                             placeholder='Phone Number'
-                            value={phoneNumber}
+                            value={phoneNumber.value}
                             onChangeText={e => setPhoneNumber({ ...phoneNumber, value: e })}
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
                             onFocus={() => setPhoneNumber({ ...phoneNumber, isFocused: true })}
                             onBlur={() => setPhoneNumber({ ...phoneNumber, isFocused: false })}
+                            keyboardType='phone-pad'
                         />
                     </View>
                 </View>
 
                 <View style={{ width: "48%" }}>
                     <PoppinsText style={styles.label}>Enter your Birth Date</PoppinsText>
-                    <TouchableOpacity style={{
-                        ...styles.inputView,
-                        borderColor: dob.isFocused ? '#E48700' : '#ADADAD'
-                    }} onPress={showDatepicker}>
-                        <Fontisto name="date" style={{
-                            ...styles.icon,
-                            color: dob.isFocused ? '#E48700' : '#ADADAD'
-                        }} />
-                        <Text style={{
+                    <TouchableOpacity
+                        style={{
+                            ...styles.inputView,
+                            borderColor: '#ADADAD',
+                        }}
+                        onPress={() => setShowDatePicker(true)}
+                    >
+                        <Fontisto
+                            name="date"
+                            style={{
+                                ...styles.icon,
+                                color: '#ADADAD'
+                            }}
+                        />
+                        <PoppinsText style={{
                             ...styles.textInput,
                             color: dob.initValue ? '#ADADAD' : 'black'
                         }}>
                             {
                                 dob.initValue ? "birth date" : date
                             }
-                        </Text>
+                        </PoppinsText>
                     </TouchableOpacity>
                 </View>
-
             </View>
 
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
@@ -235,7 +228,7 @@ const SignupScreen = () => {
                 />
                 <TextInput
                     placeholder='Password'
-                    value={password}
+                    value={password.value}
                     secureTextEntry={true}
                     onChangeText={e => setPassword({ ...password, value: e })}
                     style={styles.textInput}
@@ -250,6 +243,14 @@ const SignupScreen = () => {
             >
                 <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Sign Up</PoppinsText>
             </TouchableOpacity>
+            {
+                showDatePicker &&
+                <DatePicker
+                    value={dob.value}
+                    mode='date'
+                    onChange={onChange}
+                />
+            }
         </View>
     )
 }
