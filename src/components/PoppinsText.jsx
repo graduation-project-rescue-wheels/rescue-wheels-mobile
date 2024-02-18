@@ -6,6 +6,10 @@ const PoppinsText = ({ style, children, onPress }) => {
         'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf')
     })
 
+    if (!fontsLoaded) {
+        return null
+    }
+
     return <Text style={{ fontFamily: 'Poppins-Medium', ...style }} onPress={onPress}>{children}</Text>
 }
 
