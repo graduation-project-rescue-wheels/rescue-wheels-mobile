@@ -1,18 +1,15 @@
+import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
-import LoginScreen from './src/screens/LoginScreen';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SignupScreen from './src/screens/SignupScreen';
-import ForgotPassword from './src/screens/ForgotScreen';
-import ResetPassword from './src/screens/ResetPassword';
+import AuthStack from './src/navigation/AuthStack';
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      {/* <LoginScreen /> */}
-      {/* <SignupScreen /> */}
-      {/* <ForgotPassword /> */}
-      <ResetPassword />
+      <NavigationContainer>
+        <AuthStack />
+      </NavigationContainer>
       <StatusBar style="auto" />
     </SafeAreaView>
   );
@@ -20,7 +17,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
+    flex: 1
   },
 });
