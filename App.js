@@ -2,14 +2,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AuthStack from './src/navigation/AuthStack';
+import Index from './src/navigation/Index';
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
-      <NavigationContainer>
-        <AuthStack />
-      </NavigationContainer>
+      <Index />
       <StatusBar style="auto" />
     </SafeAreaView>
   );
