@@ -2,6 +2,8 @@ import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-nati
 import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
+import { useDispatch } from 'react-redux'
+import { signInAsync } from '../store/userSlice'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -12,9 +14,10 @@ const LoginScreen = ({ navigation }) => {
         value: "",
         isFocused: false
     })
+    const dispatch = useDispatch()
 
-    const handleSignInBtn = () => {
-        //TODO
+    const handleSignInBtn = async () => {
+        dispatch(signInAsync({ email: email.value, passowrd: password.value }))
     }
 
     const handleSignInWithGoogleBtn = () => {
