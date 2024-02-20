@@ -1,19 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { signIn } from "../api/user";
-import Toast from "react-native-root-toast";
+import showToast from "../components/Toast";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     const response = await signIn(undefined, email, passowrd)
 
     if (response.status === 200) {
-        Toast.show('Welcome to rescue wheels', {
-            duration: Toast.durations.LONG
-        })
+        showToast('Welcome to rescue wheels')
         return response.data
     } else {
-        Toast.show('Something went wrong. Please try again later.', {
-            duration: Toast.durations.LONG
-        })
+        showToast('Something went wrong. Please try again later.')
         return {
             userData: null,
             accessToken: null
