@@ -8,6 +8,7 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
 
     if (response.status === 200) {
         await SecureStore.setItemAsync('accessToken', response.data.Token)
+        await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.userData))
         showToast('Welcome to rescue wheels')
 
         return response.data
@@ -23,6 +24,17 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
 
 export const signOutAsync = createAsyncThunk('user/signOutAsync', async () => {
     await SecureStore.deleteItemAsync('accessToken')
+    await SecureStore.deleteItemAsync('currentUser')
+})
+
+export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => {
+    const userData = JSON.parse(await SecureStore.getItemAsync('currentUser'))
+    const accessToken = await SecureStore.getItemAsync('accessToken')
+
+    return {
+        userData,
+        accessToken
+    }
 })
 
 const userSlice = createSlice({
@@ -40,6 +52,11 @@ const userSlice = createSlice({
         builder.addCase(signOutAsync.fulfilled, (state) => {
             state.user = null
             state.accessToken = null
+        })
+
+        builder.addCase(loadUserAsync.fulfilled, (state, action) => {
+            state.user = action.payload.userData
+            state.accessToken = action.payload.accessToken
         })
     }
 })
