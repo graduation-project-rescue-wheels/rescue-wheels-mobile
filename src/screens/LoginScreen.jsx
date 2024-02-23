@@ -5,7 +5,7 @@ import PoppinsText from '../components/PoppinsText'
 import { useDispatch } from 'react-redux'
 import { signInAsync } from '../store/userSlice'
 import showToast from '../components/Toast'
-import { emailRegex } from '../utils/regex'
+import { validateEmail, validatePassword } from '../utils/inputValidations'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -26,79 +26,37 @@ const LoginScreen = ({ navigation }) => {
     })
     const dispatch = useDispatch()
 
-    const validateEmail = () => {
-        if (email.value.length === 0) {
-            setEmail(prev => ({
-                ...prev,
-                validation: {
-                    isValid: false,
-                    message: 'Please enter an E-mail'
-                }
-            }))
-
-            return false
-        } else if (!emailRegex.test(email.value)) {
-            setEmail(prev => ({
-                ...prev,
-                validation: {
-                    isValid: false,
-                    message: 'Invalid E-mail address'
-                }
-            }))
-
-            return false
-        } else {
-            setEmail(prev => ({
-                ...prev,
-                validation: {
-                    isValid: true,
-                    message: ''
-                }
-            }))
-
-            return true
-        }
-    }
-
-    const validatePassword = () => {
-        if (password.value.length === 0) {
-            setPassword(prev => ({
-                ...prev,
-                validation: {
-                    isValid: false,
-                    message: 'Please enter your password'
-                }
-            }))
-
-            return false
-        } else {
-            setPassword(prev => ({
-                ...prev,
-                validation: {
-                    isValid: true,
-                    message: ''
-                }
-            }))
-
-            return true
-        }
-    }
-
     const handleEmailTextInputOnBlur = () => {
-        setEmail(prev => ({ ...prev, isFocused: false }))
-        validateEmail()
+        setEmail(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateEmail(email.value)
+        }))
     }
 
     const handlePasswordTextInputOnBlur = () => {
-        setPassword(prev => ({ ...prev, isFocused: false }))
-        validatePassword()
+        setPassword(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validatePassword(password.value)
+        }))
     }
 
     const handleSignInBtn = () => {
-        const emailValidationResult = validateEmail()
-        const passwordValidationResult = validatePassword()
+        const emailValidationResult = validateEmail(email.value)
+        const passwordValidationResult = validatePassword(password.value)
 
-        if (emailValidationResult && passwordValidationResult) {
+        setEmail(prev => ({
+            ...prev,
+            validation: emailValidationResult
+        }))
+
+        setPassword(prev => ({
+            ...prev,
+            validation: passwordValidationResult
+        }))
+
+        if (emailValidationResult.isValid && passwordValidationResult.isValid) {
             dispatch(signInAsync({ email: email.value, passowrd: password.value }))
         } else {
             showToast('Invalid E-mail or password')

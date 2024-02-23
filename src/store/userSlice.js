@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import showToast from "../components/Toast";
 import * as SecureStore from 'expo-secure-store'
 import { signIn, signUp } from "../api/user";
-import Toast from "react-native-root-toast";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     const response = await signIn(undefined, email, passowrd)
@@ -15,7 +14,7 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
         return response.data
     } else {
         showToast('Something went wrong. Please try again later.')
-      
+
         return {
             userData: null,
             accessToken: null
@@ -50,17 +49,11 @@ export const signUpAsync = createAsyncThunk('user/signUpAsync', async ({
     const response = await signUp(firstName, lastName, email, password, mobileNumber, DOB)
     console.log(response.status);
     if (response.status === 201) {
-        Toast.show('User registered successfully', {
-            duration: Toast.durations.LONG
-        })
+        showToast('User registered successfully')
     } else if (response.status === 409) {
-        Toast.show('Email or Phone number is already exists', {
-            duration: Toast.durations.LONG
-        })
+        showToast('Email or Phone number is already exists')
     } else {
-        Toast.show('Something went wrong. Please try again later.', {
-            duration: Toast.durations.LONG
-        })
+        showToast('Something went wrong, Please try again later')
     }
 })
 
@@ -85,7 +78,7 @@ const userSlice = createSlice({
             state.user = action.payload.userData
             state.accessToken = action.payload.accessToken
         })
-        builder.addCase(signUpAsync.fulfilled, (state, action) => { })
+        builder.addCase(signUpAsync.fulfilled)
     }
 })
 
