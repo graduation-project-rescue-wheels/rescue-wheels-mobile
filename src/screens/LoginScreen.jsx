@@ -4,15 +4,25 @@ import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { useDispatch } from 'react-redux'
 import { signInAsync } from '../store/userSlice'
+import showToast from '../components/Toast'
+import { emailRegex } from '../utils/regex'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [password, setPassword] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const dispatch = useDispatch()
 
@@ -25,8 +35,6 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Please enter an E-mail'
                 }
             }))
-
-            return false
         } else if (!emailRegex.test(email.value)) {
             setEmail(prev => ({
                 ...prev,
@@ -35,8 +43,6 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Invalid E-mail address'
                 }
             }))
-
-            return false
         } else {
             setEmail(prev => ({
                 ...prev,
@@ -45,8 +51,6 @@ const LoginScreen = ({ navigation }) => {
                     message: ''
                 }
             }))
-
-            return true
         }
     }
 
@@ -59,8 +63,6 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Please enter your password'
                 }
             }))
-
-            return false
         } else {
             setPassword(prev => ({
                 ...prev,
@@ -69,8 +71,6 @@ const LoginScreen = ({ navigation }) => {
                     message: ''
                 }
             }))
-
-            return true
         }
     }
 
@@ -85,10 +85,10 @@ const LoginScreen = ({ navigation }) => {
     }
 
     const handleSignInBtn = () => {
-        const emailValidationResult = validateEmail()
-        const passwordValidationResult = validatePassword()
+        validateEmail()
+        validatePassword()
 
-        if (emailValidationResult && passwordValidationResult) {
+        if (email.validation.isValid && password.validation.isValid) {
             dispatch(signInAsync({ email: email.value, passowrd: password.value }))
         } else {
             showToast('Invalid E-mail or password')
@@ -140,13 +140,15 @@ const LoginScreen = ({ navigation }) => {
             <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
+                borderColor: email.isFocused ?
+                    '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ? '#E48700' : '#ADADAD'
+                        color: email.isFocused ?
+                            '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                     }} />
                 <TextInput
                     placeholder='Username or E-mail'
@@ -156,19 +158,25 @@ const LoginScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={() => setEmail(prev => ({ ...prev, isFocused: false }))}
+                    onBlur={handleEmailTextInputOnBlur}
                 />
             </View>
+            {
+                email.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{email.validation.message}</PoppinsText>
+            }
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
+                borderColor: password.isFocused ?
+                    '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: password.isFocused ? '#E48700' : '#ADADAD'
+                        color: password.isFocused ?
+                            '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />
                 <TextInput
@@ -179,9 +187,13 @@ const LoginScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={() => setPassword(prev => ({ ...prev, isFocused: false }))}
+                    onBlur={handlePasswordTextInputOnBlur}
                 />
             </View>
+            {
+                password.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{password.validation.message}</PoppinsText>
+            }
             <PoppinsText
                 style={styles.forgotPasswordText}
                 onPress={handleForgotPasswordOnPress}
@@ -219,17 +231,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
     },
-    welcomeView: {
-        width: '100%',
-        flexDirection: 'row'
-    },
     welcomeText: {
         fontSize: 16,
     },
     inputView: {
         width: '100%',
         borderWidth: 1,
-        marginVertical: 16,
+        marginTop: 16,
+        marginBottom: 8,
         borderRadius: 16,
         padding: 8,
         flexDirection: 'row',
@@ -288,5 +297,9 @@ const styles = StyleSheet.create({
         color: '#E48700',
         textAlign: 'center',
         width: '100%'
+    },
+    validationMessageText: {
+        color: 'red',
+        marginBottom: 16
     }
 })
