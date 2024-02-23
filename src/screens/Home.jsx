@@ -1,15 +1,17 @@
-import { Button, StyleSheet, View } from 'react-native'
-import { useDispatch } from 'react-redux'
-import { signOut } from '../store/userSlice'
+import { Button, StyleSheet, Text, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import { signOutAsync } from '../store/userSlice'
 
 const Home = () => {
+    const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
 
     return (
         <View>
+            <Text>{user.email}</Text>
             <Button
                 title='Sign out'
-                onPress={() => dispatch(signOut())}
+                onPress={() => dispatch(signOutAsync())}
             />
         </View>
     )

@@ -16,8 +16,84 @@ const LoginScreen = ({ navigation }) => {
     })
     const dispatch = useDispatch()
 
-    const handleSignInBtn = async () => {
-        dispatch(signInAsync({ email: email.value, passowrd: password.value }))
+    const validateEmail = () => {
+        if (email.value.length === 0) {
+            setEmail(prev => ({
+                ...prev,
+                validation: {
+                    isValid: false,
+                    message: 'Please enter an E-mail'
+                }
+            }))
+
+            return false
+        } else if (!emailRegex.test(email.value)) {
+            setEmail(prev => ({
+                ...prev,
+                validation: {
+                    isValid: false,
+                    message: 'Invalid E-mail address'
+                }
+            }))
+
+            return false
+        } else {
+            setEmail(prev => ({
+                ...prev,
+                validation: {
+                    isValid: true,
+                    message: ''
+                }
+            }))
+
+            return true
+        }
+    }
+
+    const validatePassword = () => {
+        if (password.value.length === 0) {
+            setPassword(prev => ({
+                ...prev,
+                validation: {
+                    isValid: false,
+                    message: 'Please enter your password'
+                }
+            }))
+
+            return false
+        } else {
+            setPassword(prev => ({
+                ...prev,
+                validation: {
+                    isValid: true,
+                    message: ''
+                }
+            }))
+
+            return true
+        }
+    }
+
+    const handleEmailTextInputOnBlur = () => {
+        setEmail(prev => ({ ...prev, isFocused: false }))
+        validateEmail()
+    }
+
+    const handlePasswordTextInputOnBlur = () => {
+        setPassword(prev => ({ ...prev, isFocused: false }))
+        validatePassword()
+    }
+
+    const handleSignInBtn = () => {
+        const emailValidationResult = validateEmail()
+        const passwordValidationResult = validatePassword()
+
+        if (emailValidationResult && passwordValidationResult) {
+            dispatch(signInAsync({ email: email.value, passowrd: password.value }))
+        } else {
+            showToast('Invalid E-mail or password')
+            console.log('LoginScreen sign in button:', 'Invalid E-mail or password');
+        }
     }
 
     const handleSignInWithGoogleBtn = () => {
