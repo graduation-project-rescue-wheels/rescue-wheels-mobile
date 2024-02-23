@@ -35,6 +35,8 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Please enter an E-mail'
                 }
             }))
+
+            return false
         } else if (!emailRegex.test(email.value)) {
             setEmail(prev => ({
                 ...prev,
@@ -43,6 +45,8 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Invalid E-mail address'
                 }
             }))
+
+            return false
         } else {
             setEmail(prev => ({
                 ...prev,
@@ -51,6 +55,8 @@ const LoginScreen = ({ navigation }) => {
                     message: ''
                 }
             }))
+
+            return true
         }
     }
 
@@ -63,6 +69,8 @@ const LoginScreen = ({ navigation }) => {
                     message: 'Please enter your password'
                 }
             }))
+
+            return false
         } else {
             setPassword(prev => ({
                 ...prev,
@@ -71,6 +79,8 @@ const LoginScreen = ({ navigation }) => {
                     message: ''
                 }
             }))
+
+            return true
         }
     }
 
@@ -85,10 +95,10 @@ const LoginScreen = ({ navigation }) => {
     }
 
     const handleSignInBtn = () => {
-        validateEmail()
-        validatePassword()
+        const emailValidationResult = validateEmail()
+        const passwordValidationResult = validatePassword()
 
-        if (email.validation.isValid && password.validation.isValid) {
+        if (emailValidationResult && passwordValidationResult) {
             dispatch(signInAsync({ email: email.value, passowrd: password.value }))
         } else {
             showToast('Invalid E-mail or password')
