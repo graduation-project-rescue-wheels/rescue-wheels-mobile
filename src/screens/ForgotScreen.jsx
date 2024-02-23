@@ -3,16 +3,38 @@ import { Fontisto, Ionicons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import BackButton from '../components/BackButton'
+import { validateEmail } from '../utils/inputValidations';
 
 const ForgotPassword = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
+
+    const handleEmailTextInputOnBlur = () => {
+        setEmail(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateEmail(email.value)
+        }))
+    }
 
     const handleForgotPassowrdBtn = () => {
         //TODO: Send E-mail
-        navigation.navigate('Reset password')
+        const emailValidationResult = validateEmail(email.value)
+
+        setEmail(prev => ({
+            ...prev,
+            validation: emailValidationResult
+        }))
+
+        if (emailValidationResult.isValid) {
+            navigation.navigate('Reset password')
+        }
     }
 
     return (
@@ -28,13 +50,13 @@ const ForgotPassword = ({ navigation }) => {
             <PoppinsText style={styles.label}>Please enter your registered email address, so we will send you link to your email</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
+                borderColor: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ? '#E48700' : '#ADADAD'
+                        color: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                     }} />
                 <TextInput
                     placeholder='E-mail'
@@ -44,9 +66,13 @@ const ForgotPassword = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setEmail({ ...email, isFocused: true })}
-                    onBlur={() => setEmail({ ...email, isFocused: false })}
+                    onBlur={handleEmailTextInputOnBlur}
                 />
             </View>
+            {
+                email.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{email.validation.message}</PoppinsText>
+            }
 
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: '#E48700' }}
@@ -106,5 +132,9 @@ const styles = StyleSheet.create({
         fontSize: 14,
         textAlign: 'center',
         marginTop: 70
+    },
+    validationMessageText: {
+        color: 'red',
+        marginBottom: 16
     }
 })
