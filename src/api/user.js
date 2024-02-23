@@ -7,3 +7,14 @@ export async function signIn(username, email, password) {
         password
     })
 }
+
+export async function signUp(firstName, lastName, email, password, mobileNumber, DOB) {
+    return await rwClient.post('/user/signUp', {
+        firstName,
+        lastName,
+        email,
+        password,
+        mobileNumber,
+        DOB
+    })
+}

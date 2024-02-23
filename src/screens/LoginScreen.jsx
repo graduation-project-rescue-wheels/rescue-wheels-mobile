@@ -4,25 +4,15 @@ import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { useDispatch } from 'react-redux'
 import { signInAsync } from '../store/userSlice'
-import showToast from '../components/Toast'
-import { emailRegex } from '../utils/regex'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
-        isFocused: false,
-        validation: {
-            isValid: true,
-            message: ''
-        }
+        isFocused: false
     })
     const [password, setPassword] = useState({
         value: "",
-        isFocused: false,
-        validation: {
-            isValid: true,
-            message: ''
-        }
+        isFocused: false
     })
     const dispatch = useDispatch()
 
@@ -150,15 +140,13 @@ const LoginScreen = ({ navigation }) => {
             <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: email.isFocused ?
-                    '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
+                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
             }}>
                 <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ?
-                            '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
+                        color: email.isFocused ? '#E48700' : '#ADADAD'
                     }} />
                 <TextInput
                     placeholder='Username or E-mail'
@@ -168,25 +156,19 @@ const LoginScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={handleEmailTextInputOnBlur}
+                    onBlur={() => setEmail(prev => ({ ...prev, isFocused: false }))}
                 />
             </View>
-            {
-                email.validation.isValid ?
-                    null : <PoppinsText style={styles.validationMessageText}>{email.validation.message}</PoppinsText>
-            }
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: password.isFocused ?
-                    '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
+                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
             }}>
                 <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: password.isFocused ?
-                            '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
+                        color: password.isFocused ? '#E48700' : '#ADADAD'
                     }}
                 />
                 <TextInput
@@ -197,13 +179,9 @@ const LoginScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={handlePasswordTextInputOnBlur}
+                    onBlur={() => setPassword(prev => ({ ...prev, isFocused: false }))}
                 />
             </View>
-            {
-                password.validation.isValid ?
-                    null : <PoppinsText style={styles.validationMessageText}>{password.validation.message}</PoppinsText>
-            }
             <PoppinsText
                 style={styles.forgotPasswordText}
                 onPress={handleForgotPasswordOnPress}
@@ -241,14 +219,17 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
     },
+    welcomeView: {
+        width: '100%',
+        flexDirection: 'row'
+    },
     welcomeText: {
         fontSize: 16,
     },
     inputView: {
         width: '100%',
         borderWidth: 1,
-        marginTop: 16,
-        marginBottom: 8,
+        marginVertical: 16,
         borderRadius: 16,
         padding: 8,
         flexDirection: 'row',
@@ -307,9 +288,5 @@ const styles = StyleSheet.create({
         color: '#E48700',
         textAlign: 'center',
         width: '100%'
-    },
-    validationMessageText: {
-        color: 'red',
-        marginBottom: 16
     }
 })
