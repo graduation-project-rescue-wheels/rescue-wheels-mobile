@@ -1,10 +1,12 @@
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import { useMemo, useState } from 'react'
 import { Fontisto, MaterialIcons } from '@expo/vector-icons';
 import PoppinsText from '../components/PoppinsText'
 import DatePicker from '@react-native-community/datetimepicker'
 import BackButton from '../components/BackButton';
-
+import { useDispatch } from 'react-redux';
+import { signUpAsync } from '../store/userSlice';
+import Toast from "react-native-root-toast";
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -27,6 +29,10 @@ const SignupScreen = ({ navigation }) => {
         value: "",
         isFocused: false
     })
+    const [confirmPassword, setconfirmPassword] = useState({
+        value: "",
+        isFocused: false
+    })
     const [dob, setDob] = useState({
         value: new Date(),
         initValue: true,
@@ -35,7 +41,7 @@ const SignupScreen = ({ navigation }) => {
 
     const date = useMemo(() => {
         const birthDate = dob.value
-        return `${birthDate.getDate()}/${birthDate.getMonth() + 1}/${birthDate.getFullYear()}`
+        return `${birthDate.getFullYear()}-${birthDate.getMonth() + 1}-${birthDate.getDate()}`
     }, [dob])
 
     const onChange = (e, selectedDate) => {
@@ -44,10 +50,24 @@ const SignupScreen = ({ navigation }) => {
             ...dob, value: selectedDate, initValue: false
         })
     }
+    const dispatch = useDispatch()
 
     const handleSignUpBtn = () => {
-        //TODO: Register user first
-        navigation.popToTop()
+        if (confirmPassword.value == password.value) {
+            dispatch(signUpAsync({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                email: email.value,
+                password: password.value,
+                mobileNumber: phoneNumber.value,
+                DOB: dob.value
+            }))
+        } else {
+            Toast.show('Confirmation password does not match', {
+                duration: Toast.durations.LONG
+            })
+        }
+        // navigation.popToTop()
     }
 
     const handleSignInOnPress = () => {
@@ -55,7 +75,7 @@ const SignupScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
                 style={{ color: '#E48700' }}
@@ -158,7 +178,52 @@ const SignupScreen = ({ navigation }) => {
                     onBlur={() => setEmail({ ...email, isFocused: false })}
                 />
             </View>
-
+            <PoppinsText style={styles.label}>Enter your password</PoppinsText>
+            <View style={{
+                ...styles.inputView,
+                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
+            }}>
+                <MaterialIcons
+                    name='password'
+                    style={{
+                        ...styles.icon,
+                        color: password.isFocused ? '#E48700' : '#ADADAD'
+                    }}
+                />
+                <TextInput
+                    placeholder='Password'
+                    value={password.value}
+                    secureTextEntry={true}
+                    onChangeText={e => setPassword({ ...password, value: e })}
+                    style={styles.textInput}
+                    placeholderTextColor={'#ADADAD'}
+                    onFocus={() => setPassword({ ...password, isFocused: true })}
+                    onBlur={() => setPassword({ ...password, isFocused: false })}
+                />
+            </View>
+            <PoppinsText style={styles.label}>Confirm your password</PoppinsText>
+            <View style={{
+                ...styles.inputView,
+                borderColor: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
+            }}>
+                <MaterialIcons
+                    name='password'
+                    style={{
+                        ...styles.icon,
+                        color: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
+                    }}
+                />
+                <TextInput
+                    placeholder='Confirm Password'
+                    value={confirmPassword.value}
+                    secureTextEntry={true}
+                    onChangeText={e => setconfirmPassword({ ...confirmPassword, value: e })}
+                    style={styles.textInput}
+                    placeholderTextColor={'#ADADAD'}
+                    onFocus={() => setconfirmPassword({ ...confirmPassword, isFocused: true })}
+                    onBlur={() => setconfirmPassword({ ...confirmPassword, isFocused: false })}
+                />
+            </View>
             <View style={styles.flexRow}>
                 <View style={{ width: "48%", justifyContent: 'space-between' }}>
                     <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
@@ -214,30 +279,6 @@ const SignupScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
-
-            <PoppinsText style={styles.label}>Enter your password</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
-            }}>
-                <MaterialIcons
-                    name='password'
-                    style={{
-                        ...styles.icon,
-                        color: password.isFocused ? '#E48700' : '#ADADAD'
-                    }}
-                />
-                <TextInput
-                    placeholder='Password'
-                    value={password.value}
-                    secureTextEntry={true}
-                    onChangeText={e => setPassword({ ...password, value: e })}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setPassword({ ...password, isFocused: true })}
-                    onBlur={() => setPassword({ ...password, isFocused: false })}
-                />
-            </View>
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: '#E48700' }}
                 onPress={handleSignUpBtn}
@@ -252,7 +293,7 @@ const SignupScreen = ({ navigation }) => {
                     onChange={onChange}
                 />
             }
-        </View>
+        </ScrollView>
     )
 }
 
