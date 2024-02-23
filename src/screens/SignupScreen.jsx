@@ -6,36 +6,64 @@ import DatePicker from '@react-native-community/datetimepicker'
 import BackButton from '../components/BackButton';
 import { useDispatch } from 'react-redux';
 import { signUpAsync } from '../store/userSlice';
-import Toast from "react-native-root-toast";
+import { validateConfirmationPassword, validateEmail, validateFirstName, validateLastName, validatePassword, validatePhoneNumber, validatedob } from '../utils/inputValidations';
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [firstName, setFirstName] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [lastName, setLastName] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [phoneNumber, setPhoneNumber] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [password, setPassword] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [confirmPassword, setconfirmPassword] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [dob, setDob] = useState({
         value: new Date(),
         initValue: true,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
     const [showDatePicker, setShowDatePicker] = useState(false)
 
@@ -52,8 +80,106 @@ const SignupScreen = ({ navigation }) => {
     }
     const dispatch = useDispatch()
 
+    const handleEmailTextInputOnBlur = () => {
+        setEmail(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateEmail(email.value)
+        }))
+    }
+
+    const handlePasswordTextInputOnBlur = () => {
+        setPassword(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validatePassword(password.value)
+        }))
+    }
+
+    const handleConfirmationPasswordTextInputOnBlur = () => {
+        setconfirmPassword(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateConfirmationPassword(password.value, confirmPassword.value)
+        }))
+    }
+
+    const handlePhoneNumberTextInputOnBlur = () => {
+        setPhoneNumber(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validatePhoneNumber(phoneNumber.value)
+        }))
+    }
+
+    const handleFirstNameTextInputOnBlur = () => {
+        setFirstName(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateFirstName(firstName.value)
+        }))
+    }
+
+    const handleLastNameTextInputOnBlur = () => {
+        setLastName(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateLastName(lastName.value)
+        }))
+    }
+
     const handleSignUpBtn = () => {
-        if (confirmPassword.value == password.value) {
+        const emailValidationResult = validateEmail(email.value)
+        const passwordValidationResult = validatePassword(password.value)
+        const confirmationPasswordResult = validateConfirmationPassword(password.value, confirmPassword.value)
+        const firstNameResult = validateFirstName(firstName.value)
+        const lastNameResult = validateLastName(lastName.value)
+        const phoneNumberResult = validatePhoneNumber(phoneNumber.value)
+        const dobResult = validatedob(date)
+
+        setEmail(prev => ({
+            ...prev,
+            validation: emailValidationResult
+        }))
+
+        setPassword(prev => ({
+            ...prev,
+            validation: passwordValidationResult
+        }))
+
+        setconfirmPassword(prev => ({
+            ...prev,
+            validation: confirmationPasswordResult
+        }))
+
+        setFirstName(prev => ({
+            ...prev,
+            validation: firstNameResult
+        }))
+
+        setLastName(prev => ({
+            ...prev,
+            validation: lastNameResult
+        }))
+
+        setPhoneNumber(prev => ({
+            ...prev,
+            validation: phoneNumberResult
+        }))
+
+        setDob(prev => ({
+            ...prev,
+            validation: dobResult
+        }))
+
+        if (emailValidationResult.isValid &&
+            passwordValidationResult.isValid &&
+            confirmationPasswordResult.isValid &&
+            firstNameResult.isValid &&
+            lastNameResult.isValid &&
+            phoneNumberResult.isValid &&
+            dobResult.isValid) {
+
             dispatch(signUpAsync({
                 firstName: firstName.value,
                 lastName: lastName.value,
@@ -62,12 +188,8 @@ const SignupScreen = ({ navigation }) => {
                 mobileNumber: phoneNumber.value,
                 DOB: dob.value
             }))
-        } else {
-            Toast.show('Confirmation password does not match', {
-                duration: Toast.durations.LONG
-            })
+            navigation.popToTop()
         }
-        // navigation.popToTop()
     }
 
     const handleSignInOnPress = () => {
@@ -108,13 +230,13 @@ const SignupScreen = ({ navigation }) => {
                     <PoppinsText style={styles.label}>Enter your First Name</PoppinsText>
                     <View style={{
                         ...styles.inputView,
-                        borderColor: firstName.isFocused ? '#E48700' : '#ADADAD'
+                        borderColor: firstName.isFocused ? '#E48700' : firstName.validation.isValid ? '#ADADAD' : 'red'
                     }}>
                         <MaterialIcons
                             name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: firstName.isFocused ? '#E48700' : '#ADADAD'
+                                color: firstName.isFocused ? '#E48700' : firstName.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />
                         <TextInput
@@ -124,21 +246,25 @@ const SignupScreen = ({ navigation }) => {
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
                             onFocus={() => setFirstName({ ...firstName, isFocused: true })}
-                            onBlur={() => setFirstName({ ...firstName, isFocused: false })}
+                            onBlur={handleFirstNameTextInputOnBlur}
                         />
                     </View>
+                    {
+                        firstName.validation.isValid ?
+                            null : <PoppinsText style={styles.validationMessageText}>{firstName.validation.message}</PoppinsText>
+                    }
                 </View>
 
                 <View style={{ width: "48%" }}>
                     <PoppinsText style={styles.label}>Enter your Last Name</PoppinsText>
                     <View style={{
                         ...styles.inputView,
-                        borderColor: lastName.isFocused ? '#E48700' : '#ADADAD'
+                        borderColor: lastName.isFocused ? '#E48700' : lastName.validation.isValid ? '#ADADAD' : 'red'
                     }}>
                         <MaterialIcons name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: lastName.isFocused ? '#E48700' : '#ADADAD'
+                                color: lastName.isFocused ? '#E48700' : lastName.validation.isValid ? '#ADADAD' : 'red'
                             }} />
                         <TextInput
                             placeholder='Last Name'
@@ -147,9 +273,13 @@ const SignupScreen = ({ navigation }) => {
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
                             onFocus={() => setLastName({ ...lastName, isFocused: true })}
-                            onBlur={() => setLastName({ ...lastName, isFocused: false })}
+                            onBlur={handleLastNameTextInputOnBlur}
                         />
                     </View>
+                    {
+                        lastName.validation.isValid ?
+                            null : <PoppinsText style={styles.validationMessageText}>{lastName.validation.message}</PoppinsText>
+                    }
                 </View>
             </View>
 
@@ -157,14 +287,14 @@ const SignupScreen = ({ navigation }) => {
             <View
                 style={{
                     ...styles.inputView,
-                    borderColor: email.isFocused ? '#E48700' : '#ADADAD'
+                    borderColor: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                 }}
             >
                 <Fontisto
                     name="email"
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ? '#E48700' : '#ADADAD'
+                        color: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />
                 <TextInput
@@ -175,19 +305,23 @@ const SignupScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setEmail({ ...email, isFocused: true })}
-                    onBlur={() => setEmail({ ...email, isFocused: false })}
+                    onBlur={handleEmailTextInputOnBlur}
                 />
             </View>
+            {
+                email.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{email.validation.message}</PoppinsText>
+            }
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
+                borderColor: password.isFocused ? '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: password.isFocused ? '#E48700' : '#ADADAD'
+                        color: password.isFocused ? '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />
                 <TextInput
@@ -198,19 +332,23 @@ const SignupScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setPassword({ ...password, isFocused: true })}
-                    onBlur={() => setPassword({ ...password, isFocused: false })}
+                    onBlur={handlePasswordTextInputOnBlur}
                 />
             </View>
+            {
+                password.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{password.validation.message}</PoppinsText>
+            }
             <PoppinsText style={styles.label}>Confirm your password</PoppinsText>
             <View style={{
                 ...styles.inputView,
-                borderColor: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
+                borderColor: confirmPassword.isFocused ? '#E48700' : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
+                        color: confirmPassword.isFocused ? '#E48700' : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />
                 <TextInput
@@ -221,22 +359,26 @@ const SignupScreen = ({ navigation }) => {
                     style={styles.textInput}
                     placeholderTextColor={'#ADADAD'}
                     onFocus={() => setconfirmPassword({ ...confirmPassword, isFocused: true })}
-                    onBlur={() => setconfirmPassword({ ...confirmPassword, isFocused: false })}
+                    onBlur={handleConfirmationPasswordTextInputOnBlur}
                 />
             </View>
+            {
+                confirmPassword.validation.isValid ?
+                    null : <PoppinsText style={styles.validationMessageText}>{confirmPassword.validation.message}</PoppinsText>
+            }
             <View style={styles.flexRow}>
                 <View style={{ width: "48%", justifyContent: 'space-between' }}>
                     <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
                     <View
                         style={{
                             ...styles.inputView,
-                            borderColor: phoneNumber.isFocused ? '#E48700' : '#ADADAD'
+                            borderColor: phoneNumber.isFocused ? '#E48700' : phoneNumber.validation.isValid ? '#ADADAD' : 'red'
                         }}>
                         <MaterialIcons
                             name="local-phone"
                             style={{
                                 ...styles.icon,
-                                color: phoneNumber.isFocused ? '#E48700' : '#ADADAD'
+                                color: phoneNumber.isFocused ? '#E48700' : phoneNumber.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />
                         <TextInput
@@ -246,10 +388,14 @@ const SignupScreen = ({ navigation }) => {
                             style={styles.textInput}
                             placeholderTextColor={'#ADADAD'}
                             onFocus={() => setPhoneNumber({ ...phoneNumber, isFocused: true })}
-                            onBlur={() => setPhoneNumber({ ...phoneNumber, isFocused: false })}
+                            onBlur={handlePhoneNumberTextInputOnBlur}
                             keyboardType='phone-pad'
                         />
                     </View>
+                    {
+                        phoneNumber.validation.isValid ?
+                            null : <PoppinsText style={styles.validationMessageText}>{phoneNumber.validation.message}</PoppinsText>
+                    }
                 </View>
 
                 <View style={{ width: "48%", justifyContent: 'space-between' }}>
@@ -257,7 +403,7 @@ const SignupScreen = ({ navigation }) => {
                     <TouchableOpacity
                         style={{
                             ...styles.inputView,
-                            borderColor: '#ADADAD',
+                            borderColor: dob.validation.isValid ? '#ADADAD' : 'red'
                         }}
                         onPress={() => setShowDatePicker(true)}
                     >
@@ -265,7 +411,7 @@ const SignupScreen = ({ navigation }) => {
                             name="date"
                             style={{
                                 ...styles.icon,
-                                color: '#ADADAD'
+                                color: dob.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />
                         <PoppinsText style={{
@@ -278,6 +424,10 @@ const SignupScreen = ({ navigation }) => {
                         </PoppinsText>
                     </TouchableOpacity>
                 </View>
+                {
+                    dob.validation.isValid ?
+                        null : <PoppinsText style={styles.validationMessageText}>{dob.validation.message}</PoppinsText>
+                }
             </View>
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: '#E48700' }}
@@ -346,5 +496,9 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14
+    },
+    validationMessageText: {
+        color: 'red',
+        marginBottom: 16
     }
 })
