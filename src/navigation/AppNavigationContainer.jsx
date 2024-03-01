@@ -1,9 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native"
-import AuthStack from "./AuthStack"
+import AuthStack from "./stacks/AuthStack"
 import { useDispatch, useSelector } from "react-redux"
-import Home from "../screens/Home"
 import { useLayoutEffect } from "react"
 import { loadUserAsync } from "../store/userSlice"
+import UserHomeScreen from "../screens/UserHomeScreen"
 
 const AppNavigationContainer = () => {
     const { user } = useSelector(state => state.user)
@@ -16,7 +16,7 @@ const AppNavigationContainer = () => {
     return (
         <NavigationContainer>
             {
-                user === null ? <AuthStack /> : <Home />
+                user === null ? <AuthStack /> : <UserHomeScreen />
             }
         </NavigationContainer>
     )
