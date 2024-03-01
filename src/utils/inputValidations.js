@@ -9,7 +9,7 @@ export const validatePassword = (password) => {
     } else if (!passwordRegex.test(password)) {
         return {
             isValid: false,
-            message: 'Password must contain: At least one lowercase letter, At least one uppercase letter, At least one digit, At least one special character (in the set !@#$%^&*)'
+            message: 'Password must be: \n * Minimum length of 8 characters \n * At least one lowercase and one uppercase letter.\n * At least one digit.\n * At least one special character (!@#$%^&*).'
         }
     } else {
         return {
@@ -104,8 +104,8 @@ export const validateConfirmationPassword = (passowrd, confirmPassword) => {
     }
 }
 
-export const validatedob = (dob) => {
-    if (dob.length === 0) {
+export const validatedob = (flag) => {
+    if (flag) {
         return {
             isValid: false,
             message: 'Please pick your date of birth'
