@@ -65,6 +65,7 @@ const SignupScreen = ({ navigation }) => {
             message: ''
         }
     })
+
     const [showDatePicker, setShowDatePicker] = useState(false)
 
     const date = useMemo(() => {
@@ -75,9 +76,13 @@ const SignupScreen = ({ navigation }) => {
     const onChange = (e, selectedDate) => {
         setShowDatePicker(false)
         setDob({
-            ...dob, value: selectedDate, initValue: false
+            ...dob,
+            value: selectedDate,
+            initValue: false,
+            validation: validatedob(false)
         })
     }
+
     const dispatch = useDispatch()
 
     const handleEmailTextInputOnBlur = () => {
@@ -135,7 +140,7 @@ const SignupScreen = ({ navigation }) => {
         const firstNameResult = validateFirstName(firstName.value)
         const lastNameResult = validateLastName(lastName.value)
         const phoneNumberResult = validatePhoneNumber(phoneNumber.value)
-        const dobResult = validatedob(date)
+        const dobResult = validatedob(dob.initValue)
 
         setEmail(prev => ({
             ...prev,
@@ -367,7 +372,7 @@ const SignupScreen = ({ navigation }) => {
                     null : <PoppinsText style={styles.validationMessageText}>{confirmPassword.validation.message}</PoppinsText>
             }
             <View style={styles.flexRow}>
-                <View style={{ width: "48%", justifyContent: 'space-between' }}>
+                <View style={{ width: "48%" }}>
                     <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
                     <View
                         style={{
@@ -397,8 +402,7 @@ const SignupScreen = ({ navigation }) => {
                             null : <PoppinsText style={styles.validationMessageText}>{phoneNumber.validation.message}</PoppinsText>
                     }
                 </View>
-
-                <View style={{ width: "48%", justifyContent: 'space-between' }}>
+                <View style={{ width: "48%" }}>
                     <PoppinsText style={styles.label}>Enter your Birth Date</PoppinsText>
                     <TouchableOpacity
                         style={{
@@ -423,11 +427,11 @@ const SignupScreen = ({ navigation }) => {
                             }
                         </PoppinsText>
                     </TouchableOpacity>
+                    {
+                        dob.validation.isValid ?
+                            null : <PoppinsText style={styles.validationMessageText}>{dob.validation.message}</PoppinsText>
+                    }
                 </View>
-                {
-                    dob.validation.isValid ?
-                        null : <PoppinsText style={styles.validationMessageText}>{dob.validation.message}</PoppinsText>
-                }
             </View>
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: '#E48700' }}
