@@ -48,11 +48,11 @@ const UserHomeScreen = () => {
             }
         },
         {
-            label: 'Out of fuel/Dead batery',
+            label: 'Out of fuel/Dead battery',
             Icon: () => <MaterialCommunityIcons name='fuel-cell' style={styles.selectedEmergencyIcon} />,
             onPress: () => {
                 setSelectedEmergency({
-                    label: 'Out of fuel/Dead batery',
+                    label: 'Out of fuel/Dead battery',
                     Icon: () => <MaterialCommunityIcons name='fuel-cell' style={styles.selectedEmergencyIcon} />,
                 })
                 setEmergencySelectionModalVisible(false)
@@ -215,7 +215,7 @@ const UserHomeScreen = () => {
                 />
                 <View style={styles.cardView}>
                     <View style={styles.historySectionTitleView}>
-                        <PoppinsText>Your previous emergencies</PoppinsText>
+                        <PoppinsText>Previous emergencies</PoppinsText>
                         <TouchableOpacity>
                             <PoppinsText style={styles.seeAllText}>see all</PoppinsText>
                         </TouchableOpacity>
@@ -232,7 +232,7 @@ const UserHomeScreen = () => {
                 </View>
                 <View style={styles.cardView}>
                     <View style={styles.historySectionTitleView}>
-                        <PoppinsText>Your previous visits to our repair centers</PoppinsText>
+                        <PoppinsText>Previous repair center visits</PoppinsText>
                         <TouchableOpacity>
                             <PoppinsText style={styles.seeAllText}>see all</PoppinsText>
                         </TouchableOpacity>
