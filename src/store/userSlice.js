@@ -51,7 +51,7 @@ export const signUpAsync = createAsyncThunk('user/signUpAsync', async ({
     if (response.status === 201) {
         showToast('User registered successfully')
     } else if (response.status === 409) {
-        showToast('Email or Phone number is already exists')
+        showToast('Email or Phone number already exists')
     } else {
         showToast('Something went wrong, Please try again later')
     }
