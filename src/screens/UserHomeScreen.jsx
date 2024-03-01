@@ -1,20 +1,29 @@
 import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import PoppinsText from '../components/PoppinsText'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import UserServicesFlatListItem from '../components/UserServicesFlatListItem'
 import NoHistory from '../components/NoHistory'
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import CustomModal from '../components/CustomModal'
+import EmergencyFlatListItem from '../components/EmergencyFlatListItem'
+import VehicleFlatListItem from '../components/VehicleFlatListItem'
+import NoVehicles from '../components/NoVehicles'
 
 const UserHomeScreen = () => {
     const { user } = useSelector(state => state.user)
+    const [emergencyModalVisible, setEmergencyModalVisible] = useState(false)
+    const [emergencySelectionModalVisible, setEmergencySelectionModalVisible] = useState(false)
+    const [vehicleSelectionModalVisible, setVehicleSelectionModalVisible] = useState(false)
+    const [selectedEmergency, setSelectedEmergency] = useState(null)
+    const [selectedVehicle, setSelectedVehicle] = useState(null)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const services = [
         {
             imageSrc: require('../assets/images/siren.png'),
             label: 'Emergency',
             onPress: () => {
-                //TODO
+                setEmergencyModalVisible(true)
             }
         },
         {
@@ -26,8 +35,157 @@ const UserHomeScreen = () => {
         }
     ]
 
+    const emergencies = [
+        {
+            label: 'Flat tire',
+            Icon: () => <MaterialIcons name='tire-repair' style={styles.selectedEmergencyIcon} />,
+            onPress: () => {
+                setSelectedEmergency({
+                    label: 'Flat tire',
+                    Icon: () => <MaterialIcons name='tire-repair' style={styles.selectedEmergencyIcon} />
+                })
+                setEmergencySelectionModalVisible(false)
+            }
+        },
+        {
+            label: 'Out of fuel/Dead batery',
+            Icon: () => <MaterialCommunityIcons name='fuel-cell' style={styles.selectedEmergencyIcon} />,
+            onPress: () => {
+                setSelectedEmergency({
+                    label: 'Out of fuel/Dead batery',
+                    Icon: () => <MaterialCommunityIcons name='fuel-cell' style={styles.selectedEmergencyIcon} />,
+                })
+                setEmergencySelectionModalVisible(false)
+            }
+        },
+        {
+            label: 'Other',
+            Icon: () => <MaterialCommunityIcons name='tow-truck' style={styles.selectedEmergencyIcon} />,
+            onPress: () => {
+                setSelectedEmergency({
+                    label: 'Other',
+                    Icon: () => <MaterialCommunityIcons name='tow-truck' style={styles.selectedEmergencyIcon} />,
+                })
+                setEmergencySelectionModalVisible(false)
+            }
+        }
+    ]
+
     return (
         <View style={styles.container}>
+            {/*request emergency modal*/}
+            <CustomModal
+                onRequestClose={() => setEmergencyModalVisible(false)}
+                visible={emergencyModalVisible}
+            >
+                <PoppinsText style={styles.modalTitle}>Request emergency</PoppinsText>
+                {
+                    selectedEmergency === null ?
+                        <EmergencyFlatListItem
+                            Icon={() => <AntDesign name='select1' style={styles.selectedEmergencyIcon} />}
+                            label={'Select emergency'}
+                            onPress={() => setEmergencySelectionModalVisible(true)}
+                        /> : <EmergencyFlatListItem
+                            Icon={selectedEmergency.Icon}
+                            label={selectedEmergency.label}
+                            onPress={() => setEmergencySelectionModalVisible(true)}
+                        />
+                }
+                {
+                    selectedVehicle === null ?
+                        <VehicleFlatListItem
+                            Icon={() => <AntDesign name='select1' style={styles.selectedEmergencyIcon} />}
+                            label={'Select your vehicle'}
+                            onPress={() => setVehicleSelectionModalVisible(true)}
+                        /> : <VehicleFlatListItem
+                            Icon={selectedVehicle.Icon}
+                            label={selectedVehicle.label}
+                            onPress={() => setVehicleSelectionModalVisible(true)}
+                        />
+                }
+                <View style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    marginTop: 8
+                }}>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                        onPress={() => {
+                            setEmergencyModalVisible(false)
+                            setSelectedEmergency(null)
+                            setSelectedVehicle(null)
+                        }}
+                    >
+                        <PoppinsText style={{ color: '#ADADAD' }}>cancel</PoppinsText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                        onPress={() => {/*TODO*/ }}
+                    >
+                        <PoppinsText style={{ color: '#E48700' }}>request</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+            </CustomModal>
+            {/*choose emergency type modal*/}
+            <CustomModal
+                visible={emergencySelectionModalVisible}
+                onRequestClose={() => {
+                    setEmergencySelectionModalVisible(false)
+                    setSelectedEmergency(null)
+                }}
+            >
+                <PoppinsText style={styles.modalTitle}>Choose emergency:</PoppinsText>
+                <View style={styles.flatListModalView}>
+                    <FlatList
+                        data={emergencies}
+                        renderItem={({ item }) => <EmergencyFlatListItem
+                            label={item.label}
+                            Icon={item.Icon}
+                            onPress={item.onPress}
+                        />}
+                    />
+                </View>
+                <TouchableOpacity
+                    style={styles.modalBtn}
+                    onPress={() => {
+                        setEmergencySelectionModalVisible(false)
+                        setSelectedEmergency(null)
+                    }}
+                >
+                    <PoppinsText style={{ color: '#ADADAD' }}>cancel</PoppinsText>
+                </TouchableOpacity>
+            </CustomModal>
+            {/*choose vehicle modal*/}
+            <CustomModal
+                visible={vehicleSelectionModalVisible}
+                onRequestClose={() => {
+                    setVehicleSelectionModalVisible(false)
+                    setSelectedVehicle(null)
+                }}
+            >
+                <PoppinsText style={styles.modalTitle}>Choose your vehicle</PoppinsText>
+                <View style={styles.flatListModalView}>
+                    <FlatList
+                        data={user.vehicles}
+                        renderItem={({ item }) => <VehicleFlatListItem
+                            Icon={null}
+                            label={item.model}
+                            onPress={() => selectedVehicle(item)}
+                        />}
+                        ListEmptyComponent={<NoVehicles onPress={() => {/*todo*/ }} />}
+                    />
+                </View>
+                <TouchableOpacity
+                    style={styles.modalBtn}
+                    onPress={() => {
+                        setVehicleSelectionModalVisible(false)
+                        setSelectedVehicle(null)
+                    }}
+                >
+                    <PoppinsText style={{ color: '#ADADAD' }}>cancel</PoppinsText>
+                </TouchableOpacity>
+            </CustomModal>
             <ScrollView style={{ flex: 1 }}>
                 {
                     isFirstHalfOfDay ?
@@ -119,7 +277,7 @@ const styles = StyleSheet.create({
     helpText: {
         fontSize: 14,
         color: '#666666',
-        marginBottom: 16
+        marginBottom: 8
     },
     seeAllText: {
         color: '#666666'
@@ -140,10 +298,36 @@ const styles = StyleSheet.create({
         bottom: 50,
         right: 15,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        elevation: 5
     },
     supportBtnIcon: {
         fontSize: 40,
         color: 'white'
+    },
+    selectedEmergencyBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 8,
+        alignSelf: 'baseline',
+        width: '100%'
+    },
+    selectedEmergencyLabel: {
+        fontSize: 20
+    },
+    selectedEmergencyIcon: {
+        fontSize: 20,
+        marginRight: 8
+    },
+    modalTitle: {
+        fontSize: 20,
+        marginBottom: 8
+    },
+    modalBtn: {
+        padding: 8
+    },
+    flatListModalView: {
+        height: 120,
+        marginBottom: 8
     }
 })
