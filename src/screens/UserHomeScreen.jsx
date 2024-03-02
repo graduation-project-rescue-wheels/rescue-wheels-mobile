@@ -9,6 +9,7 @@ import CustomModal from '../components/CustomModal'
 import EmergencyFlatListItem from '../components/EmergencyFlatListItem'
 import VehicleFlatListItem from '../components/VehicleFlatListItem'
 import NoVehicles from '../components/NoVehicles'
+import NoOffers from '../components/NoOffers'
 
 const UserHomeScreen = () => {
     const { user } = useSelector(state => state.user)
@@ -213,6 +214,19 @@ const UserHomeScreen = () => {
                     horizontal={true}
                     showsHorizontalScrollIndicator={false}
                 />
+                <PoppinsText style={styles.sectionTitle}>Offers</PoppinsText>
+                <View style={styles.cardView}>
+                    <FlatList
+                        style={{ marginBottom: 32 }}
+                        data={user.history}
+                        keyExtractor={(item) => item._id}
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        ListEmptyComponent={<NoOffers />}
+                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                    />
+                </View>
+                <PoppinsText style={styles.sectionTitle}>History</PoppinsText>
                 <View style={styles.cardView}>
                     <View style={styles.historySectionTitleView}>
                         <PoppinsText>Previous emergencies</PoppinsText>
@@ -329,5 +343,8 @@ const styles = StyleSheet.create({
     flatListModalView: {
         height: 120,
         marginBottom: 8
+    },
+    sectionTitle: {
+        fontSize: 24
     }
 })
