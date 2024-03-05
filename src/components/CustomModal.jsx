@@ -1,4 +1,4 @@
-import { Modal, StyleSheet, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, View } from 'react-native'
 
 const CustomModal = ({ children, onRequestClose, visible }) => {
     return (
@@ -9,11 +9,11 @@ const CustomModal = ({ children, onRequestClose, visible }) => {
             transparent={true}
             visible={visible}
         >
-            <View style={styles.centeredView}>
+            <Pressable style={styles.centeredView} onPress={onRequestClose}>
                 <View style={styles.modalView}>
                     {children}
                 </View>
-            </View>
+            </Pressable>
         </Modal >
     )
 }
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     centeredView: {
         flex: 1,
         justifyContent: "center",
-        alignItems: "center",
+        alignItems: "center"
     },
     modalView: {
         margin: 20,
