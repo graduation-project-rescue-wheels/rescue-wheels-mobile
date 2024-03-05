@@ -1,18 +1,28 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import showToast from "../components/Toast";
 import * as SecureStore from 'expo-secure-store'
-import { signIn, signUp } from "../api/user";
+import { signIn, signUp, updateUser } from "../api/user";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
-    const response = await signIn(undefined, email, passowrd)
+    try {
+        const response = await signIn(undefined, email, passowrd)
 
-    if (response.status === 200) {
-        await SecureStore.setItemAsync('accessToken', response.data.Token)
-        await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.userData))
-        showToast('Welcome to rescue wheels')
+        if (response.status === 200) {
+            await SecureStore.setItemAsync('accessToken', response.data.Token)
+            await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.userData))
+            showToast('Welcome to rescue wheels')
 
-        return response.data
-    } else {
+            return response.data
+        } else if (response.status === 201) {
+            showToast(response.data.message)
+
+            return {
+                userData: null,
+                accessToken: null
+            }
+        }
+    } catch (err) {
+        console.log(err);
         showToast('Something went wrong. Please try again later.')
 
         return {
@@ -22,7 +32,8 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
     }
 })
 
-export const signOutAsync = createAsyncThunk('user/signOutAsync', async () => {
+export const signOutAsync = createAsyncThunk('user/signOutAsync', async (navigation) => {
+    navigation.popToTop()
     await SecureStore.deleteItemAsync('accessToken')
     await SecureStore.deleteItemAsync('currentUser')
 })
@@ -43,19 +54,34 @@ export const signUpAsync = createAsyncThunk('user/signUpAsync', async ({
     email,
     password,
     mobileNumber,
-    DOB
+    DOB,
+    navigation
 }) => {
+    try {
+        const response = await signUp(firstName, lastName, email, password, mobileNumber, DOB)
 
-    const response = await signUp(firstName, lastName, email, password, mobileNumber, DOB)
-    console.log(response.status);
-    if (response.status === 201) {
-        showToast('User registered successfully')
-    } else if (response.status === 409) {
-        showToast('Email or Phone number already exists')
-    } else {
-        showToast('Something went wrong, Please try again later')
+        if (response.status === 201) {
+            showToast('User registered successfully')
+            navigation.popToTop()
+        }
+    } catch (err) {
+        if (err.response.data.status === 409) {
+            showToast(err.response.data.message)
+        } else {
+            showToast('Something went wrong. Please try again later')
+            console.log(err);
+        }
     }
 })
+
+// export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async ({
+//     firstName,
+//     lastName,
+//     mobileNumber,
+//     email
+// }) => {
+//     const response = await updateUser(firstName, lastName, mobileNumber, email)
+// })
 
 const userSlice = createSlice({
     name: 'user',
