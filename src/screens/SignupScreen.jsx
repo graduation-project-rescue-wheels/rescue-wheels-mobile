@@ -191,9 +191,9 @@ const SignupScreen = ({ navigation }) => {
                 email: email.value,
                 password: password.value,
                 mobileNumber: phoneNumber.value,
-                DOB: dob.value
+                DOB: dob.value,
+                navigation
             }))
-            navigation.popToTop()
         }
     }
 
@@ -232,7 +232,7 @@ const SignupScreen = ({ navigation }) => {
 
             <View style={styles.flexRow}>
                 <View style={{ width: "48%" }}>
-                    <PoppinsText style={styles.label}>Enter your First Name</PoppinsText>
+                    <PoppinsText style={styles.label}>Enter your first name</PoppinsText>
                     <View style={{
                         ...styles.inputView,
                         borderColor: firstName.isFocused ? '#E48700' : firstName.validation.isValid ? '#ADADAD' : 'red'
@@ -261,7 +261,7 @@ const SignupScreen = ({ navigation }) => {
                 </View>
 
                 <View style={{ width: "48%" }}>
-                    <PoppinsText style={styles.label}>Enter your Last Name</PoppinsText>
+                    <PoppinsText style={styles.label}>Enter your last name</PoppinsText>
                     <View style={{
                         ...styles.inputView,
                         borderColor: lastName.isFocused ? '#E48700' : lastName.validation.isValid ? '#ADADAD' : 'red'
@@ -288,7 +288,7 @@ const SignupScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            <PoppinsText style={styles.label}>Enter your E-mail</PoppinsText>
+            <PoppinsText style={styles.label}>Enter your e-mail</PoppinsText>
             <View
                 style={{
                     ...styles.inputView,
@@ -372,8 +372,8 @@ const SignupScreen = ({ navigation }) => {
                     null : <PoppinsText style={styles.validationMessageText}>{confirmPassword.validation.message}</PoppinsText>
             }
             <View style={styles.flexRow}>
-                <View style={{ width: "48%" }}>
-                    <PoppinsText style={styles.label}>Enter your Phone Number</PoppinsText>
+                <View style={{ width: "48%", justifyContent: 'space-between' }}>
+                    <PoppinsText style={styles.label}>Enter your phone number</PoppinsText>
                     <View
                         style={{
                             ...styles.inputView,
@@ -402,8 +402,8 @@ const SignupScreen = ({ navigation }) => {
                             null : <PoppinsText style={styles.validationMessageText}>{phoneNumber.validation.message}</PoppinsText>
                     }
                 </View>
-                <View style={{ width: "48%" }}>
-                    <PoppinsText style={styles.label}>Enter your Birth Date</PoppinsText>
+                <View style={{ width: "48%", justifyContent: 'space-between' }}>
+                    <PoppinsText style={styles.label}>Enter your birth date</PoppinsText>
                     <TouchableOpacity
                         style={{
                             ...styles.inputView,
