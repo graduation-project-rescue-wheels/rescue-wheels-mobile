@@ -14,7 +14,6 @@ export async function signUp(firstName, lastName, email, password, mobileNumber,
         lastName,
         email,
         password,
-        mobileNumber,
-        DOB
+        mobileNumber
     })
 }
