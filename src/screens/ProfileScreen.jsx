@@ -4,9 +4,11 @@ import PoppinsText from '../components/PoppinsText';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileScreenFlatListItem from '../components/ProfileScreenFlatListItem';
 import { signOutAsync } from '../store/userSlice';
+import { useMemo } from 'react';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
+    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [])
     const dispatch = useDispatch()
 
     const listItems = [
@@ -35,13 +37,13 @@ const ProfileScreen = () => {
             icon: <Ionicons name='settings-outline' style={styles.icon} />,
             label: 'Settings',
             onPress: () => {
-                //TODO
+                navigation.navigate('Settings')
             }
         }
     ]
 
     const handleSignOutBtn = () => {
-        dispatch(signOutAsync())
+        dispatch(signOutAsync(navigation))
     }
 
     return (
@@ -60,7 +62,7 @@ const ProfileScreen = () => {
                             />
                     }
                 </View>
-                <PoppinsText style={styles.usernameText}>{user.username}</PoppinsText>
+                <PoppinsText style={styles.usernameText}>{username}</PoppinsText>
             </View>
             <FlatList
                 style={styles.flatList}
@@ -80,6 +82,7 @@ const ProfileScreen = () => {
                 <Ionicons name='log-out-outline' style={{ ...styles.icon, color: 'red' }} />
                 <PoppinsText style={styles.signOutText}>Sign out</PoppinsText>
             </TouchableOpacity>
+            <View style={{ height: 85 }} />
         </View>
     )
 }
@@ -89,7 +92,8 @@ export default ProfileScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 8
+        paddingHorizontal: 8,
+        backgroundColor: 'white'
     },
     userView: {
         flexDirection: 'row',
@@ -110,7 +114,7 @@ const styles = StyleSheet.create({
         borderRadius: 45
     },
     flatList: {
-        flex: 1,
+        flex: 1
     },
     icon: {
         fontSize: 25
