@@ -19,6 +19,7 @@ const UserHomeScreen = () => {
     const [selectedEmergency, setSelectedEmergency] = useState(null)
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
+    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [])
     const services = [
         {
             imageSrc: require('../assets/images/siren.png'),
@@ -191,11 +192,11 @@ const UserHomeScreen = () => {
                 {
                     isFirstHalfOfDay ?
                         <PoppinsText style={styles.greetingText}>Good morning, <PoppinsText style={{ color: 'black' }}>
-                            {user.username}
+                            {username}
                         </PoppinsText>
                         </PoppinsText>
                         : <PoppinsText style={styles.greetingText}>Good afternoon, <PoppinsText style={{ color: 'black' }}>
-                            {user.username}
+                            {username}
                         </PoppinsText>
                         </PoppinsText>
                 }
@@ -261,6 +262,7 @@ const UserHomeScreen = () => {
                         contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
                     />
                 </View>
+                <View style={{ height: 80 }} />
             </ScrollView>
             <TouchableOpacity style={styles.supportBtn}>
                 <MaterialIcons
@@ -277,7 +279,9 @@ export default UserHomeScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 8
+        paddingTop: 8,
+        paddingHorizontal: 8,
+        backgroundColor: 'white'
     },
     greetingText: {
         fontSize: 20,
@@ -309,7 +313,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E48700',
         padding: 8,
         borderRadius: 50,
-        bottom: 50,
+        bottom: 85,
         right: 15,
         alignItems: 'center',
         justifyContent: 'center',
