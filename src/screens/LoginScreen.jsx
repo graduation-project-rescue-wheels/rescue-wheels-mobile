@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux'
 import { signInAsync } from '../store/userSlice'
 import showToast from '../components/Toast'
 import { validateEmail, validatePassword } from '../utils/inputValidations'
+import CustomTextInput from '../components/CustomTextInput'
+import ValidationMessage from '../components/ValidationMessage'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -106,62 +108,41 @@ const LoginScreen = ({ navigation }) => {
                 </View>
             </View>
             <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: email.isFocused ?
-                    '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
-            }}>
-                <Fontisto
+            <CustomTextInput
+                Icon={() => <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
                         color: email.isFocused ?
                             '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
-                    }} />
-                <TextInput
-                    placeholder='Username or E-mail'
-                    keyboardType='email-address'
-                    value={email.value}
-                    onChangeText={e => setEmail(prev => ({ ...prev, value: e }))}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={handleEmailTextInputOnBlur}
-                />
-            </View>
-            {
-                email.validation.isValid ?
-                    null : <PoppinsText style={styles.validationMessageText}>{email.validation.message}</PoppinsText>
-            }
+                    }}
+                />}
+                onBlur={handleEmailTextInputOnBlur}
+                onChangeText={e => setEmail(prev => ({ ...prev, value: e }))}
+                onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
+                placeholder='Username or E-mail'
+                state={email}
+                keyboardType='email-address'
+            />
+            <ValidationMessage state={email} />
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: password.isFocused ?
-                    '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
-            }}>
-                <MaterialIcons
+            <CustomTextInput
+                Icon={() => <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
                         color: password.isFocused ?
                             '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
-                />
-                <TextInput
-                    placeholder='Password'
-                    secureTextEntry={true}
-                    value={password.value}
-                    onChangeText={e => setPassword(prev => ({ ...prev, value: e }))}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
-                    onBlur={handlePasswordTextInputOnBlur}
-                />
-            </View>
-            {
-                password.validation.isValid ?
-                    null : <PoppinsText style={styles.validationMessageText}>{password.validation.message}</PoppinsText>
-            }
+                />}
+                onBlur={handlePasswordTextInputOnBlur}
+                onChangeText={e => setPassword(prev => ({ ...prev, value: e }))}
+                onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
+                placeholder='Password'
+                secureTextEntry={true}
+                state={password}
+            />
+            <ValidationMessage state={password} />
             <PoppinsText
                 style={styles.forgotPasswordText}
                 onPress={handleForgotPasswordOnPress}
