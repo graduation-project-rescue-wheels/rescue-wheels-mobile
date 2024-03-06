@@ -3,64 +3,53 @@ import PoppinsText from './PoppinsText'
 import { AntDesign } from '@expo/vector-icons'
 import { useEffect, useRef } from 'react'
 
-const EditableText = ({ Icon, state, onChangeText, keyboardType, placeholder, setState, onBlur }) => {
+const EditableText = ({ Icon, state, onChangeText, keyboardType, placeholder, setState, onBlur, secureTextEntry }) => {
     const inputRef = useRef()
 
     useEffect(() => {
-        if (state.editable && inputRef.current) {
+        if (state.isFocused && inputRef.current) {
             inputRef.current.focus()
-        } else if (!state.editable && inputRef.current) {
+        } else if (!state.isFocused && inputRef.current) {
             inputRef.current.blur()
         }
-    }, [state.editable])
+    }, [state.isFocused])
 
     return (
         <View style={styles.container}>
             <View style={{
                 ...styles.infoView,
-                borderColor: state.editable ?
+                borderColor: state.isFocused ?
                     '#E48700' : state.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <Icon />
-                {state.editable ?
-                    <View style={styles.flexRow}>
-                        <TextInput
-                            value={state.value}
-                            onChangeText={onChangeText}
-                            keyboardType={keyboardType}
-                            placeholder={placeholder}
-                            style={styles.textInput}
-                            ref={inputRef}
-                            onBlur={() => {
-                                onBlur()
-                                setState(prev => ({
-                                    ...prev,
-                                    editable: false
-                                }))
-                            }}
-                        />
-                        <TouchableOpacity
+                <View style={styles.flexRow}>
+                    <TextInput
+                        value={state.value}
+                        onChangeText={onChangeText}
+                        keyboardType={keyboardType}
+                        placeholder={placeholder}
+                        style={styles.textInput}
+                        ref={inputRef}
+                        secureTextEntry={secureTextEntry}
+                        editable={state.isFocused}
+                        onBlur={onBlur}
+                    />
+                    {
+                        state.isFocused ? <TouchableOpacity
                             style={styles.editableBtn}
-                            onPress={() => setState(prev => ({ ...prev, editable: false }))}
+                            onPress={() => setState(prev => ({ ...prev, isFocused: false }))}
                         >
                             <AntDesign name='closecircleo' />
-                        </TouchableOpacity>
-                    </View> : <View style={styles.flexRow}>
-                        {
-                            state.value.length === 0 ?
-                                <PoppinsText style={styles.placeholder}>First name</PoppinsText> :
-                                <PoppinsText>{state.value}</PoppinsText>
-                        }
-                        <TouchableOpacity
+                        </TouchableOpacity> : <TouchableOpacity
                             style={styles.editableBtn}
                             onPress={() => {
-                                setState(prev => ({ ...prev, editable: true }))
+                                setState(prev => ({ ...prev, isFocused: true }))
                             }}
                         >
                             <AntDesign name='edit' style={styles.editableIcon} />
                         </TouchableOpacity>
-                    </View>
-                }
+                    }
+                </View>
             </View>
             {
                 !state.validation.isValid && <PoppinsText style={styles.validationMessageText}>{state.validation.message}</PoppinsText>
