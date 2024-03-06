@@ -169,7 +169,7 @@ const UserHomeScreen = () => {
                 <PoppinsText style={styles.modalTitle}>Choose your vehicle</PoppinsText>
                 <View style={styles.flatListModalView}>
                     <FlatList
-                        data={user.vehicles}
+                        data={[]}
                         renderItem={({ item }) => <VehicleFlatListItem
                             Icon={null}
                             label={item.model}
@@ -219,12 +219,12 @@ const UserHomeScreen = () => {
                 <View style={styles.cardView}>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoOffers />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <PoppinsText style={styles.sectionTitle}>History</PoppinsText>
@@ -237,12 +237,12 @@ const UserHomeScreen = () => {
                     </View>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoHistory message="You don't have any previous emergencies" />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <View style={styles.cardView}>
@@ -254,12 +254,12 @@ const UserHomeScreen = () => {
                     </View>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoHistory message="You didn't visit any of our repair centers" />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <View style={{ height: 80 }} />
