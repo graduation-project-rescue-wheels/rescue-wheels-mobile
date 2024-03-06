@@ -1,33 +1,43 @@
-import { Modal, Pressable, StyleSheet, View } from 'react-native'
+import { Modal, StyleSheet, View, TouchableWithoutFeedback } from 'react-native';
 
 const CustomModal = ({ children, onRequestClose, visible }) => {
+    const handleModalTap = () => {
+        // Do nothing when tapped inside the modal
+    };
+
     return (
         <Modal
-            style={styles.container}
             animationType='fade'
             onRequestClose={onRequestClose}
             transparent={true}
             visible={visible}
         >
-            <Pressable style={styles.centeredView} onPress={onRequestClose}>
-                <View style={styles.modalView}>
-                    {children}
+            <TouchableWithoutFeedback onPress={onRequestClose}>
+                <View style={styles.container}>
+                    <TouchableWithoutFeedback onPress={handleModalTap}>
+                        <View style={styles.centeredView}>
+                            <View style={styles.modalView}>
+                                {children}
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
                 </View>
-            </Pressable>
-        </Modal >
-    )
-}
+            </TouchableWithoutFeedback>
+        </Modal>
+    );
+};
 
-export default CustomModal
+export default CustomModal;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     centeredView: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center"
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalView: {
         margin: 20,
@@ -37,4 +47,4 @@ const styles = StyleSheet.create({
         alignItems: "center",
         elevation: 5
     }
-})
+});
