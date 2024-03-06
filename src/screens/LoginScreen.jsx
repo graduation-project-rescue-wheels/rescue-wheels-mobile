@@ -183,24 +183,9 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 16,
     },
-    inputView: {
-        width: '100%',
-        borderWidth: 1,
-        marginTop: 16,
-        marginBottom: 8,
-        borderRadius: 16,
-        padding: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     icon: {
         paddingRight: 8,
         fontSize: 20
-    },
-    textInput: {
-        paddingVertical: 4,
-        flex: 1,
-        fontFamily: 'Poppins-Medium'
     },
     button: {
         marginVertical: 16,
@@ -218,11 +203,6 @@ const styles = StyleSheet.create({
     image: {
         position: 'absolute',
         flex: 1,
-    },
-    gradient: {
-        flex: 1,
-        paddingHorizontal: 16,
-        justifyContent: 'center'
     },
     forgotPasswordText: {
         textDecorationLine: 'underline',
@@ -246,9 +226,5 @@ const styles = StyleSheet.create({
         color: '#E48700',
         textAlign: 'center',
         width: '100%'
-    },
-    validationMessageText: {
-        color: 'red',
-        marginBottom: 16
     }
 })

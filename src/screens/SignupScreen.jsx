@@ -329,15 +329,6 @@ const styles = StyleSheet.create({
     welcomeText: {
         fontSize: 16,
     },
-    inputView: {
-        width: '100%',
-        borderWidth: 1,
-        marginVertical: 16,
-        borderRadius: 16,
-        padding: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     flexRow: {
         flexDirection: 'row',
         justifyContent: 'space-between'
@@ -345,12 +336,6 @@ const styles = StyleSheet.create({
     icon: {
         paddingRight: 8,
         fontSize: 20
-    },
-    textInput: {
-        width: '100%',
-        paddingVertical: 4,
-        flex: 1,
-        fontFamily: 'Poppins-Medium'
     },
     button: {
         marginVertical: 16,
@@ -363,9 +348,5 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14
-    },
-    validationMessageText: {
-        color: 'red',
-        marginBottom: 16
     }
 })
