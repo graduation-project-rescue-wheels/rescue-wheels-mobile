@@ -1,22 +1,28 @@
 import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Ionicons } from "@expo/vector-icons"
 import PoppinsText from '../components/PoppinsText'
 import { AntDesign } from '@expo/vector-icons'
 import * as Picker from 'expo-image-picker'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import CustomModal from '../components/CustomModal'
 import EditableText from '../components/EditableText'
 import { MaterialIcons } from '@expo/vector-icons'
-import { validateFirstName, validateLastName, validatePhoneNumber } from '../utils/inputValidations'
+import { validateConfirmationPassword, validateFirstName, validateLastName, validatePassword, validatePhoneNumber } from '../utils/inputValidations'
+import { deleteUserAsync, updateUserAsync } from '../store/userSlice'
+import CustomTextInput from '../components/CustomTextInput'
+import ValidationMessage from '../components/ValidationMessage'
 
 const UserSettingsScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
+    const dispatch = useDispatch()
     const [image, setImage] = useState(null)
     const [confirmPhotoModalVisible, setConfirmPhotoModalVisible] = useState(false)
+    const [confirmDeleteUserModalVisible, setConfirmDeleteUserModalVisible] = useState(false)
+    const [confirmNewPasswordModalVisible, setConfirmNewPasswordModalVisible] = useState(false)
     const [firstName, setFirstName] = useState({
         value: user.firstName,
-        editable: false,
+        isFocused: false,
         validation: {
             isValid: true,
             message: ''
@@ -24,7 +30,7 @@ const UserSettingsScreen = ({ navigation }) => {
     })
     const [lastName, setLastName] = useState({
         value: user.lastName,
-        editable: false,
+        isFocused: false,
         validation: {
             isValid: true,
             message: ''
@@ -32,12 +38,37 @@ const UserSettingsScreen = ({ navigation }) => {
     })
     const [mobileNumber, setMobileNumber] = useState({
         value: user.mobileNumber,
-        editable: false,
+        isFocused: false,
         validation: {
             isValid: true,
             message: ''
         }
     })
+    const [newPassword, setNewPassword] = useState({
+        value: '',
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
+    })
+    const [confirmNewPassword, setConfirmNewPassword] = useState({
+        value: '',
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
+    })
+    const [oldPassword, setOldPassword] = useState({
+        value: '',
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
+    })
+    const scrollViewRef = useRef()
 
     const pickImage = async () => {
         let result = await Picker.launchImageLibraryAsync({
@@ -56,26 +87,119 @@ const UserSettingsScreen = ({ navigation }) => {
     const handleFistNameTextInputOnBlur = () => {
         setFirstName(prev => ({
             ...prev,
-            validation: validateFirstName(firstName.value)
+            validation: validateFirstName(firstName.value),
+            isFocused: false
         }))
     }
 
     const handleLastNameTextInputOnBlur = () => {
         setLastName(prev => ({
             ...prev,
-            validation: validateLastName(lastName.value)
+            validation: validateLastName(lastName.value),
+            isFocused: false
         }))
     }
 
     const handleMobileNumberTextInputOnBlur = () => {
         setMobileNumber(prev => ({
             ...prev,
-            validation: validatePhoneNumber(mobileNumber.value)
+            validation: validatePhoneNumber(mobileNumber.value),
+            isFocused: false
         }))
+    }
+
+    const handleNewPasswordTextInputOnBlur = () => {
+        setNewPassword(prev => ({
+            ...prev,
+            isFocused: false
+        }))
+    }
+
+    const handleConfirmNewPasswordTextInputOnBlur = () => {
+        setConfirmNewPassword(prev => ({
+            ...prev,
+            validation: validateConfirmationPassword(newPassword.value, confirmNewPassword.value),
+            isFocused: false
+        }))
+    }
+
+    const handleOldPasswordTextInputOnBlur = () => {
+        setOldPassword(prev => ({
+            ...prev,
+            validation: validatePassword(oldPassword.value),
+            isFocused: false
+        }))
+    }
+
+    const handleSaveChangesBtnOnPress = () => {
+        const firstNameValidationResult = validateFirstName(firstName.value)
+        const lastNameValidationResult = validateFirstName(lastName.value)
+        const mobileNumberValidationResult = validateFirstName(mobileNumber.value)
+
+        setFirstName(prev => ({
+            ...prev,
+            validation: firstNameValidationResult
+        }))
+
+        setLastName(prev => ({
+            ...prev,
+            validation: lastNameValidationResult
+        }))
+
+        setMobileNumber(prev => ({
+            ...prev,
+            validation: mobileNumberValidationResult
+        }))
+
+        if (firstNameValidationResult &&
+            lastNameValidationResult &&
+            mobileNumberValidationResult &&
+            (firstName.value !== user.firstName ||
+                lastName.value !== user.lastName ||
+                mobileNumber.value !== user.mobileNumber)) {
+            dispatch(updateUserAsync({
+                firstName: firstName.value,
+                lastName: lastName.value,
+                mobileNumber: mobileNumber.value
+            }))
+        }
+
+        if (newPassword.value.length > 0) {
+            setConfirmNewPasswordModalVisible(true)
+        }
+    }
+
+    const resetConfirmNewPasswordModal = () => {
+        setConfirmNewPasswordModalVisible(false)
+        setConfirmNewPassword({
+            value: '',
+            isFocused: false,
+            validation: {
+                isValid: true,
+                message: ''
+            }
+        })
+        setOldPassword({
+            value: '',
+            isFocused: false,
+            validation: {
+                isValid: true,
+                message: ''
+            }
+        })
+        setNewPassword({
+            value: '',
+            isFocused: false,
+            validation: {
+                isValid: true,
+                message: ''
+            }
+        })
     }
 
     return (
         <View style={styles.container}>
+            {/*profile photo modal*/}
             <CustomModal
                 visible={confirmPhotoModalVisible}
                 onRequestClose={() => {
@@ -110,7 +234,95 @@ const UserSettingsScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </CustomModal>
-            <ScrollView style={{ flex: 1 }}>
+            {/*delete account modal*/}
+            <CustomModal
+                visible={confirmDeleteUserModalVisible}
+                onRequestClose={() => setConfirmDeleteUserModalVisible(false)}
+            >
+                <PoppinsText>Would you like to delete your account?</PoppinsText>
+                <View style={styles.modalBtnsView}>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                        onPress={() => {
+                            setConfirmDeleteUserModalVisible(false)
+                        }}
+                    >
+                        <PoppinsText style={{ color: 'red' }}>No</PoppinsText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                        onPress={() => {
+                            dispatch(deleteUserAsync())
+                        }}
+                    >
+                        <PoppinsText style={{ color: 'green' }}>Yes</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+            </CustomModal>
+            {/*new password modal*/}
+            <CustomModal
+                visible={confirmNewPasswordModalVisible}
+                onRequestClose={resetConfirmNewPasswordModal}
+            >
+                <PoppinsText style={{
+                    alignSelf: 'flex-start'
+                }}>
+                    Confirm your new password
+                </PoppinsText>
+                <CustomTextInput
+                    Icon={() => <MaterialIcons
+                        name='password'
+                        style={{
+                            ...styles.textInputIcon,
+                            color: confirmNewPassword.isFocused ? '#E48700' : confirmNewPassword.validation.isValid ? '#ADADAD' : 'red'
+                        }}
+                    />}
+                    onBlur={handleConfirmNewPasswordTextInputOnBlur}
+                    onChangeText={e => setConfirmNewPassword({ ...confirmNewPassword, value: e })}
+                    onFocus={() => setConfirmNewPassword(prev => ({
+                        ...prev,
+                        isFocused: true
+                    }))}
+                    placeholder={'Confirm new password'}
+                    secureTextEntry={true}
+                    state={confirmNewPassword}
+                />
+                <ValidationMessage state={confirmNewPassword} />
+                <PoppinsText style={{ alignSelf: 'flex-start' }}>Enter your old password</PoppinsText>
+                <CustomTextInput
+                    Icon={() => <MaterialIcons
+                        name='password'
+                        style={{
+                            ...styles.textInputIcon,
+                            color: oldPassword.isFocused ? '#E48700' : oldPassword.validation.isValid ? '#ADADAD' : 'red'
+                        }}
+                    />}
+                    onBlur={handleOldPasswordTextInputOnBlur}
+                    onChangeText={e => setOldPassword({ ...oldPassword, value: e })}
+                    onFocus={() => setOldPassword(prev => ({
+                        ...prev,
+                        isFocused: true
+                    }))}
+                    placeholder={'Old password'}
+                    secureTextEntry={true}
+                    state={oldPassword}
+                />
+                <ValidationMessage state={oldPassword} />
+                <View style={styles.modalBtnsView}>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                        onPress={resetConfirmNewPasswordModal}
+                    >
+                        <PoppinsText style={{ color: '#ADADAD' }}>Cancel</PoppinsText>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.modalBtn}
+                    >
+                        <PoppinsText style={{ color: '#E48700' }}>Confirm</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+            </CustomModal>
+            <ScrollView style={{ flex: 1 }} ref={scrollViewRef} onLayout={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
                 <View style={{ ...styles.flexRow, justifyContent: 'flex-start', alignItems: 'center' }}>
                     {
                         user.photoURL === undefined ?
@@ -129,7 +341,7 @@ const UserSettingsScreen = ({ navigation }) => {
                     style={styles.editProfilePhotoBtn}
                     onPress={pickImage}
                 >
-                    <AntDesign name='edit' style={styles.icon} />
+                    <AntDesign name='edit' style={styles.editIcon} />
                 </TouchableOpacity>
                 <View style={styles.flexRow}>
                     <View style={styles.columnView}>
@@ -169,13 +381,35 @@ const UserSettingsScreen = ({ navigation }) => {
                         onBlur={handleMobileNumberTextInputOnBlur}
                     />
                 </View>
+                <View style={{ marginBottom: 16 }}>
+                    <PoppinsText style={styles.title}>Chnage password</PoppinsText>
+                    <EditableText
+                        placeholder='New password'
+                        state={newPassword}
+                        onChangeText={e => setNewPassword(prev => ({ ...prev, value: e }))}
+                        Icon={() => <MaterialIcons name='password' style={styles.EditableTextIcon} />}
+                        setState={setNewPassword}
+                        onBlur={handleNewPasswordTextInputOnBlur}
+                        secureTextEntry={true}
+                    />
+                </View>
                 <TouchableOpacity
-                    style={styles.saveBtn}
-                    onPress={() => {
-                        //TODO
+                    style={{
+                        ...styles.btn,
+                        backgroundColor: '#E48700'
                     }}
+                    onPress={handleSaveChangesBtnOnPress}
                 >
                     <PoppinsText style={styles.saveBtnText}>Save changes</PoppinsText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{
+                        ...styles.btn,
+                        backgroundColor: '#F9BFBF',
+                    }}
+                    onPress={() => setConfirmDeleteUserModalVisible(true)}
+                >
+                    <PoppinsText style={{ color: 'red' }}>Delete account</PoppinsText>
                 </TouchableOpacity>
                 <View style={{ height: 85 }} />
             </ScrollView>
@@ -198,7 +432,7 @@ const styles = StyleSheet.create({
     profilePhoto: {
         marginRight: 8
     },
-    icon: {
+    editIcon: {
         color: 'white',
         fontSize: 14
     },
@@ -244,15 +478,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 8
     },
-    saveBtn: {
+    btn: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#E48700',
         padding: 8,
         borderRadius: 16,
-        justifyContent: 'center'
+        justifyContent: 'center',
+        marginBottom: 16
     },
     saveBtnText: {
         color: 'white'
+    },
+    textInputIcon: {
+        paddingRight: 8,
+        fontSize: 20
     }
 })
