@@ -103,17 +103,3 @@ export const validateConfirmationPassword = (passowrd, confirmPassword) => {
         }
     }
 }
-
-export const validatedob = (flag) => {
-    if (flag) {
-        return {
-            isValid: false,
-            message: 'Please pick your date of birth'
-        }
-    } else {
-        return {
-            isValid: true,
-            message: ''
-        }
-    }
-}
