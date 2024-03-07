@@ -103,3 +103,17 @@ export const validateConfirmationPassword = (passowrd, confirmPassword) => {
         }
     }
 }
+
+export const validateOldPassword = (oldPassword) => {
+    if (oldPassword.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter your old password'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
