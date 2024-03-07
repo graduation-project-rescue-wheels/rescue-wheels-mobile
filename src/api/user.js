@@ -35,8 +35,22 @@ export async function updateUser(firstName, lastName, mobileNumber) {
 
 export async function deleteUser() {
     const accessToken = await SecureStore.getItemAsync('accessToken')
-    
+
     return await rwClient.delete('/user/DeleteUser', {
+        headers: {
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+        }
+    })
+}
+
+export async function updatePassword(oldPassword, newPassword, confirmNewPassword) {
+    const accessToken = await SecureStore.getItemAsync('accessToken')
+
+    return await rwClient.put('/user/UpdatePassword', {
+        oldPassword,
+        newPassword,
+        confirmNewPassword
+    }, {
         headers: {
             accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
