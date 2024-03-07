@@ -8,8 +8,8 @@ import { useRef, useState } from 'react'
 import CustomModal from '../components/CustomModal'
 import EditableText from '../components/EditableText'
 import { MaterialIcons } from '@expo/vector-icons'
-import { validateConfirmationPassword, validateFirstName, validateLastName, validatePassword, validatePhoneNumber } from '../utils/inputValidations'
-import { deleteUserAsync, updateUserAsync } from '../store/userSlice'
+import { validateConfirmationPassword, validateFirstName, validateLastName, validateOldPassword, validatePassword, validatePhoneNumber } from '../utils/inputValidations'
+import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/userSlice'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
 
@@ -126,7 +126,7 @@ const UserSettingsScreen = ({ navigation }) => {
     const handleOldPasswordTextInputOnBlur = () => {
         setOldPassword(prev => ({
             ...prev,
-            validation: validatePassword(oldPassword.value),
+            validation: validateOldPassword(oldPassword.value),
             isFocused: false
         }))
     }
@@ -135,6 +135,7 @@ const UserSettingsScreen = ({ navigation }) => {
         const firstNameValidationResult = validateFirstName(firstName.value)
         const lastNameValidationResult = validateFirstName(lastName.value)
         const mobileNumberValidationResult = validateFirstName(mobileNumber.value)
+        const newPasswordValidationResult = validatePassword(newPassword.value)
 
         setFirstName(prev => ({
             ...prev,
@@ -151,6 +152,11 @@ const UserSettingsScreen = ({ navigation }) => {
             validation: mobileNumberValidationResult
         }))
 
+        setNewPassword(prev => ({
+            ...prev,
+            validation: newPasswordValidationResult
+        }))
+
         if (firstNameValidationResult &&
             lastNameValidationResult &&
             mobileNumberValidationResult &&
@@ -165,7 +171,10 @@ const UserSettingsScreen = ({ navigation }) => {
         }
 
         if (newPassword.value.length > 0) {
-            setConfirmNewPasswordModalVisible(true)
+
+            if (newPasswordValidationResult.isValid) {
+                setConfirmNewPasswordModalVisible(true)
+            }
         }
     }
 
@@ -195,6 +204,31 @@ const UserSettingsScreen = ({ navigation }) => {
                 message: ''
             }
         })
+    }
+
+    const handleUpdatePasswordConfirmBTN = () => {
+        const confirmNewPasswordResult = validateConfirmationPassword(newPassword.value, confirmNewPassword.value)
+        const oldPasswordValidationResult = validateOldPassword(oldPassword.value)
+
+        setConfirmNewPassword(prev => ({
+            ...prev,
+            validation: confirmNewPasswordResult
+        }))
+
+        setOldPassword(prev => ({
+            ...prev,
+            validation: oldPasswordValidationResult
+        }))
+
+        if (confirmNewPasswordResult.isValid &&
+            oldPasswordValidationResult.isValid &&
+            newPassword.value != oldPassword.value) {
+            dispatch(updatePasswordAsync({
+                oldPassword: oldPassword.value,
+                newPassword: newPassword.value,
+                confirmNewPassword: confirmNewPassword.value
+            }))
+        }
     }
 
     return (
@@ -317,6 +351,7 @@ const UserSettingsScreen = ({ navigation }) => {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.modalBtn}
+                        onPress={handleUpdatePasswordConfirmBTN}
                     >
                         <PoppinsText style={{ color: '#E48700' }}>Confirm</PoppinsText>
                     </TouchableOpacity>
@@ -382,7 +417,7 @@ const UserSettingsScreen = ({ navigation }) => {
                     />
                 </View>
                 <View style={{ marginBottom: 16 }}>
-                    <PoppinsText style={styles.title}>Chnage password</PoppinsText>
+                    <PoppinsText style={styles.title}>Change password</PoppinsText>
                     <EditableText
                         placeholder='New password'
                         state={newPassword}
