@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import showToast, { SMTH_WENT_WRONG } from "../components/Toast";
 import * as SecureStore from 'expo-secure-store'
-import { deleteUser, signIn, signUp, updateUser } from "../api/user";
+import { deleteUser, signIn, signUp, updatePassword, updateUser } from "../api/user";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -120,6 +120,27 @@ export const deleteUserAsync = createAsyncThunk('user/deleteUserAsync', async ()
     }
 })
 
+export const updatePasswordAsync = createAsyncThunk('user/updatePasswordAsync', async ({
+    oldPassword,
+    newPassword,
+    confirmNewPassword
+}) => {
+    try {
+        const response = await updatePassword(oldPassword, newPassword, confirmNewPassword)
+
+        if (response.status === 200) {
+            showToast(response.data.message)
+        }
+
+    } catch (err) {
+        if (err.response.data.status === 409) {
+            showToast(err.response.data.message)
+        } else {
+            showToast(SMTH_WENT_WRONG)
+        }
+    }
+})
+
 const userSlice = createSlice({
     name: 'user',
     initialState: {
@@ -154,6 +175,10 @@ const userSlice = createSlice({
             if (action.payload) {
                 state.user = null
             }
+        })
+
+        builder.addCase(updatePasswordAsync.fulfilled, (state, action) => {
+            state.user = action.payload.data
         })
     }
 })
