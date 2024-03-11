@@ -1,10 +1,10 @@
 import { NavigationContainer } from "@react-navigation/native"
 import { useDispatch, useSelector } from "react-redux"
 import { Suspense, lazy, useLayoutEffect } from "react"
-import { loadUserAsync } from "../store/userSlice"
+import { loadUserAsync } from "../store/UserAsyncThunks"
 
 const AuthStack = lazy(() => import('../navigation/stacks/AuthStack'))
-const UserStack = lazy(() => import('../navigation/stacks/UserStack'))
+const UserStack = lazy(() => import('../navigation/stacks/userStacks/UserStack'))
 
 const AppNavigationContainer = () => {
     const { user } = useSelector(state => state.user)
