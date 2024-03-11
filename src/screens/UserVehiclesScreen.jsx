@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import VehicleFlatListItem from '../components/VehicleFlatListItem'
 import { AntDesign } from '@expo/vector-icons'
-import { loadUserAsync } from '../store/UserAsyncThunks'
+import { loadUserAsync } from '../store/userAsyncThunks'
 
 const UserVehiclesScreen = () => {
     const { user } = useSelector(state => state.user)

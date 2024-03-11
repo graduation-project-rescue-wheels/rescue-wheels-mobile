@@ -5,7 +5,7 @@ import { getVehicleById } from '../api/vehicle'
 import { MaterialIcons, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'
 import CustomModal from './CustomModal'
 import { useDispatch } from 'react-redux'
-import { deleteVehicleAsync } from '../store/UserAsyncThunks'
+import { deleteVehicleAsync } from '../store/userAsyncThunks'
 
 const VehicleFlatListItem = ({ id }) => {
     const [vehicle, setVehicle] = useState(null)

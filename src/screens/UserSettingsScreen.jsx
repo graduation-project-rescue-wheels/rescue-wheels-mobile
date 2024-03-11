@@ -11,7 +11,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { validateConfirmationPassword, validateFirstName, validateLastName, validateOldPassword, validatePassword, validatePhoneNumber } from '../utils/inputValidations'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
-import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/UserAsyncThunks'
+import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/userAsyncThunks'
 
 const UserSettingsScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)

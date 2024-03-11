@@ -7,7 +7,7 @@ import showToast from '../components/Toast'
 import { validateEmail, validatePassword } from '../utils/inputValidations'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
-import { signInAsync } from '../store/UserAsyncThunks'
+import { signInAsync } from '../store/userAsyncThunks'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({

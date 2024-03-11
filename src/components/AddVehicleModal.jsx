@@ -8,7 +8,7 @@ import SelectionButton from "./SelectionButton"
 import { validateLicensePlate, validateVehicleEnergySource, validateVehicleMaker, validateVehicleModel, validateVehicleType } from "../utils/inputValidations"
 import { useDispatch } from "react-redux"
 import ValidationMessage from "./ValidationMessage"
-import { addVehicleAsync } from "../store/UserAsyncThunks"
+import { addVehicleAsync } from "../store/userAsyncThunks"
 
 const AddVehicleModal = ({ onRequestClose, visible }) => {
     const [make, setMake] = useState({

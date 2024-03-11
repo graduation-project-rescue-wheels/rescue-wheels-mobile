@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 import { validateConfirmationPassword, validateEmail, validateFirstName, validateLastName, validatePassword, validatePhoneNumber } from '../utils/inputValidations';
 import CustomTextInput from '../components/CustomTextInput';
 import ValidationMessage from '../components/ValidationMessage';
-import { signUpAsync } from '../store/UserAsyncThunks';
+import { signUpAsync } from '../store/userAsyncThunks';
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
