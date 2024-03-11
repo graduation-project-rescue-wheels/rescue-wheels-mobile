@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 
 const ProfileScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
-    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [])
+    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
     const dispatch = useDispatch()
 
     const listItems = [
@@ -23,7 +23,7 @@ const ProfileScreen = ({ navigation }) => {
             icon: <AntDesign name='car' style={styles.icon} />,
             label: 'Your vehicles',
             onPress: () => {
-                //TODO
+                navigation.navigate('Your vehicles')
             }
         },
         {
