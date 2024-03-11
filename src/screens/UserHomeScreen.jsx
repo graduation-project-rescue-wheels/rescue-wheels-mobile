@@ -19,7 +19,7 @@ const UserHomeScreen = () => {
     const [selectedEmergency, setSelectedEmergency] = useState(null)
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
-    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [])
+    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
     const services = [
         {
             imageSrc: require('../assets/images/siren.png'),
@@ -169,12 +169,12 @@ const UserHomeScreen = () => {
                 <PoppinsText style={styles.modalTitle}>Choose your vehicle</PoppinsText>
                 <View style={styles.flatListModalView}>
                     <FlatList
-                        data={[]}
-                        renderItem={({ item }) => <VehicleFlatListItem
-                            Icon={null}
-                            label={item.model}
-                            onPress={() => selectedVehicle(item)}
-                        />}
+                        data={user.vehicles_IDS}
+                        // renderItem={({ item }) => <VehicleFlatListItem
+                        //     Icon={null}
+                        //     label={item.model}
+                        //     onPress={() => selectedVehicle(item)}
+                        // />}
                         ListEmptyComponent={<NoVehicles onPress={() => {/*todo*/ }} />}
                     />
                 </View>
