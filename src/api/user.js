@@ -56,3 +56,13 @@ export async function updatePassword(oldPassword, newPassword, confirmNewPasswor
         }
     })
 }
+
+export async function getCurrnetUser() {
+    const accessToken = await SecureStore.getItemAsync('accessToken')
+
+    return await rwClient.get('/user/getUserData', {
+        headers: {
+            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+        }
+    })
+}
