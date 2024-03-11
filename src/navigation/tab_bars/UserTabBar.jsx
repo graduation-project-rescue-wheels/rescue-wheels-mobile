@@ -1,4 +1,4 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet, Pressable } from 'react-native';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 function UserTabBar({ state, descriptors, navigation }) {
@@ -35,7 +35,7 @@ function UserTabBar({ state, descriptors, navigation }) {
                 };
 
                 return (
-                    <TouchableOpacity
+                    <Pressable
                         accessibilityRole="button"
                         accessibilityState={isFocused ? { selected: true } : {}}
                         accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -67,7 +67,7 @@ function UserTabBar({ state, descriptors, navigation }) {
                                 ...styles.indicator
                             }}
                         />
-                    </TouchableOpacity>
+                    </Pressable>
                 );
             })}
         </View>
