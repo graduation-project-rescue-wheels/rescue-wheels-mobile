@@ -3,11 +3,11 @@ import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { useDispatch } from 'react-redux'
-import { signInAsync } from '../store/userSlice'
 import showToast from '../components/Toast'
 import { validateEmail, validatePassword } from '../utils/inputValidations'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
+import { signInAsync } from '../store/UserAsyncThunks'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({

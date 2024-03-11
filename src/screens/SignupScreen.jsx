@@ -4,10 +4,10 @@ import { Fontisto, MaterialIcons } from '@expo/vector-icons';
 import PoppinsText from '../components/PoppinsText'
 import BackButton from '../components/BackButton';
 import { useDispatch } from 'react-redux';
-import { signUpAsync } from '../store/userSlice';
 import { validateConfirmationPassword, validateEmail, validateFirstName, validateLastName, validatePassword, validatePhoneNumber } from '../utils/inputValidations';
 import CustomTextInput from '../components/CustomTextInput';
 import ValidationMessage from '../components/ValidationMessage';
+import { signUpAsync } from '../store/UserAsyncThunks';
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({

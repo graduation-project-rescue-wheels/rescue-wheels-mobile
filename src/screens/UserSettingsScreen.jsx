@@ -9,9 +9,9 @@ import CustomModal from '../components/CustomModal'
 import EditableText from '../components/EditableText'
 import { MaterialIcons } from '@expo/vector-icons'
 import { validateConfirmationPassword, validateFirstName, validateLastName, validateOldPassword, validatePassword, validatePhoneNumber } from '../utils/inputValidations'
-import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/userSlice'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
+import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/UserAsyncThunks'
 
 const UserSettingsScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
