@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import showToast, { SMTH_WENT_WRONG } from "../components/Toast";
 import * as SecureStore from 'expo-secure-store'
-import { deleteUser, signIn, signUp, updatePassword, updateUser } from "../api/user";
+import { addVehicle, deleteUser, signIn, signUp, updatePassword, updateUser } from "../api/user";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -22,7 +22,7 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
             }
         }
     } catch (err) {
-        console.log(err);
+        console.log(err.response.data);
         showToast(SMTH_WENT_WRONG)
 
         return {
@@ -82,6 +82,7 @@ export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async ({
         const response = await updateUser(firstName, lastName, mobileNumber)
 
         if (response.status === 200) {
+            await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.updatedUser))
             showToast(response.data.message)
 
             return {
@@ -133,10 +134,36 @@ export const updatePasswordAsync = createAsyncThunk('user/updatePasswordAsync', 
         }
 
     } catch (err) {
+        console.log(err.response.data);
+        
         if (err.response.data.status === 409) {
             showToast(err.response.data.message)
         } else {
             showToast(SMTH_WENT_WRONG)
+        }
+    }
+})
+
+export const addVehicleAsync = createAsyncThunk('user/addVehicleAsync', async ({ make, model, licensePlate, type, energySource, onRequestClose }) => {
+    try {
+        const response = await addVehicle(make, model, licensePlate, type, energySource)
+
+        if (response.status === 201) {
+            showToast(response.data.message)
+            onRequestClose()
+            await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
+
+            return {
+                isValid: true,
+                data: response.data.user
+            }
+        }
+    } catch (err) {
+        console.log(err.response.data);
+        showToast(SMTH_WENT_WRONG)
+
+        return {
+            isValid: false
         }
     }
 })
@@ -179,6 +206,12 @@ const userSlice = createSlice({
 
         builder.addCase(updatePasswordAsync.fulfilled, (state, action) => {
             state.user = action.payload.data
+        })
+
+        builder.addCase(addVehicleAsync.fulfilled, (state, action) => {
+            if (action.payload.isValid) {
+                state.user = action.payload.data
+            }
         })
     }
 })
