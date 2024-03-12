@@ -3,7 +3,7 @@ import { Ionicons, AntDesign, MaterialIcons } from '@expo/vector-icons';
 import PoppinsText from '../components/PoppinsText';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfileScreenFlatListItem from '../components/ProfileScreenFlatListItem';
-import { signOutAsync } from '../store/userSlice';
+import { signOutAsync } from '../store/userAsyncThunks';
 import { useMemo } from 'react';
 
 const ProfileScreen = ({ navigation }) => {
