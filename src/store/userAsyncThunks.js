@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store'
 import { deleteUser, getCurrnetUser, signIn, signUp, updatePassword, updateUser } from "../api/user";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { addVehicle, deleteVehicle } from "../api/vehicle";
+import * as SplashScreen from 'expo-splash-screen'
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -59,6 +60,8 @@ export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => 
             userData: JSON.parse(await SecureStore.getItemAsync('currentUser')),
             accessToken: await SecureStore.getItemAsync('accessToken')
         }
+    } finally {
+        await SplashScreen.hideAsync()
     }
 })
 
