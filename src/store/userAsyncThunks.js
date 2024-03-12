@@ -138,20 +138,22 @@ export const deleteUserAsync = createAsyncThunk('user/deleteUserAsync', async ()
 export const updatePasswordAsync = createAsyncThunk('user/updatePasswordAsync', async ({
     oldPassword,
     newPassword,
-    confirmNewPassword
+    confirmNewPassword,
+    setModalVisible
 }) => {
     try {
         const response = await updatePassword(oldPassword, newPassword, confirmNewPassword)
 
         if (response.status === 200) {
             showToast(response.data.message)
+            setModalVisible(false)
         }
 
     } catch (err) {
-        console.log(err.response.data);
+        console.log(err);
 
-        if (err.response.data.status === 409) {
-            showToast(err.response.data.message)
+        if (err.response.status === 404) {
+            showToast(err.response.data.errMsg)
         } else {
             showToast(SMTH_WENT_WRONG)
         }
