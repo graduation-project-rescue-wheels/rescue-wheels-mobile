@@ -226,7 +226,8 @@ const UserSettingsScreen = ({ navigation }) => {
             dispatch(updatePasswordAsync({
                 oldPassword: oldPassword.value,
                 newPassword: newPassword.value,
-                confirmNewPassword: confirmNewPassword.value
+                confirmNewPassword: confirmNewPassword.value,
+                setModalVisible: setConfirmNewPasswordModalVisible
             }))
         }
     }
