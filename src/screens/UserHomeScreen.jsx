@@ -19,6 +19,7 @@ const UserHomeScreen = () => {
     const [selectedEmergency, setSelectedEmergency] = useState(null)
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
+    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
     const services = [
         {
             imageSrc: require('../assets/images/siren.png'),
@@ -168,12 +169,12 @@ const UserHomeScreen = () => {
                 <PoppinsText style={styles.modalTitle}>Choose your vehicle</PoppinsText>
                 <View style={styles.flatListModalView}>
                     <FlatList
-                        data={user.vehicles}
-                        renderItem={({ item }) => <VehicleFlatListItem
-                            Icon={null}
-                            label={item.model}
-                            onPress={() => selectedVehicle(item)}
-                        />}
+                        data={user.vehicles_IDS}
+                        // renderItem={({ item }) => <VehicleFlatListItem
+                        //     Icon={null}
+                        //     label={item.model}
+                        //     onPress={() => selectedVehicle(item)}
+                        // />}
                         ListEmptyComponent={<NoVehicles onPress={() => {/*todo*/ }} />}
                     />
                 </View>
@@ -191,11 +192,11 @@ const UserHomeScreen = () => {
                 {
                     isFirstHalfOfDay ?
                         <PoppinsText style={styles.greetingText}>Good morning, <PoppinsText style={{ color: 'black' }}>
-                            {user.username}
+                            {username}
                         </PoppinsText>
                         </PoppinsText>
                         : <PoppinsText style={styles.greetingText}>Good afternoon, <PoppinsText style={{ color: 'black' }}>
-                            {user.username}
+                            {username}
                         </PoppinsText>
                         </PoppinsText>
                 }
@@ -218,12 +219,12 @@ const UserHomeScreen = () => {
                 <View style={styles.cardView}>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoOffers />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <PoppinsText style={styles.sectionTitle}>History</PoppinsText>
@@ -236,12 +237,12 @@ const UserHomeScreen = () => {
                     </View>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoHistory message="You don't have any previous emergencies" />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <View style={styles.cardView}>
@@ -253,14 +254,15 @@ const UserHomeScreen = () => {
                     </View>
                     <FlatList
                         style={{ marginBottom: 32 }}
-                        data={user.history}
+                        data={[]}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoHistory message="You didn't visit any of our repair centers" />}
-                        contentContainerStyle={{ alignItems: user.history ? 'flex-start' : 'center', flex: 1 }}
+                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
+                <View style={{ height: 80 }} />
             </ScrollView>
             <TouchableOpacity style={styles.supportBtn}>
                 <MaterialIcons
@@ -277,7 +279,9 @@ export default UserHomeScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 8
+        paddingTop: 8,
+        paddingHorizontal: 8,
+        backgroundColor: 'white'
     },
     greetingText: {
         fontSize: 20,
@@ -309,7 +313,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#E48700',
         padding: 8,
         borderRadius: 50,
-        bottom: 50,
+        bottom: 85,
         right: 15,
         alignItems: 'center',
         justifyContent: 'center',

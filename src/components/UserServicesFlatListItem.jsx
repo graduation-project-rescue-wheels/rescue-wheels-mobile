@@ -1,9 +1,9 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import PoppinsText from './PoppinsText'
 
 const UserServicesFlatListItem = ({ imageSrc, label, onPress }) => {
     return (
-        <TouchableOpacity
+        <Pressable
             style={styles.container}
             onPress={onPress}
         >
@@ -14,7 +14,7 @@ const UserServicesFlatListItem = ({ imageSrc, label, onPress }) => {
                 />
             </View>
             <PoppinsText style={styles.label}>{label}</PoppinsText>
-        </TouchableOpacity>
+        </Pressable>
     )
 }
 

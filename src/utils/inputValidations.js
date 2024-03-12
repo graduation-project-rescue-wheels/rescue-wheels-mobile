@@ -104,11 +104,81 @@ export const validateConfirmationPassword = (passowrd, confirmPassword) => {
     }
 }
 
-export const validatedob = (flag) => {
-    if (flag) {
+export const validateOldPassword = (oldPassword) => {
+    if (oldPassword.length === 0) {
         return {
             isValid: false,
-            message: 'Please pick your date of birth'
+            message: 'Please enter your old password'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
+export const validateVehicleMaker = (make) => {
+    if (make.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter vehicle maker'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
+export const validateVehicleModel = (model) => {
+    if (model.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter vehicle model'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
+export const validateLicensePlate = (licensePlate) => {
+    if (licensePlate.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter license plate'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
+export const validateVehicleType = (type) => {
+    if (type.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter vehicle type'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
+export const validateVehicleEnergySource = (energySource) => {
+    if (energySource.length === 0) {
+        return {
+            isValid: false,
+            message: "Please enter vehicle's energy source"
         }
     } else {
         return {
