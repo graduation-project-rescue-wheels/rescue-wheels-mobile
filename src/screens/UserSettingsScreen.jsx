@@ -135,7 +135,6 @@ const UserSettingsScreen = ({ navigation }) => {
         const firstNameValidationResult = validateFirstName(firstName.value)
         const lastNameValidationResult = validateFirstName(lastName.value)
         const mobileNumberValidationResult = validateFirstName(mobileNumber.value)
-        const newPasswordValidationResult = validatePassword(newPassword.value)
 
         setFirstName(prev => ({
             ...prev,
@@ -152,25 +151,23 @@ const UserSettingsScreen = ({ navigation }) => {
             validation: mobileNumberValidationResult
         }))
 
-        setNewPassword(prev => ({
-            ...prev,
-            validation: newPasswordValidationResult
-        }))
-
         if (firstNameValidationResult &&
             lastNameValidationResult &&
-            mobileNumberValidationResult &&
-            (firstName.value !== user.firstName ||
-                lastName.value !== user.lastName ||
-                mobileNumber.value !== user.mobileNumber)) {
+            mobileNumberValidationResult) {
             dispatch(updateUserAsync({
-                firstName: firstName.value,
-                lastName: lastName.value,
-                mobileNumber: mobileNumber.value
+                firstName: firstName.value !== user.firstName && firstName.value,
+                lastName: lastName.value !== user.lastName && lastName.value,
+                mobileNumber: mobileNumber.value !== user.mobileNumber && mobileNumber.value
             }))
         }
 
         if (newPassword.value.length > 0) {
+            const newPasswordValidationResult = validatePassword(newPassword.value)
+
+            setNewPassword(prev => ({
+                ...prev,
+                validation: newPasswordValidationResult
+            }))
 
             if (newPasswordValidationResult.isValid) {
                 setConfirmNewPasswordModalVisible(true)
