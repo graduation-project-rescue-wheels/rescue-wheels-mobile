@@ -187,3 +187,23 @@ export const validateVehicleEnergySource = (energySource) => {
         }
     }
 }
+
+export const validateSelectedVehicle = (vehicle) => {
+    return vehicle ? {
+        isValid: true,
+        message: ''
+    } : {
+        isValid: false,
+        message: 'Please choose a vehicle'
+    }
+}
+
+export const validateSelectedEmergency = (emergency) => {
+    return emergency ? {
+        isValid: true,
+        message: ''
+    } : {
+        isValid: false,
+        message: 'Please choose an emergency'
+    }
+}
