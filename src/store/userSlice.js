@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { addVehicleAsync, deleteUserAsync, deleteVehicleAsync, loadUserAsync, signInAsync, signOutAsync, signUpAsync, updatePasswordAsync, updateUserAsync } from "./userAsyncThunks";
+import { addVehicleAsync, deleteUserAsync, deleteVehicleAsync, loadUserAsync, requestEmergencyAsync, signInAsync, signOutAsync, signUpAsync, updatePasswordAsync, updateUserAsync } from "./userAsyncThunks";
 
 const userSlice = createSlice({
     name: 'user',
@@ -48,6 +48,12 @@ const userSlice = createSlice({
         })
 
         builder.addCase(deleteVehicleAsync.fulfilled, (state, action) => {
+            if (action.payload.isValid) {
+                state.user = action.payload.data
+            }
+        })
+
+        builder.addCase(requestEmergencyAsync.fulfilled, (state, action) => {
             if (action.payload.isValid) {
                 state.user = action.payload.data
             }

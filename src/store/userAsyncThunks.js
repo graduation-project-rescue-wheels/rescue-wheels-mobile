@@ -4,6 +4,7 @@ import { deleteUser, getCurrnetUser, signIn, signUp, updatePassword, updateUser 
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { addVehicle, deleteVehicle } from "../api/vehicle";
 import * as SplashScreen from 'expo-splash-screen'
+import { requestEmergency } from "../api/EmergencyRequest";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -46,6 +47,7 @@ export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => 
 
         if (response.status === 200) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.data))
+            console.log(await SecureStore.getItemAsync('accessToken'));
 
             return {
                 userData: response.data.data,
@@ -195,6 +197,29 @@ export const deleteVehicleAsync = createAsyncThunk('user/deleteVehicleAsync', as
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
             onRequestClose()
             showToast(response.data.message)
+
+            return {
+                isValid: true,
+                data: response.data.user
+            }
+        }
+    } catch (err) {
+        console.log(err.response.data);
+        showToast(SMTH_WENT_WRONG)
+
+        return {
+            isValid: false
+        }
+    }
+})
+
+export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsync', async ({ vehicle, coordinates, type, navigation }) => {
+    try {
+        const response = await requestEmergency(vehicle, coordinates, type)
+
+        if (response.status === 201) {
+            await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
+            navigation.navigate('Map')
 
             return {
                 isValid: true,
