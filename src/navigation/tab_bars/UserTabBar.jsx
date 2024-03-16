@@ -1,5 +1,5 @@
 import { View, StyleSheet, Pressable } from 'react-native';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 function UserTabBar({ state, descriptors, navigation }) {
     return (
@@ -53,13 +53,20 @@ function UserTabBar({ state, descriptors, navigation }) {
                                         ...styles.icon,
                                         color: isFocused ? '#E48700' : '#ADADAD'
                                     }}
-                                /> : <Ionicons
-                                    name='person-circle-outline'
-                                    style={{
-                                        ...styles.icon,
-                                        color: isFocused ? '#E48700' : '#ADADAD'
-                                    }}
-                                />
+                                /> : label === 'Emergency-stack' ?
+                                    <MaterialCommunityIcons
+                                        name='car-emergency'
+                                        style={{
+                                            ...styles.icon,
+                                            color: isFocused ? '#E48700' : '#ADADAD'
+                                        }}
+                                    /> : <Ionicons
+                                        name='person-circle-outline'
+                                        style={{
+                                            ...styles.icon,
+                                            color: isFocused ? '#E48700' : '#ADADAD'
+                                        }}
+                                    />
                         }
                         <View
                             style={{

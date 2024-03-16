@@ -54,6 +54,12 @@
       {
         "photosPermission": "The app accesses your photos to let you update your profile picture."
       }
+    ],
+    [
+      "expo-location",
+      {
+        "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+      }
     ]
   ]
 }
