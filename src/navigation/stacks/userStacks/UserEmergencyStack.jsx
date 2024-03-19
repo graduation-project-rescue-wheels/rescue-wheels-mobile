@@ -8,7 +8,10 @@ const UserEmergencyStack = () => {
     return (
         <Stack.Navigator initialRouteName="Emergency">
             <Stack.Screen name="Emergency" component={EmergencyScreen} />
-            <Stack.Screen name="Map" component={UserEmergencyMapScreen} />
+            <Stack.Screen name="Map" component={UserEmergencyMapScreen} options={{
+                headerTransparent: true,
+                headerTitle: ''
+            }} />
         </Stack.Navigator>
     )
 }
