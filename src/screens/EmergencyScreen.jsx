@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import SelectionButton from '../components/SelectionButton'
 import { useEffect, useState } from 'react'
 import { AntDesign, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
@@ -13,15 +13,20 @@ import { validateSelectedEmergency, validateSelectedVehicle } from '../utils/inp
 import { requestEmergencyAsync } from '../store/userAsyncThunks'
 import ValidationMessage from '../components/ValidationMessage'
 import { getRequestById } from '../api/EmergencyRequest'
+import showToast from '../components/Toast'
+import { useIsFocused } from '@react-navigation/native'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
+    const isScreenFocused = useIsFocused()
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const [selectedEmergency, setSelectedEmergency] = useState(null)
     const [vehicles, setVehicles] = useState([])
     const [selectVehicleModalVisible, setSelectVehicleModalVisible] = useState(false)
     const [selectEmergencyModalVisible, setSelectEmergencyModalVisible] = useState(false)
+    const [isLoadingRequests, setIsLoadingRequests] = useState(false)
+    const [isLoadingVehicles, setIsLoadingVehicles] = useState(false)
     const [address, setAddress] = useState({
         value: '',
         isFocused: false
@@ -55,21 +60,39 @@ const EmergencyScreen = ({ navigation }) => {
     ]
 
     const fetchVehicles = async () => {
-        const res = await Promise.all(user.vehicles_IDS.map(getVehicleById))
-        const vehicles = res.map(e => e.data.vehicle)
+        try {
+            setIsLoadingVehicles(true)
 
-        setVehicles(vehicles)
+            const res = await Promise.all(user.vehicles_IDS.map(getVehicleById))
+            const vehicles = res.map(e => e.data.vehicle)
+
+            setVehicles(vehicles)
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't load your vehicles")
+        } finally {
+            setIsLoadingVehicles(false)
+        }
     }
 
     const fetchEmergencyRequests = async () => {
-        const res = await Promise.all(user.Requests_IDS.map(getRequestById))
-        const requests = res.map(e => e.data.request)
+        try {
+            setIsLoadingRequests(true)
 
-        for (let i = 0; i < requests.length; i++) {
-            if (requests[i].state === 'pending') {
-                setPendingRequest(requests[i])
-                break
+            const res = await Promise.all(user.Requests_IDS.map(getRequestById))
+            const requests = res.map(e => e.data.request)
+
+            for (let i = 0; i < requests.length; i++) {
+                if (requests[i].state === 'pending') {
+                    setPendingRequest(requests[i])
+                    break
+                }
             }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't load your requests")
+        } finally {
+            setIsLoadingRequests(false)
         }
     }
 
@@ -97,9 +120,11 @@ const EmergencyScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
-        fetchVehicles()
-        fetchEmergencyRequests()
-    }, [])
+        if (isScreenFocused) {
+            fetchVehicles()
+            fetchEmergencyRequests()
+        }
+    }, [isScreenFocused])
 
     return (
         <ScrollView style={styles.container}>
@@ -189,15 +214,16 @@ const EmergencyScreen = ({ navigation }) => {
                         placeholder='Drop off'
                     />
                 }
-                {pendingRequest ?
-                    <TouchableOpacity
-                        style={{ ...styles.btn, backgroundColor: '#E48700' }}
-                        onPress={() => navigation.navigate('Map', { id: pendingRequest._id })}
-                    >
-                        <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
-                    </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
-                        <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
-                    </TouchableOpacity>
+                {isLoadingRequests ?
+                    <ActivityIndicator color={'#E48700'} size={'large'} /> : pendingRequest ?
+                        <TouchableOpacity
+                            style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                            onPress={() => navigation.navigate('Map', { id: pendingRequest._id })}
+                        >
+                            <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
+                        </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
+                            <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
+                        </TouchableOpacity>
                 }
             </View>
         </ScrollView>
