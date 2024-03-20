@@ -8,62 +8,50 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Ionicons } from "@expo/vector-icons"
-// import MapViewDirections from 'react-native-maps-directions'
 
 const { height } = Dimensions.get('window')
 
 const TechnicianRequestsMapScreen = ({ route }) => {
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
-    const [user, setuser] = useState(null)
-    const [vehicle, setVehicles] = useState(null)
-    const [coords, setCoords] = useState([])
-    const [index, setIndex] = useState(0)
+    const [mapPadding, setMapPadding] = useState(85)
 
     const snappingPoints = useMemo(() => {
-        return [0.25, 0.52].map(percentage => percentage * height);
+        return [0.28, 0.55].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
     const bottomSheetRef = useRef();
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
 
-    const getCurrentLocation = async () => {
+    const getCurrentLocationAndRequest = async () => {
         const perm = await Location.requestForegroundPermissionsAsync()
-        const location = await Location.getCurrentPositionAsync({})
 
         if (perm.granted) {
+            const location = await Location.getCurrentPositionAsync({})
+            const requestData = await getRequestById('65f5ff896fb047a8215e2e1e')
+
+            setRequest(requestData.data.request)
+
             setRegion({
                 longitude: location.coords.longitude,
                 latitude: location.coords.latitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.01
+                latitudeDelta: 0.004757,
+                longitudeDelta: 0.006866
             })
         }
-    }
-
-    const getRequests = async () => {
-        const requestData = await getRequestById('65f5ff896fb047a8215e2e1e')
-        setRequest(requestData.data.request)
-        setuser(requestData.data.request.requestedBy)
-        setVehicles(requestData.data.request.vehicle)
-        setCoords([
-            region,
-            requestData.data.request.coordinates
-        ])
     }
 
     const handleSheetChanges = useCallback(index => {
         Animated.spring(myLocationBtnBottom, {
             toValue: -snappingPoints[index],
             useNativeDriver: true
-        }).start()
-        setIndex(index)
+        }).start((finished) => {
+            if (finished.value) {
+                setMapPadding(-finished.value)
+            }
+        })
     }, [])
-
-    const focusMap = () => {
-        mapRef.current.fitToCoordinates(coords)
-    }
 
     const handleMyLocationBtn = () => {
         mapRef.current.animateToRegion(region)
@@ -74,14 +62,18 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }
 
     useEffect(() => {
-        getCurrentLocation()
-        getRequests()
+        getCurrentLocationAndRequest()
     }, [])
 
     useEffect(() => {
-        focusMap()
-        console.log("aasd", index);
-    }, [coords, index])
+        if (request && region) {
+            mapRef.current.fitToCoordinates([region, request?.coordinates])
+        }
+    }, [request?.state, region?.longitude])
+
+    useEffect(() => {
+        mapRef.current.fitToCoordinates([region, request?.coordinates])
+    }, [mapPadding])
 
     return (
         <View style={styles.continer}>
@@ -92,34 +84,20 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
-                mapPadding={{ bottom: snappingPoints[index] }}
+                mapPadding={{ bottom: mapPadding }}
             >
-                {request != null && <Marker
-                    coordinate={{
-                        longitude: request.coordinates.longitude,
-                        latitude: request.coordinates.latitude,
-                    }}>
+                {request && <Marker coordinate={request.coordinates}>
                     <Callout>
                         <PoppinsText>{request.type}</PoppinsText>
                     </Callout>
                 </Marker>}
-                {/* <MapViewDirections
-                    origin={region}
-                    destination={{
-                        longitude: request.coordinates.longitude,
-                        latitude: request.coordinates.latitude,
-                    }}
-                    apikey="YOUR_GOOGLE_MAPS_API_KEY_HERE"
-                    strokeWidth={4}
-                    strokeColor="red"
-                /> */}
             </MapView>
-            <Animated.View style={{ bottom: snappingPoints[0] / 2, transform: [{ translateY: myLocationBtnBottom }] }}>
+            <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
                     <MaterialIcons name='my-location' style={styles.icon} />
                 </TouchableOpacity>
             </Animated.View>
-            {request && user && vehicle && <BottomSheet
+            {request && <BottomSheet
                 ref={bottomSheetRef}
                 onChange={handleSheetChanges}
                 snapPoints={snappingPoints}
@@ -131,20 +109,20 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                     </PoppinsText>
                     <View style={{ flexDirection: 'row' }}>
                         {
-                            user.photoURL === undefined ?
+                            request.requestedBy.profilePic.length === 0 ?
                                 <Ionicons
                                     name='person-circle-outline'
                                     style={styles.profilePic}
                                 /> : <Image
-                                    source={{ uri: user.photoPic }}
+                                    source={{ uri: request.requestedBy.profilePic }}
                                     style={styles.profilePic}
                                 />
                         }
                         <View>
                             <PoppinsText style={{ fontSize: 18 }}>
-                                {user.firstName} {user.lastName}
+                                {request.requestedBy.firstName} {request.requestedBy.lastName}
                             </PoppinsText>
-                            <PoppinsText style={styles.highLightedText}> {user.mobileNumber} </PoppinsText>
+                            <PoppinsText style={styles.highLightedText}> {request.requestedBy.mobileNumber} </PoppinsText>
                         </View>
                     </View>
                     <View style={{ ...styles.requestInfo, paddingTop: 30 }}>
@@ -153,11 +131,11 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                     </View>
                     <View style={styles.requestInfo}>
                         <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                        <PoppinsText>{vehicle.make} {vehicle.model}</PoppinsText>
+                        <PoppinsText>{request.vehicle.make} {request.vehicle.model}</PoppinsText>
                     </View>
                     <View style={styles.requestInfo}>
                         <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
-                        <PoppinsText>{vehicle.licensePlate}</PoppinsText>
+                        <PoppinsText>{request.vehicle.licensePlate}</PoppinsText>
                     </View>
                     <TouchableOpacity
                         style={styles.acceptBTN}
@@ -180,13 +158,15 @@ const styles = StyleSheet.create({
         flex: 1
     },
     myLocationBtn: {
-        position: 'absolute',
         backgroundColor: '#E48700',
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
+    },
+    myLocationBtnView: {
+        position: 'absolute',
         right: 16,
     },
     icon: {
@@ -223,5 +203,4 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 20
     }
-
 })
