@@ -15,6 +15,7 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
+    const [mapPadding, setMapPadding] = useState(85)
 
     const snappingPoints = useMemo(() => {
         return [0.23, 0.45].map(percentage => percentage * height);
@@ -29,7 +30,11 @@ const UserEmergencyMapScreen = ({ route }) => {
         Animated.spring(myLocationBtnBottom, {
             toValue: -snappingPoints[index],
             useNativeDriver: true
-        }).start()
+        }).start((finished) => {
+            if (finished.value) {
+                setMapPadding(-finished.value)
+            }
+        })
     }, [])
 
     const getCurrentLocation = async () => {
@@ -39,8 +44,8 @@ const UserEmergencyMapScreen = ({ route }) => {
         setRegion({
             longitude: location.coords.longitude,
             latitude: location.coords.latitude,
-            latitudeDelta: 0.03,
-            longitudeDelta: 0.01
+            latitudeDelta: 0.004757,
+            longitudeDelta: 0.006866
         })
     }
 
@@ -81,7 +86,6 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     useEffect(() => {
         getCurrentLocation()
-        pulseAnimation().start()
 
         if (id) {
             fetchRequest()
@@ -101,6 +105,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
+                mapPadding={{ bottom: mapPadding }}
             >
                 {/* {region && <Marker coordinate={{
                     latitude: region.latitude,
@@ -111,7 +116,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                     </Callout>
                 </Marker>} */}
             </MapView>
-            <Animated.View style={{ bottom: snappingPoints[0] / 2, transform: [{ translateY: myLocationBtnBottom }] }}>
+            <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
                     <MaterialIcons name='my-location' style={styles.icon} />
                 </TouchableOpacity>
@@ -154,15 +159,17 @@ const styles = StyleSheet.create({
     map: {
         flex: 1
     },
-    myLocationBtn: {
+    myLocationBtnView: {
         position: 'absolute',
+        right: 16
+    },
+    myLocationBtn: {
         backgroundColor: '#E48700',
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
-        right: 16
     },
     icon: {
         fontSize: 30,
