@@ -83,7 +83,7 @@ const EmergencyScreen = ({ navigation }) => {
             const requests = res.map(e => e.data.request)
 
             for (let i = 0; i < requests.length; i++) {
-                if (requests[i].state === 'pending') {
+                if (requests[i].state === 'pending' || requests[i].state === 'inProgress') {
                     setPendingRequest(requests[i])
                     break
                 }

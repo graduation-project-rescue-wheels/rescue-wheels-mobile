@@ -5,6 +5,7 @@ import { loadUserAsync } from "../store/userAsyncThunks"
 
 const AuthStack = lazy(() => import('../navigation/stacks/AuthStack'))
 const UserStack = lazy(() => import('../navigation/stacks/userStacks/UserStack'))
+const TechnicianStack = lazy(() => import('./stacks/technicianStacks/TechnicianStack'))
 
 const AppNavigationContainer = () => {
     const { user } = useSelector(state => state.user)
@@ -18,7 +19,8 @@ const AppNavigationContainer = () => {
         <Suspense>
             <NavigationContainer>
                 {
-                    user === null ? <AuthStack /> : <UserStack />
+                    user === null ? <AuthStack /> :
+                        user.role === "Technician" ? <TechnicianStack /> : <UserStack />
                 }
             </NavigationContainer>
         </Suspense>
