@@ -137,7 +137,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                         request.state === 'pending' && <PoppinsText>Connecting you to a technician</PoppinsText>
                     }
                     {
-                        request.state === 'inProgress' && <PoppinsText>Siko Siko is on his way</PoppinsText>
+                        request.state === 'inProgress' && <PoppinsText>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
                     }
                 </BottomSheetView>
             </BottomSheet>}
