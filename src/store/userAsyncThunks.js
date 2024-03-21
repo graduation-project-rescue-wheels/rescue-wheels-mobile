@@ -219,7 +219,7 @@ export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsyn
 
         if (response.status === 201) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
-            navigation.navigate('Map')
+            navigation.navigate('Map', { id: response.data.request._id })
 
             return {
                 isValid: true,
