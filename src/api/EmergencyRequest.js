@@ -26,3 +26,15 @@ export async function getRequestById(id) {
         }
     })
 }
+
+export async function cancelRequest(id) {
+    const accessToken = await SecureStore.getItemAsync('accessToken')
+
+    return rwClient.put('/user/cancelRequest', {
+        id
+    }, {
+        headers: {
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+        }
+    })
+}
