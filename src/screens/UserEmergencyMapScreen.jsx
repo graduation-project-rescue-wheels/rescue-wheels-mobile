@@ -4,8 +4,8 @@ import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { MaterialIcons } from '@expo/vector-icons'
-import { getRequestById } from '../api/EmergencyRequest'
-import showToast from '../components/Toast'
+import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
+import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const { height, width } = Dimensions.get('window')
@@ -64,7 +64,6 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     const handleMyLocationBtn = () => {
         mapRef.current.animateToRegion(region)
-        setRequest({ ...request, state: 'inProgress' })
     }
 
     const pulseAnimation = () => {
@@ -82,6 +81,19 @@ const UserEmergencyMapScreen = ({ route }) => {
                 })
             ])
         )
+    }
+
+    const handleCancelRequestBtn = async () => {
+        try {
+            const response = await cancelRequest(request._id)
+
+            if (response.status === 200) {
+                setRequest(response.data.request)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast(SMTH_WENT_WRONG)
+        }
     }
 
     useEffect(() => {
@@ -106,6 +118,12 @@ const UserEmergencyMapScreen = ({ route }) => {
                 showsMyLocationButton={false}
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding }}
+                onUserLocationChange={(e) => {
+                    const { longitude, latitude } = e.nativeEvent.coordinate
+                    setRegion(prev => ({
+                        ...prev, longitude, latitude
+                    }))
+                }}
             >
                 {/* {region && <Marker coordinate={{
                     latitude: region.latitude,
@@ -139,10 +157,21 @@ const UserEmergencyMapScreen = ({ route }) => {
                         }} />
                     </View>
                     {
-                        request.state === 'pending' && <PoppinsText>Connecting you to a technician</PoppinsText>
+                        request.state === 'pending' && <PoppinsText style={styles.stateMessage}>Connecting you to a technician</PoppinsText>
                     }
                     {
-                        request.state === 'inProgress' && <PoppinsText>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
+                        request.state === 'inProgress' && <PoppinsText style={styles.stateMessage}>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
+                    }
+                    {
+                        request.state === 'cancelled' && <PoppinsText style={styles.stateMessage}>Your request has been cancelled</PoppinsText>
+                    }
+                    {
+                        (request.state === 'pending' || request.state === 'inProgress') && <TouchableOpacity
+                            style={{ ...styles.btn, backgroundColor: '#F9BFBF' }}
+                            onPress={handleCancelRequestBtn}
+                        >
+                            <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
+                        </TouchableOpacity>
                     }
                 </BottomSheetView>
             </BottomSheet>}
@@ -177,7 +206,7 @@ const styles = StyleSheet.create({
     },
     bottomSheetContainer: {
         flex: 1,
-        alignItems: 'center',
+        paddingHorizontal: 8
     },
     bar: {
         height: 4,
@@ -191,5 +220,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8
+    },
+    btn: {
+        borderRadius: 16,
+        padding: 8,
+        alignItems: 'center'
+    },
+    stateMessage: {
+        textAlign: 'center',
+        marginBottom: 16
     }
 })
