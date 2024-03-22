@@ -8,6 +8,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Ionicons } from "@expo/vector-icons"
+import { acceptRequest } from '../api/user'
 
 const { height } = Dimensions.get('window')
 
@@ -29,10 +30,9 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
         if (perm.granted) {
             const location = await Location.getCurrentPositionAsync({})
-            const requestData = await getRequestById('65f5ff896fb047a8215e2e1e')
+            const requestData = await getRequestById('65fcc6f380746317240f6200')
 
             setRequest(requestData.data.request)
-
             setRegion({
                 longitude: location.coords.longitude,
                 latitude: location.coords.latitude,
@@ -57,8 +57,12 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         mapRef.current.animateToRegion(region)
     }
 
-    const handleAcceptBtn = () => {
-        setRequest({ ...request, state: 'inProgress' })
+    const handleMarkerLocation = () => {
+        mapRef.current.fitToCoordinates([request?.coordinates])
+    }
+
+    const handleFocusMap = () => {
+        mapRef.current.fitToCoordinates([region, request?.coordinates])
     }
 
     useEffect(() => {
@@ -67,13 +71,19 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
     useEffect(() => {
         if (request && region) {
-            mapRef.current.fitToCoordinates([region, request?.coordinates])
+            handleFocusMap()
         }
     }, [request?.state, region?.longitude])
 
     useEffect(() => {
-        mapRef.current.fitToCoordinates([region, request?.coordinates])
+        handleFocusMap()
     }, [mapPadding])
+
+    const handleAcceptBtn = () => {
+        if (request) {
+            acceptRequest(request._id)
+        }
+    }
 
     return (
         <View style={styles.continer}>
@@ -104,26 +114,36 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 index={0}
             >
                 <BottomSheetView style={styles.bottomSheetContainer}>
-                    <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
-                        Request details
-                    </PoppinsText>
-                    <View style={{ flexDirection: 'row' }}>
-                        {
-                            request.requestedBy.profilePic.length === 0 ?
-                                <Ionicons
-                                    name='person-circle-outline'
-                                    style={styles.profilePic}
-                                /> : <Image
-                                    source={{ uri: request.requestedBy.profilePic }}
-                                    style={styles.profilePic}
-                                />
-                        }
-                        <View>
-                            <PoppinsText style={{ fontSize: 18 }}>
-                                {request.requestedBy.firstName} {request.requestedBy.lastName}
-                            </PoppinsText>
-                            <PoppinsText style={styles.highLightedText}> {request.requestedBy.mobileNumber} </PoppinsText>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
+                            Request details
+                        </PoppinsText>
+                        <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
+                            <MaterialIcons name='center-focus-strong' style={styles.icon} />
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.userInfo}>
+                        <View style={{ flexDirection: 'row' }}>
+                            {
+                                request.requestedBy.profilePic.length === 0 ?
+                                    <Ionicons
+                                        name='person-circle-outline'
+                                        style={styles.profilePic}
+                                    /> : <Image
+                                        source={{ uri: request.requestedBy.profilePic }}
+                                        style={styles.profilePic}
+                                    />
+                            }
+                            <View>
+                                <PoppinsText style={{ fontSize: 18 }}>
+                                    {request.requestedBy.firstName} {request.requestedBy.lastName}
+                                </PoppinsText>
+                                <PoppinsText style={styles.highLightedText}> {request.requestedBy.mobileNumber} </PoppinsText>
+                            </View>
                         </View>
+                        <TouchableOpacity style={styles.navigationBTN} onPress={handleMarkerLocation}>
+                            <MaterialIcons name='location-pin' style={styles.icon} />
+                        </TouchableOpacity>
                     </View>
                     <View style={{ ...styles.requestInfo, paddingTop: 30 }}>
                         <PoppinsText style={styles.highLightedText}>Emergency</PoppinsText>
@@ -177,6 +197,11 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 15,
     },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-between",
+    },
     profilePic: {
         fontSize: 60,
         marginRight: 8
@@ -202,5 +227,15 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         fontSize: 20
+    },
+    navigationBTN: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#E48700',
+        elevation: 5,
+        borderRadius: 50,
+        padding: 5,
+        marginHorizontal: 8
+
     }
 })
