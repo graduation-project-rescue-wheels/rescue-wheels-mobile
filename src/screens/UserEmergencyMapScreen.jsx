@@ -7,6 +7,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { socket } from '../api/socket.io'
 
 const { height, width } = Dimensions.get('window')
 
@@ -98,9 +99,14 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     useEffect(() => {
         getCurrentLocation()
+        socket.connect()
 
         if (id) {
             fetchRequest()
+        }
+
+        return () => {
+            socket.disconnect()
         }
     }, [])
 
