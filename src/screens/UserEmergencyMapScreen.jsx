@@ -8,11 +8,13 @@ import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { socket } from '../api/socket.io'
+import { useSelector } from 'react-redux'
 
 const { height, width } = Dimensions.get('window')
 
 const UserEmergencyMapScreen = ({ route }) => {
     const { id } = route.params
+    const { user } = useSelector(state => state.user)
 
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
@@ -113,6 +115,12 @@ const UserEmergencyMapScreen = ({ route }) => {
     useEffect(() => {
         pulseAnimation().start()
     }, [request?.state])
+
+    useEffect(() => {
+        if (socket.connected) {
+            socket.emit('createRoom', user._id)
+        }
+    }, [socket.connected])
 
     return (
         <View style={styles.continer}>
