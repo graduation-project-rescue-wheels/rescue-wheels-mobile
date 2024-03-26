@@ -1,12 +1,11 @@
 import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import SelectionButton from '../components/SelectionButton'
 import { useEffect, useState } from 'react'
-import { AntDesign, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
+import { AntDesign, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { getVehicleById } from '../api/vehicle'
 import CustomModal from '../components/CustomModal'
 import PoppinsText from '../components/PoppinsText'
-import CustomTextInput from '../components/CustomTextInput'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import * as Location from 'expo-location'
 import { validateSelectedEmergency, validateSelectedVehicle } from '../utils/inputValidations'
@@ -15,6 +14,7 @@ import ValidationMessage from '../components/ValidationMessage'
 import { getRequestById } from '../api/EmergencyRequest'
 import showToast from '../components/Toast'
 import { useIsFocused } from '@react-navigation/native'
+import NoVehicles from '../components/NoVehicles'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -83,7 +83,7 @@ const EmergencyScreen = ({ navigation }) => {
             const requests = res.map(e => e.data.request)
 
             for (let i = 0; i < requests.length; i++) {
-                if (requests[i].state === 'pending') {
+                if (requests[i].state === 'pending' || requests[i].state === 'inProgress') {
                     setPendingRequest(requests[i])
                     break
                 }
@@ -119,33 +119,45 @@ const EmergencyScreen = ({ navigation }) => {
         }
     }
 
+    const handleNoVehicleOnPress = () => {
+        navigation.navigate('Profile-stack', { screen: 'Your vehicles' })
+        setSelectVehicleModalVisible(false)
+    }
+
     useEffect(() => {
         if (isScreenFocused) {
-            fetchVehicles()
             fetchEmergencyRequests()
         }
     }, [isScreenFocused])
+
+    useEffect(() => {
+        if (selectVehicleModalVisible) {
+            fetchVehicles()
+        }
+    }, [selectVehicleModalVisible])
 
     return (
         <ScrollView style={styles.container}>
             <CustomModal visible={selectVehicleModalVisible} onRequestClose={() => setSelectVehicleModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
                 <ScrollView style={{ flexGrow: 0 }}>
-                    {
-                        vehicles.map(vehicle => (
-                            <SelectionButton
-                                value={`${vehicle.make} ${vehicle.model}`}
-                                Icon={vehicle.type === 'car' ?
-                                    () => <AntDesign name="car" style={styles.icon} /> :
-                                    () => <MaterialIcons name="motorcycle" style={styles.icon} />
-                                }
-                                onPress={() => {
-                                    setSelectedVehicle(vehicle)
-                                    setSelectVehicleModalVisible(false)
-                                }}
-                                key={vehicle._id}
-                            />
-                        ))
+                    {isLoadingVehicles ?
+                        <ActivityIndicator color={'#E48700'} size={'large'} /> : vehicles.length === 0 ?
+                            <NoVehicles onPress={handleNoVehicleOnPress} /> :
+                            vehicles.map(vehicle => (
+                                <SelectionButton
+                                    value={`${vehicle.make} ${vehicle.model}`}
+                                    Icon={vehicle.type === 'car' ?
+                                        () => <AntDesign name="car" style={styles.icon} /> :
+                                        () => <MaterialIcons name="motorcycle" style={styles.icon} />
+                                    }
+                                    onPress={() => {
+                                        setSelectedVehicle(vehicle)
+                                        setSelectVehicleModalVisible(false)
+                                    }}
+                                    key={vehicle._id}
+                                />
+                            ))
                     }
                 </ScrollView>
                 <TouchableOpacity

@@ -4,8 +4,8 @@ import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { MaterialIcons } from '@expo/vector-icons'
-import { getRequestById } from '../api/EmergencyRequest'
-import showToast from '../components/Toast'
+import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
+import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 
 const { height, width } = Dimensions.get('window')
@@ -15,6 +15,7 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
+    const [mapPadding, setMapPadding] = useState(85)
 
     const snappingPoints = useMemo(() => {
         return [0.23, 0.45].map(percentage => percentage * height);
@@ -29,7 +30,11 @@ const UserEmergencyMapScreen = ({ route }) => {
         Animated.spring(myLocationBtnBottom, {
             toValue: -snappingPoints[index],
             useNativeDriver: true
-        }).start()
+        }).start((finished) => {
+            if (finished.value) {
+                setMapPadding(-finished.value)
+            }
+        })
     }, [])
 
     const getCurrentLocation = async () => {
@@ -39,8 +44,8 @@ const UserEmergencyMapScreen = ({ route }) => {
         setRegion({
             longitude: location.coords.longitude,
             latitude: location.coords.latitude,
-            latitudeDelta: 0.03,
-            longitudeDelta: 0.01
+            latitudeDelta: 0.004757,
+            longitudeDelta: 0.006866
         })
     }
 
@@ -59,7 +64,6 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     const handleMyLocationBtn = () => {
         mapRef.current.animateToRegion(region)
-        setRequest({ ...request, state: 'inProgress' })
     }
 
     const pulseAnimation = () => {
@@ -79,9 +83,21 @@ const UserEmergencyMapScreen = ({ route }) => {
         )
     }
 
+    const handleCancelRequestBtn = async () => {
+        try {
+            const response = await cancelRequest(request._id)
+
+            if (response.status === 200) {
+                setRequest(response.data.request)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast(SMTH_WENT_WRONG)
+        }
+    }
+
     useEffect(() => {
         getCurrentLocation()
-        pulseAnimation().start()
 
         if (id) {
             fetchRequest()
@@ -101,6 +117,13 @@ const UserEmergencyMapScreen = ({ route }) => {
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
+                mapPadding={{ bottom: mapPadding }}
+                onUserLocationChange={(e) => {
+                    const { longitude, latitude } = e.nativeEvent.coordinate
+                    setRegion(prev => ({
+                        ...prev, longitude, latitude
+                    }))
+                }}
             >
                 {/* {region && <Marker coordinate={{
                     latitude: region.latitude,
@@ -111,7 +134,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                     </Callout>
                 </Marker>} */}
             </MapView>
-            <Animated.View style={{ bottom: snappingPoints[0] / 2, transform: [{ translateY: myLocationBtnBottom }] }}>
+            <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
                     <MaterialIcons name='my-location' style={styles.icon} />
                 </TouchableOpacity>
@@ -134,10 +157,21 @@ const UserEmergencyMapScreen = ({ route }) => {
                         }} />
                     </View>
                     {
-                        request.state === 'pending' && <PoppinsText>Connecting you to a technician</PoppinsText>
+                        request.state === 'pending' && <PoppinsText style={styles.stateMessage}>Connecting you to a technician</PoppinsText>
                     }
                     {
-                        request.state === 'inProgress' && <PoppinsText>Siko Siko is on his way</PoppinsText>
+                        request.state === 'inProgress' && <PoppinsText style={styles.stateMessage}>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
+                    }
+                    {
+                        request.state === 'cancelled' && <PoppinsText style={styles.stateMessage}>Your request has been cancelled</PoppinsText>
+                    }
+                    {
+                        (request.state === 'pending' || request.state === 'inProgress') && <TouchableOpacity
+                            style={{ ...styles.btn, backgroundColor: '#F9BFBF' }}
+                            onPress={handleCancelRequestBtn}
+                        >
+                            <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
+                        </TouchableOpacity>
                     }
                 </BottomSheetView>
             </BottomSheet>}
@@ -154,15 +188,17 @@ const styles = StyleSheet.create({
     map: {
         flex: 1
     },
-    myLocationBtn: {
+    myLocationBtnView: {
         position: 'absolute',
+        right: 16
+    },
+    myLocationBtn: {
         backgroundColor: '#E48700',
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
-        right: 16
     },
     icon: {
         fontSize: 30,
@@ -170,7 +206,7 @@ const styles = StyleSheet.create({
     },
     bottomSheetContainer: {
         flex: 1,
-        alignItems: 'center',
+        paddingHorizontal: 8
     },
     bar: {
         height: 4,
@@ -184,5 +220,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8
+    },
+    btn: {
+        borderRadius: 16,
+        padding: 8,
+        alignItems: 'center'
+    },
+    stateMessage: {
+        textAlign: 'center',
+        marginBottom: 16
     }
 })
