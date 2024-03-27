@@ -5,7 +5,7 @@ import CustomTextInput from "./CustomTextInput"
 import { useState } from "react"
 import { MaterialIcons, FontAwesome, AntDesign, MaterialCommunityIcons } from '@expo/vector-icons'
 import SelectionButton from "./SelectionButton"
-import { validateLicensePlate, validateVehicleEnergySource, validateVehicleMaker, validateVehicleModel, validateVehicleType } from "../utils/inputValidations"
+import { validateLicensePlate, validateModelYear, validateVehicleEnergySource, validateVehicleMaker, validateVehicleModel, validateVehicleType } from "../utils/inputValidations"
 import { useDispatch } from "react-redux"
 import ValidationMessage from "./ValidationMessage"
 import { addVehicleAsync } from "../store/userAsyncThunks"
@@ -28,6 +28,14 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
         }
     })
     const [licensePlate, setLicensePlate] = useState({
+        value: '',
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
+    })
+    const [modelYear, setModelYear] = useState({
         value: '',
         isFocused: false,
         validation: {
@@ -79,10 +87,19 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
         }))
     }
 
+    const handleMoedlYearTextInPutOnBlur = () => {
+        setModelYear(prev => ({
+            ...prev,
+            validation: validateModelYear(modelYear.value),
+            isFocused: false
+        }))
+    }
+
     const handleAddBtnOnPress = () => {
         const makeValidationResult = validateVehicleMaker(make.value)
         const modelValidationResult = validateVehicleModel(model.value)
         const licensePlateValidationResult = validateLicensePlate(licensePlate.value)
+        const modelYearValidationResult = validateModelYear(modelYear.value)
         const typeValidationResult = validateVehicleType(type.value)
         const energySourceValidationResult = validateVehicleEnergySource(energySource.value)
 
@@ -98,6 +115,10 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
             ...prev,
             validation: licensePlateValidationResult
         }))
+        setModelYear(prev => ({
+            ...prev,
+            validation: modelYearValidationResult
+        }))
         setType(prev => ({
             ...prev,
             validation: typeValidationResult
@@ -107,17 +128,19 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
             validation: energySourceValidationResult
         }))
 
-        if (makeValidationResult &&
-            modelValidationResult &&
-            licensePlateValidationResult &&
-            typeValidationResult &&
-            energySourceValidationResult) {
+        if (makeValidationResult.isValid &&
+            modelValidationResult.isValid &&
+            licensePlateValidationResult.isValid &&
+            modelYearValidationResult.isValid &&
+            typeValidationResult.isValid &&
+            energySourceValidationResult.isValid) {
             dispatch(addVehicleAsync({
                 make: make.value,
                 model: model.value,
                 licensePlate: licensePlate.value,
                 type: type.value,
                 energySource: energySource.value,
+                modelYear: modelYear.value,
                 onRequestClose
             }))
         }
@@ -257,21 +280,43 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                     <ValidationMessage state={model} />
                 </View>
             </View>
-            <PoppinsText style={styles.label}>License plate</PoppinsText>
-            <CustomTextInput
-                Icon={() => <FontAwesome name="drivers-license-o"
-                    style={{
-                        ...styles.icon,
-                        color: licensePlate.isFocused ? '#E48700' : licensePlate.validation.isValid ? '#ADADAD' : 'red'
-                    }}
-                />}
-                state={licensePlate}
-                onChangeText={e => setLicensePlate(prev => ({ ...prev, value: e }))}
-                placeholder={'License plate'}
-                onBlur={handleLicensePlateTextInputOnBlur}
-                onFocus={() => setLicensePlate(prev => ({ ...prev, isFocused: true }))}
-            />
-            <ValidationMessage state={licensePlate} />
+            <View style={styles.flexRow}>
+                <View style={styles.columnView}>
+                    <PoppinsText style={styles.label}>License plate</PoppinsText>
+                    <CustomTextInput
+                        Icon={() => <FontAwesome name="drivers-license-o"
+                            style={{
+                                ...styles.icon,
+                                color: licensePlate.isFocused ? '#E48700' : licensePlate.validation.isValid ? '#ADADAD' : 'red'
+                            }}
+                        />}
+                        state={licensePlate}
+                        onChangeText={e => setLicensePlate(prev => ({ ...prev, value: e }))}
+                        placeholder={'License plate'}
+                        onBlur={handleLicensePlateTextInputOnBlur}
+                        onFocus={() => setLicensePlate(prev => ({ ...prev, isFocused: true }))}
+                    />
+                    <ValidationMessage state={licensePlate} />
+                </View>
+                <View style={styles.columnView}>
+                    <PoppinsText style={styles.label}>Model year</PoppinsText>
+                    <CustomTextInput
+                        state={modelYear}
+                        Icon={() => <AntDesign name="calendar"
+                            style={{
+                                ...styles.icon,
+                                color: modelYear.isFocused ? '#E48700' : modelYear.validation.isValid ? '#ADADAD' : 'red'
+                            }}
+                        />}
+                        onChangeText={e => setModelYear(prev => ({ ...prev, value: e }))}
+                        placeholder={'model year'}
+                        onBlur={handleMoedlYearTextInPutOnBlur}
+                        onFocus={() => setModelYear(prev => ({ ...prev, isFocused: true }))}
+                        keyboardType={'numeric'}
+                    />
+                    <ValidationMessage state={modelYear} />
+                </View>
+            </View>
             <View style={styles.flexRow}>
                 <View style={{ ...styles.columnView, marginRight: 16 }}>
                     <PoppinsText>Select vehicle type</PoppinsText>

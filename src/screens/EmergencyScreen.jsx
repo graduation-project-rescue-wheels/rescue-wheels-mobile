@@ -76,23 +76,19 @@ const EmergencyScreen = ({ navigation }) => {
     }
 
     const fetchEmergencyRequests = async () => {
-        try {
-            setIsLoadingRequests(true)
+        if (user.onGoingRequestId !== null) {
+            try {
+                setIsLoadingRequests(true)
 
-            const res = await Promise.all(user.Requests_IDS.map(getRequestById))
-            const requests = res.map(e => e.data.request)
+                const res = await getRequestById(user.onGoingRequestId)
 
-            for (let i = 0; i < requests.length; i++) {
-                if (requests[i].state === 'pending' || requests[i].state === 'inProgress') {
-                    setPendingRequest(requests[i])
-                    break
-                }
+                setPendingRequest(res.data.request)
+            } catch (err) {
+                console.log(err.response.data);
+                showToast("Couldn't load your requests")
+            } finally {
+                setIsLoadingRequests(false)
             }
-        } catch (err) {
-            console.log(err);
-            showToast("Couldn't load your requests")
-        } finally {
-            setIsLoadingRequests(false)
         }
     }
 

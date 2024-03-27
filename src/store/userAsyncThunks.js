@@ -165,9 +165,9 @@ export const updatePasswordAsync = createAsyncThunk('user/updatePasswordAsync', 
     }
 })
 
-export const addVehicleAsync = createAsyncThunk('user/addVehicleAsync', async ({ make, model, licensePlate, type, energySource, onRequestClose }) => {
+export const addVehicleAsync = createAsyncThunk('user/addVehicleAsync', async ({ make, model, licensePlate, modelYear, type, energySource, onRequestClose }) => {
     try {
-        const response = await addVehicle(make, model, licensePlate, type, energySource)
+        const response = await addVehicle(make, model, licensePlate, modelYear, type, energySource)
 
         if (response.status === 201) {
             showToast(response.data.message)
