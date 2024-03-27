@@ -33,7 +33,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
         if (perm.granted) {
             const location = await Location.getCurrentPositionAsync({})
-            const requestData = await getRequestById('65fcc6f380746317240f6200')
+            const requestData = await getRequestById('66043a5df5fabf87631c84e8')
             setRequest(requestData.data.request)
             setRegion({
                 longitude: location.coords.longitude,
