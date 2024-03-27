@@ -1,7 +1,7 @@
 import rwClient from "./axios";
 import * as SecureStore from "expo-secure-store"
 
-export async function addVehicle(make, model, licensePlate, type, energySource) {
+export async function addVehicle(make, model, licensePlate, modelYear, type, energySource) {
     const accessToken = await SecureStore.getItemAsync('accessToken')
     const owner = JSON.parse(await SecureStore.getItemAsync('currentUser'))._id
 
@@ -11,6 +11,7 @@ export async function addVehicle(make, model, licensePlate, type, energySource) 
         licensePlate,
         type,
         energySource,
+        modelYear,
         owner
     }, {
         headers: {
