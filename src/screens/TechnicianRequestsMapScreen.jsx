@@ -19,7 +19,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const [mapPadding, setMapPadding] = useState(85)
 
     const snappingPoints = useMemo(() => {
-        return [0.28, 0.55].map(percentage => percentage * height);
+        return [0.28, 0.60].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
@@ -131,7 +131,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 {request && <Marker
                     coordinate={request.coordinates}
                     ref={markerRef}>
-                    <Callout style={{ borderRadius: 20 }}>
+                    <Callout tooltip>
                         <PoppinsText>{request.type}</PoppinsText>
                     </Callout>
                 </Marker>}
@@ -208,19 +208,24 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 {
                                     request.state === 'pending' ?
                                         <TouchableOpacity
-                                            style={{ ...styles.acceptBTN, marginTop: 10 }}
+                                            style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
                                             onPress={handleAcceptBtn}>
                                             <PoppinsText style={styles.buttonText}>Accept request</PoppinsText>
                                         </TouchableOpacity> :
-                                        <View style={styles.acceptRequestView}>
-                                            <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
-                                            <TouchableOpacity
-                                                style={styles.navigatButton}
-                                                onPress={openGPS}>
-                                                <Fontisto name="navigate" size={24} color='#E48700' />
-                                                <PoppinsText style={styles.navigateText}>
-                                                    Navigate
-                                                </PoppinsText>
+                                        <View>
+                                            <View style={styles.acceptRequestView}>
+                                                <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
+                                                <TouchableOpacity
+                                                    style={styles.navigatButton}
+                                                    onPress={openGPS}>
+                                                    <Fontisto name="navigate" size={24} color='#E48700' />
+                                                    <PoppinsText style={styles.navigateText}>
+                                                        Navigate
+                                                    </PoppinsText>
+                                                </TouchableOpacity>
+                                            </View>
+                                            <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}>
+                                                <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                             </TouchableOpacity>
                                         </View>
                                 }
@@ -278,11 +283,9 @@ const styles = StyleSheet.create({
     highLightedText: {
         color: "#878791"
     },
-    acceptBTN: {
+    btn: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#E48700',
-        elevation: 5,
         padding: 10,
         borderRadius: 25,
         marginHorizontal: 8
