@@ -22,7 +22,19 @@ export async function getRequestById(id) {
 
     return rwClient.get(`/emrgencyRequest/getRequestById/${id}`, {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+        }
+    })
+}
+
+export async function cancelResponder(id) {
+    const accessToken = await SecureStore.getItemAsync('accessToken')
+
+    return rwClient.put(`/emrgencyRequest/cancelResponder/`, {
+        id
+    }, {
+        headers: {
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }
