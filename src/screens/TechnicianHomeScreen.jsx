@@ -1,20 +1,41 @@
-import React, { useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { MaterialIcons } from '@expo/vector-icons'
 import PoppinsText from '../components/PoppinsText'
 import { Ionicons } from "@expo/vector-icons"
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import NoHistory from '../components/NoHistory'
+import { getRequestById } from '../api/EmergencyRequest'
+import { Fontisto } from '@expo/vector-icons';
 
-const TechnicianHomeScreen = () => {
+const TechnicianHomeScreen = ({ navigation }) => {
 
     const { user } = useSelector(state => state.user)
-    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
+    const techUsername = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const [technicianRate, setTechnicianRate] = useState(0.0)
     const [totalRequests, setTotalRequests] = useState(0)
     const [onGoingRequests, setonGoingRequests] = useState(null)
+
+    const getOnGoingRequests = async () => {
+
+        if (user.onGoingRequestId != null) {
+            const requestData = await getRequestById(user.onGoingRequestId)
+            setonGoingRequests(requestData.data.request)
+        }
+    }
+
+    const handleCallBtn = () => {
+        if (Platform.OS === 'android')
+            Linking.openURL(`tel:${onGoingRequests?.requestedBy.mobileNumber}`)
+        else if (Platform.OS === 'ios')
+            Linking.openURL(`telprompt:${onGoingRequests?.requestedBy.mobileNumber}`)
+    }
+
+    useEffect(() => {
+        getOnGoingRequests()
+    }, [])
 
     return (
         <View style={styles.container}>
@@ -38,7 +59,7 @@ const TechnicianHomeScreen = () => {
                         }
                         <View style={{ justifyContent: 'center' }}>
                             <PoppinsText style={{ fontSize: 18 }}>
-                                {username}
+                                {techUsername}
                             </PoppinsText>
                             <View style={styles.onlineView}>
                                 <MaterialIcons
@@ -77,7 +98,49 @@ const TechnicianHomeScreen = () => {
                                 </PoppinsText>
                             </View> :
                             <View>
-                                {/* todo */}
+                                <View style={{ flexDirection: 'row' }}>
+                                    {
+                                        onGoingRequests.requestedBy.profilePic.length === 0 ?
+                                            <Ionicons
+                                                name='person-circle-outline'
+                                                style={styles.profilePic}
+                                            /> : <Image
+                                                source={{ uri: onGoingRequests.requestedBy.profilePic }}
+                                                style={styles.profilePic}
+                                            />
+                                    }
+                                    <View style={{ justifyContent: 'center' }}>
+                                        <PoppinsText style={{ fontSize: 18 }}>
+                                            {onGoingRequests?.requestedBy.firstName} {onGoingRequests?.requestedBy.lastName}
+                                        </PoppinsText>
+                                        <PoppinsText style={styles.highLightedText}>
+                                            {onGoingRequests.requestedBy.mobileNumber}
+                                        </PoppinsText>
+                                    </View>
+                                </View>
+                                <View style={styles.line}></View>
+                                <View style={styles.buttonsView}>
+                                    <View>
+                                        <TouchableOpacity
+                                            style={styles.Buttons}
+                                            onPress={handleCallBtn}>
+                                            <MaterialIcons name="call" size={26} color='#E48700' />
+                                            <PoppinsText style={{ ...styles.highLightedText, marginLeft: 5 }}>
+                                                Call
+                                            </PoppinsText>
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View>
+                                        <TouchableOpacity
+                                            style={styles.Buttons}
+                                            onPress={() => { navigation.navigate("Emergency-stack") }}>
+                                            <MaterialIcons name="info" size={26} color='#E48700' />
+                                            <PoppinsText style={{ ...styles.highLightedText, marginLeft: 5 }}>
+                                                Details
+                                            </PoppinsText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
                             </View>
                     }
                 </View>
@@ -124,7 +187,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f2ede6',
         marginHorizontal: 2,
         marginBottom: 30,
-        borderRadius: 20,
+        borderRadius: 16,
         elevation: 5
     },
     profilePic: {
@@ -169,5 +232,14 @@ const styles = StyleSheet.create({
     orangeHighLightedText: {
         fontSize: 20,
         color: "#E48700"
+    },
+    Buttons: {
+        flexDirection: "row",
+    },
+    buttonsView: {
+        marginHorizontal: 10,
+        marginTop: 15,
+        justifyContent: 'space-around',
+        flexDirection: 'row'
     }
 })
