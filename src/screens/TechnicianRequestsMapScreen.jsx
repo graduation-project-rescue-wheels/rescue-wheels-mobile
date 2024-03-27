@@ -2,7 +2,7 @@ import { Animated, Dimensions, Linking, Platform, StyleSheet, View } from 'react
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
-import { getRequestById } from '../api/EmergencyRequest'
+import { cancelResponder, getRequestById } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -98,7 +98,6 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         const response = await acceptRequest(request._id)
         if (response.status == 200) {
             setRequest(response.data.request)
-            openGPS()
         }
     }
 
@@ -131,7 +130,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 {request && <Marker
                     coordinate={request.coordinates}
                     ref={markerRef}>
-                    <Callout tooltip>
+                    <Callout>
                         <PoppinsText>{request.type}</PoppinsText>
                     </Callout>
                 </Marker>}
@@ -206,7 +205,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                     <PoppinsText>{request.vehicle.licensePlate}</PoppinsText>
                                 </View>
                                 {
-                                    request.state === 'pending' ?
+                                    request.state === 'pending' || request.state === 'cancelled' ?
                                         <TouchableOpacity
                                             style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
                                             onPress={handleAcceptBtn}>
@@ -224,7 +223,9 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                                     </PoppinsText>
                                                 </TouchableOpacity>
                                             </View>
-                                            <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}>
+                                            <TouchableOpacity
+                                                style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}
+                                                onPress={() => { cancelResponder(request._id) }}>
                                                 <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                             </TouchableOpacity>
                                         </View>
@@ -324,5 +325,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginLeft: 5,
         color: '#E48700'
-    }
+    },
 })
