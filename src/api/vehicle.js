@@ -14,7 +14,7 @@ export async function addVehicle(make, model, licensePlate, type, energySource) 
         owner
     }, {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }
@@ -34,7 +34,7 @@ export async function deleteVehicle(id) {
 
     return await rwClient.delete(`/vehicle/deleteVehicle/${id}`, {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }
