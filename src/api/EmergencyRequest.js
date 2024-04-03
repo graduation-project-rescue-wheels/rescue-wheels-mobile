@@ -1,3 +1,4 @@
+import { accessToken } from "../jwt/token";
 import rwClient from "./axios";
 import * as SecureStore from 'expo-secure-store'
 
@@ -45,6 +46,14 @@ export async function cancelRequest(id) {
     return rwClient.put('/user/cancelRequest', {
         id
     }, {
+        headers: {
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+        }
+    })
+}
+
+export async function getNearbyRequests(long, lat) {
+    return rwClient.get(`/emrgencyRequest/nearbyRequests/${long}/${lat}`, {
         headers: {
             accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
