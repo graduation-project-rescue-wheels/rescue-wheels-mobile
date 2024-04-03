@@ -130,6 +130,12 @@ const UserEmergencyMapScreen = ({ route }) => {
                 await fetchRequest()
             }
         })
+
+        socket.on('request:responder-cancel', async (payload) => {
+            if (id === payload._id) {
+                await fetchRequest()
+            }
+        })
     }, [socket])
 
     return (
