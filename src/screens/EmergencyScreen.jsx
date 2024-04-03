@@ -11,15 +11,12 @@ import * as Location from 'expo-location'
 import { validateSelectedEmergency, validateSelectedVehicle } from '../utils/inputValidations'
 import { requestEmergencyAsync } from '../store/userAsyncThunks'
 import ValidationMessage from '../components/ValidationMessage'
-import { getRequestById } from '../api/EmergencyRequest'
 import showToast from '../components/Toast'
-import { useIsFocused } from '@react-navigation/native'
 import NoVehicles from '../components/NoVehicles'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
-    const isScreenFocused = useIsFocused()
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const [selectedEmergency, setSelectedEmergency] = useState(null)
     const [vehicles, setVehicles] = useState([])
@@ -43,7 +40,6 @@ const EmergencyScreen = ({ navigation }) => {
             message: ''
         }
     })
-    const [pendingRequest, setPendingRequest] = useState(null)
     const emergencies = [
         {
             label: 'Flat tire',
@@ -75,23 +71,6 @@ const EmergencyScreen = ({ navigation }) => {
         }
     }
 
-    const fetchEmergencyRequests = async () => {
-        if (user.onGoingRequestId !== null) {
-            try {
-                setIsLoadingRequests(true)
-
-                const res = await getRequestById(user.onGoingRequestId)
-
-                setPendingRequest(res.data.request)
-            } catch (err) {
-                console.log(err.response.data);
-                showToast("Couldn't load your requests")
-            } finally {
-                setIsLoadingRequests(false)
-            }
-        }
-    }
-
     const handleRequestHelpBtnOnPress = async () => {
         const res = await Location.requestForegroundPermissionsAsync()
         const vehicleValidationResult = validateSelectedVehicle(selectedVehicle)
@@ -119,12 +98,6 @@ const EmergencyScreen = ({ navigation }) => {
         navigation.navigate('Profile-stack', { screen: 'Your vehicles' })
         setSelectVehicleModalVisible(false)
     }
-
-    useEffect(() => {
-        if (isScreenFocused) {
-            fetchEmergencyRequests()
-        }
-    }, [isScreenFocused])
 
     useEffect(() => {
         if (selectVehicleModalVisible) {
@@ -222,16 +195,15 @@ const EmergencyScreen = ({ navigation }) => {
                         placeholder='Drop off'
                     />
                 }
-                {isLoadingRequests ?
-                    <ActivityIndicator color={'#E48700'} size={'large'} /> : pendingRequest ?
-                        <TouchableOpacity
-                            style={{ ...styles.btn, backgroundColor: '#E48700' }}
-                            onPress={() => navigation.navigate('Map', { id: pendingRequest._id })}
-                        >
-                            <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
-                        </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
-                            <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
-                        </TouchableOpacity>
+                {user.onGoingRequestId !== null ?
+                    <TouchableOpacity
+                        style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                        onPress={() => navigation.navigate('Map', { id: user.onGoingRequestId })}
+                    >
+                        <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
+                    </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
+                        <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
+                    </TouchableOpacity>
                 }
             </View>
         </ScrollView>
