@@ -1,8 +1,8 @@
-import { Animated, Dimensions, Linking, Platform, StyleSheet, View } from 'react-native'
+import { Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from 'react-native'
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
-import { cancelResponder, getRequestById } from '../api/EmergencyRequest'
+import { cancelResponder, getNearbyRequests, getRequestById } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -10,13 +10,21 @@ import { Fontisto } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Ionicons } from "@expo/vector-icons"
 import { acceptRequest } from '../api/user'
+import { socket } from '../api/socket.io'
+import { useDispatch, useSelector } from 'react-redux'
+import { loadUserAsync } from '../store/userAsyncThunks'
+import { calculateDistance } from '../utils/locations'
+import showToast from '../components/Toast'
 
 const { height } = Dimensions.get('window')
 
 const TechnicianRequestsMapScreen = ({ route }) => {
+    const { user } = useSelector(state => state.user)
+    const dispatch = useDispatch()
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
+    const [nearbyRequests, setNearbyRequests] = useState([])
 
     const snappingPoints = useMemo(() => {
         return [0.28, 0.60].map(percentage => percentage * height);
@@ -28,19 +36,36 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
     const barOpacity = useRef(new Animated.Value(1)).current
 
+    const fetchOngoingRequest = async () => {
+        if (user.onGoingRequestId) {
+            const response = await getRequestById(user.onGoingRequestId)
+
+            if (response.status === 200) {
+                setRequest(response.data.request)
+            }
+        }
+    }
+
     const getCurrentLocationAndRequest = async () => {
         const perm = await Location.requestForegroundPermissionsAsync()
 
-        if (perm.granted) {
-            const location = await Location.getCurrentPositionAsync({})
-            const requestData = await getRequestById('66043a5df5fabf87631c84e8')
-            setRequest(requestData.data.request)
-            setRegion({
-                longitude: location.coords.longitude,
-                latitude: location.coords.latitude,
-                latitudeDelta: 0.004757,
-                longitudeDelta: 0.006866
-            })
+        try {
+            if (perm.granted) {
+                const location = await Location.getCurrentPositionAsync({})
+                const nearby = await getNearbyRequests(location.coords.longitude, location.coords.latitude)
+
+                setNearbyRequests(nearby.data.requests)
+                setRegion({
+                    longitude: location.coords.longitude,
+                    latitude: location.coords.latitude,
+                    latitudeDelta: 0.004757,
+                    longitudeDelta: 0.006866
+                })
+            }
+
+            await fetchOngoingRequest()
+        } catch (err) {
+            console.log(err.response.data);
         }
     }
 
@@ -95,15 +120,21 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
 
     const handleAcceptBtn = async () => {
-        const response = await acceptRequest(request._id)
-        if (response.status == 200) {
-            setRequest(response.data.request)
+        try {
+            const response = await acceptRequest(nearbyRequests[0]._id)
+            if (response.status == 200) {
+                setRequest(response.data.request)
+                socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
+            }
+        } catch (err) {
+            showToast("Couldn't take request. Please try again later.")
         }
     }
 
     useEffect(() => {
         getCurrentLocationAndRequest()
         pulseAnimation().start()
+        socket.connect()
     }, [])
 
     useEffect(() => {
@@ -113,8 +144,40 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }, [request?.state, region?.longitude])
 
     useEffect(() => {
+        pulseAnimation().start()
+
+        return () => {
+            pulseAnimation().stop()
+        }
+    }, [nearbyRequests.length])
+
+    useEffect(() => {
         handleFocusMap()
     }, [mapPadding])
+
+    useEffect(() => {
+        socket.on('request:add', async payload => {
+            if ((await Location.getForegroundPermissionsAsync()).granted) {
+                const currentLocation = await Location.getCurrentPositionAsync()
+
+                if (calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude) <= 5) {
+                    setNearbyRequests(prev => [...prev, payload])
+                }
+            }
+        })
+
+        socket.on('request:cancelled', payload => {
+            if (request) {
+                setRequest(payload)
+            }
+            setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
+            dispatch(loadUserAsync())
+        })
+
+        socket.on('request:accepted', payload => {
+            setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
+        })
+    }, [socket])
 
     return (
         <View style={styles.continer}>
@@ -127,6 +190,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding }}
             >
+                {(nearbyRequests.length > 0 && request === null) && <Marker
+                    coordinate={nearbyRequests[0].coordinates}
+                    ref={markerRef}>
+                    <Callout>
+                        <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
+                    </Callout>
+                </Marker>}
                 {request && <Marker
                     coordinate={request.coordinates}
                     ref={markerRef}>
@@ -148,7 +218,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             >
                 <BottomSheetView style={styles.bottomSheetContainer}>
                     {
-                        request === null ?
+                        request === null && nearbyRequests.length === 0 ?
                             <View style={{ marginTop: 20 }}>
                                 <Animated.View style={{
                                     ...styles.bar,
@@ -159,78 +229,141 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                         Searching for emergency requests ....
                                     </PoppinsText>
                                 </View>
-                            </View> :
-                            <View>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
-                                        Request details
-                                    </PoppinsText>
-                                    <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
-                                        <MaterialIcons name='center-focus-strong' style={styles.icon} />
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.userInfo}>
-                                    <View style={{ flexDirection: 'row' }}>
-                                        {
-                                            request.requestedBy.profilePic.length === 0 ?
-                                                <Ionicons
-                                                    name='person-circle-outline'
-                                                    style={styles.profilePic}
-                                                /> : <Image
-                                                    source={{ uri: request.requestedBy.profilePic }}
-                                                    style={styles.profilePic}
-                                                />
-                                        }
-                                        <View>
-                                            <PoppinsText style={{ fontSize: 18 }}>
-                                                {request.requestedBy.firstName} {request.requestedBy.lastName}
-                                            </PoppinsText>
-                                            <PoppinsText style={styles.highLightedText}> {request.requestedBy.mobileNumber} </PoppinsText>
-                                        </View>
+                            </View> : request === null && nearbyRequests.length > 0 ?
+                                <View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
+                                            Request details
+                                        </PoppinsText>
+                                        <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
+                                            <MaterialIcons name='center-focus-strong' style={styles.icon} />
+                                        </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity style={styles.navigationBTN} onPress={handleMarkerLocation}>
-                                        <MaterialIcons name='location-pin' style={styles.icon} />
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={{ ...styles.requestInfo, paddingTop: 30 }}>
-                                    <PoppinsText style={styles.highLightedText}>Emergency</PoppinsText>
-                                    <PoppinsText>{request.type}</PoppinsText>
-                                </View>
-                                <View style={styles.requestInfo}>
-                                    <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                                    <PoppinsText>{request.vehicle.make} {request.vehicle.model}</PoppinsText>
-                                </View>
-                                <View style={styles.requestInfo}>
-                                    <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
-                                    <PoppinsText>{request.vehicle.licensePlate}</PoppinsText>
-                                </View>
-                                {
-                                    request.state === 'pending' || request.state === 'cancelled' ?
-                                        <TouchableOpacity
-                                            style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
-                                            onPress={handleAcceptBtn}>
-                                            <PoppinsText style={styles.buttonText}>Accept request</PoppinsText>
-                                        </TouchableOpacity> :
-                                        <View>
-                                            <View style={styles.acceptRequestView}>
-                                                <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
+                                    <View style={styles.userInfo}>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            {
+                                                nearbyRequests[0].requestedBy?.profilePic?.length === 0 ?
+                                                    <Ionicons
+                                                        name='person-circle-outline'
+                                                        style={styles.profilePic}
+                                                    /> : <Image
+                                                        source={{ uri: nearbyRequests[0].requestedBy.profilePic }}
+                                                        style={styles.profilePic}
+                                                    />
+                                            }
+                                            <View>
+                                                <PoppinsText style={{ fontSize: 18 }}>
+                                                    {nearbyRequests[0].requestedBy.firstName} {nearbyRequests[0].requestedBy.lastName}
+                                                </PoppinsText>
+                                                <PoppinsText style={styles.highLightedText}> {nearbyRequests[0].requestedBy.mobileNumber} </PoppinsText>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity style={styles.navigationBTN} onPress={handleMarkerLocation}>
+                                            <MaterialIcons name='location-pin' style={styles.icon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{ ...styles.requestInfo, paddingTop: 30 }}>
+                                        <PoppinsText style={styles.highLightedText}>Emergency</PoppinsText>
+                                        <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
+                                    </View>
+                                    <View style={styles.requestInfo}>
+                                        <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
+                                        <PoppinsText>{nearbyRequests[0].vehicle.make} {nearbyRequests[0].vehicle.model}</PoppinsText>
+                                    </View>
+                                    <View style={styles.requestInfo}>
+                                        <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
+                                        <PoppinsText>{nearbyRequests[0].vehicle.licensePlate}</PoppinsText>
+                                    </View>
+                                    {
+                                        nearbyRequests[0].state === 'pending' || nearbyRequests[0].state === 'cancelled' ?
+                                            <TouchableOpacity
+                                                style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
+                                                onPress={handleAcceptBtn}>
+                                                <PoppinsText style={styles.buttonText}>Accept request</PoppinsText>
+                                            </TouchableOpacity> :
+                                            <View>
+                                                <View style={styles.acceptRequestView}>
+                                                    <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
+                                                    <TouchableOpacity
+                                                        style={styles.navigatButton}
+                                                        onPress={openGPS}>
+                                                        <Fontisto name="navigate" size={24} color='#E48700' />
+                                                        <PoppinsText style={styles.navigateText}>
+                                                            Navigate
+                                                        </PoppinsText>
+                                                    </TouchableOpacity>
+                                                </View>
                                                 <TouchableOpacity
-                                                    style={styles.navigatButton}
-                                                    onPress={openGPS}>
-                                                    <Fontisto name="navigate" size={24} color='#E48700' />
-                                                    <PoppinsText style={styles.navigateText}>
-                                                        Navigate
-                                                    </PoppinsText>
+                                                    style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}
+                                                    onPress={() => { cancelResponder(request._id) }}>
+                                                    <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                                 </TouchableOpacity>
                                             </View>
+                                    }
+                                </View> : <View>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
+                                            Request details
+                                        </PoppinsText>
+                                        <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
+                                            <MaterialIcons name='center-focus-strong' style={styles.icon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={styles.userInfo}>
+                                        <View style={{ flexDirection: 'row' }}>
+                                            {
+                                                request.requestedBy.profilePic.length === 0 ?
+                                                    <Ionicons
+                                                        name='person-circle-outline'
+                                                        style={styles.profilePic}
+                                                    /> : <Image
+                                                        source={{ uri: request.requestedBy.profilePic }}
+                                                        style={styles.profilePic}
+                                                    />
+                                            }
+                                            <View>
+                                                <PoppinsText style={{ fontSize: 18 }}>
+                                                    {request.requestedBy.firstName} {request.requestedBy.lastName}
+                                                </PoppinsText>
+                                                <PoppinsText style={styles.highLightedText}> {request.requestedBy.mobileNumber} </PoppinsText>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity style={styles.navigationBTN} onPress={handleMarkerLocation}>
+                                            <MaterialIcons name='location-pin' style={styles.icon} />
+                                        </TouchableOpacity>
+                                    </View>
+                                    <View style={{ ...styles.requestInfo, paddingTop: 30 }}>
+                                        <PoppinsText style={styles.highLightedText}>Emergency</PoppinsText>
+                                        <PoppinsText>{request.type}</PoppinsText>
+                                    </View>
+                                    <View style={styles.requestInfo}>
+                                        <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
+                                        <PoppinsText>{request.vehicle.make} {request.vehicle.model}</PoppinsText>
+                                    </View>
+                                    <View style={styles.requestInfo}>
+                                        <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
+                                        <PoppinsText>{request.vehicle.licensePlate}</PoppinsText>
+                                    </View>
+                                    {
+                                        request.state === 'inProgress' && <View>
                                             <TouchableOpacity
                                                 style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}
                                                 onPress={() => { cancelResponder(request._id) }}>
                                                 <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                             </TouchableOpacity>
                                         </View>
-                                }
-                            </View>
+                                    }
+                                    {
+                                        request.state === 'cancelled' && <View>
+                                            <TouchableOpacity
+                                                style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
+                                                onPress={() => setRequest(null)}
+                                            >
+                                                <PoppinsText style={{ color: 'white' }}>Load nearby requests</PoppinsText>
+                                            </TouchableOpacity>
+                                        </View>
+                                    }
+                                </View>
                     }
                 </BottomSheetView>
             </BottomSheet>
@@ -273,7 +406,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     profilePic: {
-        fontSize: 60,
+        // fontSize: 60,
         marginRight: 8
     },
     requestInfo: {
