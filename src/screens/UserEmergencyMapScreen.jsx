@@ -12,7 +12,7 @@ import Connecting from '../components/Connecting'
 import { useDispatch } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
 
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 
 const UserEmergencyMapScreen = ({ route }) => {
     const { id } = route.params
@@ -93,7 +93,6 @@ const UserEmergencyMapScreen = ({ route }) => {
     }
 
     const handleCancelRequestBtn = async () => {
-        // socket.emit("request:cancel", request._id)
         try {
             const response = await cancelRequest(request._id)
 
@@ -245,14 +244,14 @@ const styles = StyleSheet.create({
         height: 4,
         backgroundColor: '#E48700',
         marginHorizontal: 4,
-        width: (width / 2) - 8,
+        flex: 1,
         borderRadius: 4
     },
     barsView: {
-        width,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8
+        marginBottom: 8,
+        marginHorizontal: 8
     },
     btn: {
         borderRadius: 16,

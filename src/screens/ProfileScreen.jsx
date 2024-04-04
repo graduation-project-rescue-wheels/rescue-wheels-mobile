@@ -49,19 +49,11 @@ const ProfileScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <View style={styles.userView}>
-                <View>
-                    {
-                        user.photoURL === undefined ?
-                            <Ionicons
-                                name='person-circle-outline'
-                                style={styles.profileIcon}
-                            /> : <Image
-                                source={{ uri: user.photoURL }}
-                                style={styles.profilePhoto}
-                                resizeMode='contain'
-                            />
-                    }
-                </View>
+                <Image
+                    source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../assets/images/avatar.png')}
+                    style={styles.profilePhoto}
+                    resizeMode='contain'
+                />
                 <PoppinsText style={styles.usernameText}>{username}</PoppinsText>
             </View>
             <FlatList
@@ -98,7 +90,7 @@ const styles = StyleSheet.create({
     userView: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16
+        marginVertical: 16
     },
     profileIcon: {
         fontSize: 130
@@ -108,10 +100,10 @@ const styles = StyleSheet.create({
         marginLeft: 8
     },
     profilePhoto: {
-        width: 130,
-        height: 130,
+        width: 110,
+        height: 110,
         marginRight: 8,
-        borderRadius: 45
+        borderRadius: 110,
     },
     flatList: {
         flex: 1

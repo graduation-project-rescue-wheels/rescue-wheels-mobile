@@ -125,13 +125,12 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             const response = await cancelResponder(request._id)
             if (response.status == 200) {
                 setRequest(null)
-
                 socket.emit('request:responder-leave', response.data.request.requestedBy._id)
+                dispatch(loadUserAsync())
             }
         } catch (err) {
             showToast("Couldn't leave request.")
         }
-
     }
 
     const handleAcceptBtn = async () => {
@@ -140,6 +139,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             if (response.status == 200) {
                 setRequest(response.data.request)
                 socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
+                dispatch(loadUserAsync())
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
@@ -171,6 +171,17 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }, [mapPadding])
 
     useEffect(() => {
+        socket.on('request:cancelled', payload => {
+            if (payload._id === request?._id) {
+                setRequest(payload)
+            }
+
+            setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
+            dispatch(loadUserAsync())
+        })
+    }, [request])
+
+    useEffect(() => {
         socket.on('request:add', async payload => {
             if ((await Location.getForegroundPermissionsAsync()).granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
@@ -181,28 +192,18 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             }
         })
 
-        socket.on('request:cancelled', payload => {
-
-            if (payload._id === request?._id) {
-                setRequest(payload)
-            }
-            setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
-            dispatch(loadUserAsync())
-        })
-
         socket.on('request:accepted', payload => {
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
         })
 
         socket.on('request:responder-cancel', async payload => {
-            console.log(payload);
             const currentLocation = await Location.getCurrentPositionAsync()
             const distance = calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude)
             if (distance <= 5) {
                 setNearbyRequests(prev => [...prev, payload].sort(sortRequests))
             }
         })
-    }, [request])
+    }, [])
 
     return (
         <View style={styles.continer}>
@@ -269,16 +270,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.userInfo}>
                                 <View style={{ flexDirection: 'row' }}>
-                                    {
-                                        nearbyRequests[0].requestedBy?.profilePic?.length === 0 ?
-                                            <Ionicons
-                                                name='person-circle-outline'
-                                                style={styles.profilePic}
-                                            /> : <Image
-                                                source={{ uri: nearbyRequests[0].requestedBy.profilePic }}
-                                                style={styles.profilePic}
-                                            />
-                                    }
+                                    <Image
+                                        source={nearbyRequests[0].requestedBy?.profilePic?.length === 0 ?
+                                            require('../assets/images/avatar.png') :
+                                            { uri: nearbyRequests[0].requestedByprofilePic }
+                                        }
+                                        style={styles.profilePic}
+                                    />
                                     <View>
                                         <PoppinsText style={{ fontSize: 18 }}>
                                             {nearbyRequests[0].requestedBy.firstName} {nearbyRequests[0].requestedBy.lastName}
@@ -322,16 +320,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.userInfo}>
                                 <View style={{ flexDirection: 'row' }}>
-                                    {
-                                        request.requestedBy.profilePic.length === 0 ?
-                                            <Ionicons
-                                                name='person-circle-outline'
-                                                style={styles.profilePic}
-                                            /> : <Image
-                                                source={{ uri: request.requestedBy.profilePic }}
-                                                style={styles.profilePic}
-                                            />
-                                    }
+                                    <Image
+                                        source={request.requestedBy.profilePic.length === 0 ?
+                                            require('../assets/images/avatar.png') :
+                                            { uri: request.requestedBy.profilePic }
+                                        }
+                                        style={styles.profilePic}
+                                    />
                                     <View>
                                         <PoppinsText style={{ fontSize: 18 }}>
                                             {request.requestedBy.firstName} {request.requestedBy.lastName}
@@ -428,7 +423,9 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     profilePic: {
-        // fontSize: 60,
+        height: 60,
+        width: 60,
+        borderRadius: 60,
         marginRight: 8
     },
     requestInfo: {

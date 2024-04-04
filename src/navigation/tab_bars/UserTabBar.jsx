@@ -1,7 +1,10 @@
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, Image } from 'react-native';
 import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 function UserTabBar({ state, descriptors, navigation }) {
+    const { user } = useSelector(state => state.user)
+
     return (
         <View style={styles.container}>
             {state.routes.map((route, index) => {
@@ -60,13 +63,13 @@ function UserTabBar({ state, descriptors, navigation }) {
                                             ...styles.icon,
                                             color: isFocused ? '#E48700' : '#ADADAD'
                                         }}
-                                    /> : <Ionicons
-                                        name='person-circle-outline'
-                                        style={{
-                                            ...styles.icon,
-                                            color: isFocused ? '#E48700' : '#ADADAD'
-                                        }}
-                                    />
+                                    /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24 }}>
+                                        <Image
+                                            source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
+                                            style={styles.profilePic}
+                                            resizeMode='contain'
+                                        />
+                                    </View>
                         }
                         <View
                             style={{
@@ -101,5 +104,10 @@ const styles = StyleSheet.create({
         width: 6,
         borderRadius: 6,
         marginTop: 6
+    },
+    profilePic: {
+        height: 24,
+        width: 24,
+        borderRadius: 24
     }
 })

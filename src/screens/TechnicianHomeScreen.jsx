@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { Image, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { MaterialIcons } from '@expo/vector-icons'
 import PoppinsText from '../components/PoppinsText'
-import { Ionicons } from "@expo/vector-icons"
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import NoHistory from '../components/NoHistory'
 import { getRequestById } from '../api/EmergencyRequest'
-import { Fontisto } from '@expo/vector-icons';
+import { useIsFocused } from '@react-navigation/native'
 
 const TechnicianHomeScreen = ({ navigation }) => {
 
@@ -17,10 +16,10 @@ const TechnicianHomeScreen = ({ navigation }) => {
     const [technicianRate, setTechnicianRate] = useState(0.0)
     const [totalRequests, setTotalRequests] = useState(0)
     const [onGoingRequests, setonGoingRequests] = useState(null)
+    const isFocused = useIsFocused()
 
     const getOnGoingRequests = async () => {
-
-        if (user.onGoingRequestId != null) {
+        if (user.onGoingRequestId) {
             const requestData = await getRequestById(user.onGoingRequestId)
             setonGoingRequests(requestData.data.request)
         }
@@ -35,7 +34,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
 
     useEffect(() => {
         getOnGoingRequests()
-    }, [])
+    }, [isFocused])
 
     return (
         <View style={styles.container}>
@@ -47,16 +46,10 @@ const TechnicianHomeScreen = ({ navigation }) => {
                 }
                 <View style={{ ...styles.CardView, marginTop: 20 }}>
                     <View style={{ flexDirection: 'row' }}>
-                        {
-                            user.profilePic.length === 0 ?
-                                <Ionicons
-                                    name='person-circle-outline'
-                                    style={styles.profilePic}
-                                /> : <Image
-                                    source={{ uri: user.profilePic }}
-                                    style={styles.profilePic}
-                                />
-                        }
+                        <Image
+                            source={user.profilePic.length === 0 ? require('../assets/images/avatar.png') : { uri: user.profilePic }}
+                            style={styles.profilePic}
+                        />
                         <View style={{ justifyContent: 'center' }}>
                             <PoppinsText style={{ fontSize: 18 }}>
                                 {techUsername}
@@ -99,16 +92,10 @@ const TechnicianHomeScreen = ({ navigation }) => {
                             </View> :
                             <View>
                                 <View style={{ flexDirection: 'row' }}>
-                                    {
-                                        onGoingRequests.requestedBy.profilePic.length === 0 ?
-                                            <Ionicons
-                                                name='person-circle-outline'
-                                                style={styles.profilePic}
-                                            /> : <Image
-                                                source={{ uri: onGoingRequests.requestedBy.profilePic }}
-                                                style={styles.profilePic}
-                                            />
-                                    }
+                                    <Image
+                                        source={onGoingRequests.requestedBy.profilePic.length === 0 ? require('../assets/images/avatar.png') : { uri: onGoingRequests.requestedBy.profilePic }}
+                                        style={styles.profilePic}
+                                    />
                                     <View style={{ justifyContent: 'center' }}>
                                         <PoppinsText style={{ fontSize: 18 }}>
                                             {onGoingRequests?.requestedBy.firstName} {onGoingRequests?.requestedBy.lastName}
@@ -191,7 +178,10 @@ const styles = StyleSheet.create({
         elevation: 5
     },
     profilePic: {
-        fontSize: 60,
+        height: 60,
+        width: 60,
+        borderRadius: 60,
+        backgroundColor: 'white',
         marginRight: 8
     },
     onlineView: {
