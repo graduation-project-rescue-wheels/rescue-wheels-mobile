@@ -62,7 +62,7 @@ export async function getCurrnetUser() {
 
     return await rwClient.get('/user/getUserData', {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }

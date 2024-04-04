@@ -1,20 +1,21 @@
 import rwClient from "./axios";
 import * as SecureStore from "expo-secure-store"
 
-export async function addVehicle(make, model, licensePlate, type, energySource) {
+export async function addVehicle(make, model, licensePlate, modelYear, type, energySource) {
     const accessToken = await SecureStore.getItemAsync('accessToken')
     const owner = JSON.parse(await SecureStore.getItemAsync('currentUser'))._id
 
-    return await rwClient.post('/user/addVehicle', {
+    return await rwClient.post('/vehicle/addVehicle', {
         make,
         model,
         licensePlate,
         type,
         energySource,
+        modelYear,
         owner
     }, {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }
@@ -34,7 +35,7 @@ export async function deleteVehicle(id) {
 
     return await rwClient.delete(`/vehicle/deleteVehicle/${id}`, {
         headers: {
-            accessToken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
+            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
 }

@@ -7,18 +7,23 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
+import { socket } from '../api/socket.io'
+import Connecting from '../components/Connecting'
+import { useDispatch } from 'react-redux'
+import { loadUserAsync } from '../store/userAsyncThunks'
 
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 
 const UserEmergencyMapScreen = ({ route }) => {
     const { id } = route.params
+    const dispatch = useDispatch()
 
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
 
     const snappingPoints = useMemo(() => {
-        return [0.23, 0.45].map(percentage => percentage * height);
+        return [0.23, 0.55].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
@@ -38,15 +43,19 @@ const UserEmergencyMapScreen = ({ route }) => {
     }, [])
 
     const getCurrentLocation = async () => {
-        const location = await Location.getCurrentPositionAsync({})
-        console.log(location.coords);
+        const locationPermission = await Location.requestForegroundPermissionsAsync()
 
-        setRegion({
-            longitude: location.coords.longitude,
-            latitude: location.coords.latitude,
-            latitudeDelta: 0.004757,
-            longitudeDelta: 0.006866
-        })
+        if (locationPermission.granted) {
+            const location = await Location.getCurrentPositionAsync({})
+            console.log(location.coords);
+
+            setRegion({
+                longitude: location.coords.longitude,
+                latitude: location.coords.latitude,
+                latitudeDelta: 0.004757,
+                longitudeDelta: 0.006866
+            })
+        }
     }
 
     const fetchRequest = async () => {
@@ -98,6 +107,7 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     useEffect(() => {
         getCurrentLocation()
+        socket.connect()
 
         if (id) {
             fetchRequest()
@@ -107,6 +117,25 @@ const UserEmergencyMapScreen = ({ route }) => {
     useEffect(() => {
         pulseAnimation().start()
     }, [request?.state])
+
+    useEffect(() => {
+        socket.on('request:cancelled', async () => {
+            await fetchRequest()
+            dispatch(loadUserAsync())
+        })
+
+        socket.on('request:accepted', async (payload) => {
+            if (id === payload._id) {
+                await fetchRequest()
+            }
+        })
+
+        socket.on('request:responder-cancel', async (payload) => {
+            if (id === payload._id) {
+                await fetchRequest()
+            }
+        })
+    }, [socket])
 
     return (
         <View style={styles.continer}>
@@ -157,7 +186,10 @@ const UserEmergencyMapScreen = ({ route }) => {
                         }} />
                     </View>
                     {
-                        request.state === 'pending' && <PoppinsText style={styles.stateMessage}>Connecting you to a technician</PoppinsText>
+                        request.state === 'pending' && <View style={{ alignItems: 'center' }}>
+                            <PoppinsText style={styles.stateMessage}>Connecting you to a technician</PoppinsText>
+                            {/* <Connecting /> */}
+                        </View>
                     }
                     {
                         request.state === 'inProgress' && <PoppinsText style={styles.stateMessage}>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
@@ -212,14 +244,14 @@ const styles = StyleSheet.create({
         height: 4,
         backgroundColor: '#E48700',
         marginHorizontal: 4,
-        width: (width / 2) - 8,
+        flex: 1,
         borderRadius: 4
     },
     barsView: {
-        width,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 8
+        marginBottom: 8,
+        marginHorizontal: 8
     },
     btn: {
         borderRadius: 16,

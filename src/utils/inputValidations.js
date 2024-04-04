@@ -160,6 +160,25 @@ export const validateLicensePlate = (licensePlate) => {
     }
 }
 
+export const validateModelYear = (modelYear) => {
+    if (modelYear.length === 0) {
+        return {
+            isValid: false,
+            message: 'Please enter model year'
+        }
+    } else if (modelYear.length > 4) {
+        return {
+            isValid: false,
+            message: 'Please enter a valid year'
+        }
+    } else {
+        return {
+            isValid: true,
+            message: ''
+        }
+    }
+}
+
 export const validateVehicleType = (type) => {
     if (type.length === 0) {
         return {
