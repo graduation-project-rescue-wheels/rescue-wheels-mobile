@@ -22,7 +22,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
         if (user.onGoingRequestId) {
             const requestData = await getRequestById(user.onGoingRequestId)
             setonGoingRequests(requestData.data.request)
-        }
+        } else setonGoingRequests(null)
     }
 
     const handleCallBtn = () => {
