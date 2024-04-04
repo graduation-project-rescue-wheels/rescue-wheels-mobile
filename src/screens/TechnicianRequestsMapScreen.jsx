@@ -2,20 +2,20 @@ import { Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
-import { cancelResponder, getNearbyRequests, getRequestById } from '../api/EmergencyRequest'
+import { acceptRequest, cancelResponder, getNearbyRequests, getRequestById } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Fontisto } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { Ionicons } from "@expo/vector-icons"
-import { acceptRequest } from '../api/user'
 import { socket } from '../api/socket.io'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
 import { calculateDistance } from '../utils/locations'
 import showToast from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
+import { useIsFocused } from '@react-navigation/native'
 
 const { height } = Dimensions.get('window')
 
@@ -31,6 +31,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         return [0.28, 0.60].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
+    const isFocused = useIsFocused()
     const mapRef = useRef()
     const bottomSheetRef = useRef();
     const markerRef = useRef();
@@ -124,7 +125,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             const response = await cancelResponder(request._id)
             if (response.status == 200) {
                 setRequest(null)
-                getCurrentLocationAndRequest()
+
                 socket.emit('request:responder-leave', response.data.request.requestedBy._id)
             }
         } catch (err) {
@@ -149,7 +150,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         getCurrentLocationAndRequest()
         pulseAnimation().start()
         socket.connect()
-    }, [])
+    }, [isFocused])
 
     useEffect(() => {
         if (request && region) {
@@ -158,12 +159,12 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }, [request?.state, region?.longitude])
 
     useEffect(() => {
-        pulseAnimation().start()
+        if (!request) pulseAnimation().start()
 
         return () => {
             pulseAnimation().stop()
         }
-    }, [nearbyRequests.length])
+    }, [nearbyRequests.length, request])
 
     useEffect(() => {
         handleFocusMap()
@@ -181,7 +182,8 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         })
 
         socket.on('request:cancelled', payload => {
-            if (request) {
+
+            if (payload._id === request?._id) {
                 setRequest(payload)
             }
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
@@ -200,7 +202,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 setNearbyRequests(prev => [...prev, payload].sort(sortRequests))
             }
         })
-    }, [socket])
+    }, [request])
 
     return (
         <View style={styles.continer}>
@@ -211,7 +213,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
-                mapPadding={{ bottom: mapPadding }}
+                mapPadding={{ bottom: mapPadding, top: 80 }}
             >
                 {(nearbyRequests.length > 0 && request === null) && <Marker
                     coordinate={nearbyRequests[0].coordinates}
