@@ -30,6 +30,7 @@ const UserEmergencyMapScreen = ({ route }) => {
     const bottomSheetRef = useRef();
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
     const barOpacity = useRef(new Animated.Value(1)).current
+    const techIcon = require('../assets/images/tow-truck.png')
 
     const handleSheetChanges = useCallback(index => {
         Animated.spring(myLocationBtnBottom, {
@@ -154,14 +155,16 @@ const UserEmergencyMapScreen = ({ route }) => {
                     }))
                 }}
             >
-                {/* {region && <Marker coordinate={{
-                    latitude: region.latitude,
-                    longitude: region.longitude
-                }}>
+                {region && <Marker
+                    coordinate={{
+                        latitude: region.latitude,
+                        longitude: region.longitude
+                    }}
+                    image={techIcon}>
                     <Callout>
                         <PoppinsText>I'm here</PoppinsText>
                     </Callout>
-                </Marker>} */}
+                </Marker>}
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
