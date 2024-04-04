@@ -66,15 +66,3 @@ export async function getCurrnetUser() {
         }
     })
 }
-
-export async function acceptRequest(id) {
-    const accessToken = await SecureStore.getItemAsync('accessToken')
-
-    return rwClient.put('/user/acceptRequest', {
-        id
-    }, {
-        headers: {
-            accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
-        }
-    })
-}

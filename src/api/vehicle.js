@@ -5,7 +5,7 @@ export async function addVehicle(make, model, licensePlate, modelYear, type, ene
     const accessToken = await SecureStore.getItemAsync('accessToken')
     const owner = JSON.parse(await SecureStore.getItemAsync('currentUser'))._id
 
-    return await rwClient.post('/user/addVehicle', {
+    return await rwClient.post('/vehicle/addVehicle', {
         make,
         model,
         licensePlate,
