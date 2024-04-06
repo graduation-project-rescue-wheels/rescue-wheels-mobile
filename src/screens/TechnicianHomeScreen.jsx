@@ -33,7 +33,9 @@ const TechnicianHomeScreen = ({ navigation }) => {
     }
 
     useEffect(() => {
-        getOnGoingRequests()
+        if (isFocused) {
+            getOnGoingRequests()
+        }
     }, [isFocused])
 
     return (
