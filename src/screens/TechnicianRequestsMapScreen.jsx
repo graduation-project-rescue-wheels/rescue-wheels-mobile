@@ -26,6 +26,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
     const [nearbyRequests, setNearbyRequests] = useState([])
+    const markerIcon = require('../assets/images/broken-car.png')
 
     const snappingPoints = useMemo(() => {
         return [0.28, 0.60].map(percentage => percentage * height);
@@ -214,18 +215,20 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 showsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
-                mapPadding={{ bottom: mapPadding, top: 80 }}
+                mapPadding={{ bottom: mapPadding, top: 120 }}
             >
                 {(nearbyRequests.length > 0 && request === null) && <Marker
                     coordinate={nearbyRequests[0].coordinates}
-                    ref={markerRef}>
+                    ref={markerRef}
+                    image={markerIcon}>
                     <Callout>
                         <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
                     </Callout>
                 </Marker>}
                 {request && <Marker
                     coordinate={request.coordinates}
-                    ref={markerRef}>
+                    ref={markerRef}
+                    image={markerIcon}>
                     <Callout>
                         <PoppinsText>{request.type}</PoppinsText>
                     </Callout>

@@ -10,7 +10,7 @@ const userSlice = createSlice({
     extraReducers: builder => {
         builder.addCase(signInAsync.fulfilled, (state, action) => {
             state.user = action.payload.userData
-            state.accessToken = action.payload.token
+            state.accessToken = action.payload.Token
         })
 
         builder.addCase(signOutAsync.fulfilled, (state) => {

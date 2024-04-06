@@ -17,6 +17,7 @@ const CustomTextInput = ({ state, placeholder, secureTextEntry, onChangeText, on
                 onFocus={onFocus}
                 onBlur={onBlur}
                 keyboardType={keyboardType}
+                cursorColor={'#E48700'}
             />
         </View>
     )

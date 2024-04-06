@@ -1,7 +1,7 @@
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import SelectionButton from '../components/SelectionButton'
-import { useEffect, useState } from 'react'
-import { AntDesign, MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { useEffect, useRef, useState } from 'react'
+import { AntDesign, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { getVehicleById } from '../api/vehicle'
 import CustomModal from '../components/CustomModal'
@@ -13,21 +13,20 @@ import { requestEmergencyAsync } from '../store/userAsyncThunks'
 import ValidationMessage from '../components/ValidationMessage'
 import showToast from '../components/Toast'
 import NoVehicles from '../components/NoVehicles'
+import MapView, { Marker } from 'react-native-maps'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [selectedVehicle, setSelectedVehicle] = useState(null)
     const [selectedEmergency, setSelectedEmergency] = useState(null)
+    const [selectedAddress, setSelectedAddress] = useState('')
     const [vehicles, setVehicles] = useState([])
     const [selectVehicleModalVisible, setSelectVehicleModalVisible] = useState(false)
     const [selectEmergencyModalVisible, setSelectEmergencyModalVisible] = useState(false)
-    const [isLoadingRequests, setIsLoadingRequests] = useState(false)
+    const [selectAdressModalVisible, setSelectAdressModalVisible] = useState(false)
     const [isLoadingVehicles, setIsLoadingVehicles] = useState(false)
-    const [address, setAddress] = useState({
-        value: '',
-        isFocused: false
-    })
+    const [region, setRegion] = useState(null)
     const [vehicleValidation, setVehicleValidation] = useState({
         validation: {
             isValid: true,
@@ -40,6 +39,17 @@ const EmergencyScreen = ({ navigation }) => {
             message: ''
         }
     })
+    const [addressValidation, setAddressValidation] = useState({
+        validation: {
+            isValid: true,
+            message: ''
+        }
+    })
+    const [dropOffMarkerCoordinates, setDropOffMarkerCoordinates] = useState(null)
+
+    const containerRef = useRef()
+    const mapRef = useRef()
+
     const emergencies = [
         {
             label: 'Flat tire',
@@ -99,14 +109,68 @@ const EmergencyScreen = ({ navigation }) => {
         setSelectVehicleModalVisible(false)
     }
 
+    const handleMyLocationBtn = () => {
+        mapRef.current.animateToRegion(region)
+    }
+
+    const handleMapViewOnPress = async ({ nativeEvent }) => {
+        setDropOffMarkerCoordinates(nativeEvent.coordinate)
+        const address = await mapRef.current.addressForCoordinate(nativeEvent.coordinate)
+        setSelectedAddress(`${address.name} - ${address.subAdministrativeArea}`)
+    }
+
+    const handleConfirmDropOffBtn = () => {
+        if (!dropOffMarkerCoordinates) {
+            Alert.alert('Invalid drop off', 'Please choose a drop off location either by searching or tapping the desired location on the map.', [
+                {
+                    text: 'OK',
+                    style: 'default'
+                }
+            ])
+            showToast("ksjvb")
+        } else {
+            setSelectAdressModalVisible(false)
+        }
+    }
+
+    const handleGooglePlacesAutoCompleteOnPress = (data, details = null) => {
+        setDropOffMarkerCoordinates({
+            longitude: details.geometry.location.lng,
+            latitude: details.geometry.location.lat
+        })
+        setSelectedAddress(data.structured_formatting.main_text)
+    }
+
+    const handleDropOffSelectionBtn = async () => {
+        const locationPermission = await Location.requestForegroundPermissionsAsync()
+
+        if (locationPermission.granted) {
+            const location = await Location.getCurrentPositionAsync({})
+
+            setRegion({
+                longitude: location.coords.longitude,
+                latitude: location.coords.latitude,
+                latitudeDelta: 0.004757,
+                longitudeDelta: 0.006866
+            })
+            setSelectAdressModalVisible(true)
+        }
+    }
+
     useEffect(() => {
         if (selectVehicleModalVisible) {
             fetchVehicles()
         }
     }, [selectVehicleModalVisible])
 
+    useEffect(() => {
+        if (dropOffMarkerCoordinates) {
+            mapRef.current.fitToCoordinates([region, dropOffMarkerCoordinates])
+        }
+    }, [dropOffMarkerCoordinates?.longitude, dropOffMarkerCoordinates?.latitude])
+
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps="always" ref={containerRef}>
             <CustomModal visible={selectVehicleModalVisible} onRequestClose={() => setSelectVehicleModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
                 <ScrollView style={{ flexGrow: 0 }}>
@@ -166,6 +230,62 @@ const EmergencyScreen = ({ navigation }) => {
                     <PoppinsText style={styles.modalBtnText}>Cancel</PoppinsText>
                 </TouchableOpacity>
             </CustomModal>
+            <Modal
+                visible={selectAdressModalVisible}
+                onRequestClose={() => {
+                    setDropOffMarkerCoordinates(null)
+                    setSelectedAddress(null)
+                    setSelectAdressModalVisible(false)
+                }}
+                animationType='fade'
+            >
+                <MapView
+                    style={{ flex: 1 }}
+                    provider='google'
+                    showsUserLocation
+                    region={region}
+                    onPress={handleMapViewOnPress}
+                    ref={mapRef}
+                    mapPadding={{ bottom: 90, top: 120, right: 70 }}
+                    showsMyLocationButton={false}
+                >
+                    {dropOffMarkerCoordinates && <Marker coordinate={dropOffMarkerCoordinates} />}
+                </MapView>
+                <View style={styles.modalAbsoluteView}>
+                    <GooglePlacesAutocomplete
+                        placeholder='Drop off'
+                        query={{
+                            key: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
+                            language: 'en',
+                            components: 'country:eg'
+                        }}
+                        suppressDefaultStyles
+                        styles={{
+                            container: styles.placesAutoCompleteContainer,
+                            textInput: styles.placesAutoCompleteTestInput,
+                            row: styles.placesAutoCompleteRow,
+                            separator: styles.placesAutoCompleteSeparator
+                        }}
+                        onPress={handleGooglePlacesAutoCompleteOnPress}
+                        textInputProps={{
+                            cursorColor: '#E48700'
+                        }}
+                        fetchDetails
+                    />
+                </View>
+                <View style={{ ...styles.modalAbsoluteView, bottom: 40 }}>
+                    <TouchableOpacity
+                        style={{ ...styles.btn, backgroundColor: '#E48700', flexDirection: 'row' }}
+                        onPress={handleConfirmDropOffBtn}
+                    >
+                        <AntDesign name='checkcircleo' style={{ ...styles.icon, color: 'white' }} />
+                        <PoppinsText style={{ color: 'white' }}>Confirm drop off location</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+                <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
+                    <MaterialIcons name='my-location' style={{ color: 'white', fontSize: 30 }} />
+                </TouchableOpacity>
+            </Modal>
             <View style={styles.card}>
                 <SelectionButton
                     placeholder={'Select vehicle'}
@@ -189,12 +309,14 @@ const EmergencyScreen = ({ navigation }) => {
                     state={emergencyValidation}
                 />
                 <ValidationMessage state={emergencyValidation} />
-                {
-                    selectedEmergency?.label === 'Other' &&
-                    <GooglePlacesAutocomplete
-                        placeholder='Drop off'
-                    />
-                }
+                {selectedEmergency?.label === 'Other' && <SelectionButton
+                    placeholder={'Drop off'}
+                    value={selectedAddress ? selectedAddress : ''}
+                    Icon={() => <Ionicons name='location-outline' style={{ ...styles.icon, color: 'black' }} />}
+                    onPress={handleDropOffSelectionBtn}
+                    hasValidation={true}
+                    state={addressValidation}
+                />}
                 {user.onGoingRequestId !== null ?
                     <TouchableOpacity
                         style={{ ...styles.btn, backgroundColor: '#E48700' }}
@@ -247,5 +369,43 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 16,
         justifyContent: 'center',
+    },
+    placesAutoCompleteContainer: {
+        padding: 8,
+        backgroundColor: 'white',
+        marginVertical: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#ADADAD',
+        width: '100%'
+    },
+    placesAutoCompleteTestInput: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#ADADAD',
+        marginBottom: 8,
+        paddingBottom: 8
+    },
+    placesAutoCompleteRow: {
+        paddingVertical: 8
+    },
+    placesAutoCompleteSeparator: {
+        borderBottomColor: '#ADADAD',
+        borderBottomWidth: 1
+    },
+    modalAbsoluteView: {
+        position: 'absolute',
+        width: '100%',
+        paddingHorizontal: 8
+    },
+    myLocationBtn: {
+        backgroundColor: '#E48700',
+        padding: 12,
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        position: 'absolute',
+        bottom: 100,
+        right: 16
     }
 })
