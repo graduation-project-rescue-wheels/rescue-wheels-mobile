@@ -6,6 +6,7 @@ import { addVehicle, deleteVehicle } from "../api/vehicle";
 import * as SplashScreen from 'expo-splash-screen'
 import { requestEmergency } from "../api/EmergencyRequest";
 import rwClient from "../api/axios";
+import { socket } from "../api/socket.io";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -16,6 +17,7 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.userData))
             showToast('Welcome to rescue wheels')
             rwClient.defaults.headers.common['accesstoken'] = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + response.data.Token
+            socket.auth.token = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + response.data.Token
 
             return response.data
         } else if (response.status === 201) {
@@ -50,6 +52,7 @@ export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => 
         if (response.status === 200) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.data))
             rwClient.defaults.headers.common['accesstoken'] = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + await SecureStore.getItemAsync('accessToken')
+            socket.auth.token = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + await SecureStore.getItemAsync('accessToken')
             console.log(await SecureStore.getItemAsync('accessToken'));
 
             return {
