@@ -113,13 +113,7 @@ const UserEmergencyMapScreen = ({ route }) => {
         if (id) {
             fetchRequest()
         }
-    }, [])
 
-    useEffect(() => {
-        pulseAnimation().start()
-    }, [request?.state])
-
-    useEffect(() => {
         socket.on('request:cancelled', async () => {
             await fetchRequest()
             dispatch(loadUserAsync())
@@ -136,7 +130,11 @@ const UserEmergencyMapScreen = ({ route }) => {
                 await fetchRequest()
             }
         })
-    }, [socket])
+    }, [])
+
+    useEffect(() => {
+        pulseAnimation().start()
+    }, [request?.state])
 
     return (
         <View style={styles.continer}>
@@ -155,7 +153,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                     }))
                 }}
             >
-                {region && <Marker
+                {request?.responder && <Marker
                     coordinate={{
                         latitude: region.latitude,
                         longitude: region.longitude
