@@ -14,6 +14,7 @@ import ValidationMessage from '../components/ValidationMessage'
 import showToast from '../components/Toast'
 import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
+import { getAddress } from '../utils/locations'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -136,7 +137,7 @@ const EmergencyScreen = ({ navigation }) => {
 
     const handleMapViewOnPress = async ({ nativeEvent }) => {
         setDropOffMarkerCoordinates(nativeEvent.coordinate)
-        const address = await mapRef.current.addressForCoordinate(nativeEvent.coordinate)
+        const address = await getAddress(nativeEvent.coordinate, mapRef)
         setSelectedAddress(`${address.name} - ${address.subAdministrativeArea}`)
     }
 
@@ -148,7 +149,6 @@ const EmergencyScreen = ({ navigation }) => {
                     style: 'default'
                 }
             ])
-            showToast("ksjvb")
         } else {
             setSelectAdressModalVisible(false)
         }
