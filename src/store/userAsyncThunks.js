@@ -216,9 +216,9 @@ export const deleteVehicleAsync = createAsyncThunk('user/deleteVehicleAsync', as
     }
 })
 
-export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsync', async ({ vehicle, coordinates, type, navigation }) => {
+export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsync', async ({ vehicle, coordinates, type, dropOffLocation = null, navigation }) => {
     try {
-        const response = await requestEmergency(vehicle, coordinates, type)
+        const response = await requestEmergency(vehicle, coordinates, type, dropOffLocation)
 
         if (response.status === 201) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
