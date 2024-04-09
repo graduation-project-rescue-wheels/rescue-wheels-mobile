@@ -11,6 +11,7 @@ import { socket } from '../api/socket.io'
 import Connecting from '../components/Connecting'
 import { useDispatch } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
+import MapViewDirections from 'react-native-maps-directions'
 
 const { height } = Dimensions.get('window')
 
@@ -21,6 +22,7 @@ const UserEmergencyMapScreen = ({ route }) => {
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
+    const [responderCoordinate, setResponderCoordinate] = useState(null)
 
     const snappingPoints = useMemo(() => {
         return [0.23, 0.55].map(percentage => percentage * height);
@@ -153,16 +155,23 @@ const UserEmergencyMapScreen = ({ route }) => {
                     }))
                 }}
             >
-                {request?.responder && <Marker
-                    coordinate={{
-                        latitude: region.latitude,
-                        longitude: region.longitude
-                    }}
-                    image={techIcon}>
-                    <Callout>
-                        <PoppinsText>I'm here</PoppinsText>
-                    </Callout>
-                </Marker>}
+                {(request && responderCoordinate) && <>
+                    <MapViewDirections
+                        apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                        destination={request.coordinates}
+                        origin={responderCoordinate}
+                        strokeColor='#E48700'
+                        strokeWidth={4}
+                    />
+                    <Marker
+                        coordinate={{
+                            latitude: region.latitude,
+                            longitude: region.longitude
+                        }}
+                        image={techIcon}
+                    >
+                    </Marker>
+                </>}
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
