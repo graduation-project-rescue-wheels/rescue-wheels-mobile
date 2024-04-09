@@ -132,6 +132,11 @@ const UserEmergencyMapScreen = ({ route }) => {
                 await fetchRequest()
             }
         })
+
+        socket.on('request:responder-coord-update', payload => {
+            console.log("updated");
+            setResponderCoordinate(payload)
+        })
     }, [])
 
     useEffect(() => {
