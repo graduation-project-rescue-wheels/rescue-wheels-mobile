@@ -16,6 +16,7 @@ import showToast from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
 import MapViewDirections from 'react-native-maps-directions'
+import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
 
 const { height } = Dimensions.get('window')
 
@@ -129,6 +130,17 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         }
     }
 
+    const registerBackGroundLocationTask = async () => {
+        const permission = await Location.requestBackgroundPermissionsAsync()
+
+        if (permission.granted) {
+            Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
+                distanceInterval: 1,
+                showsBackgroundLocationIndicator: true
+            })
+        }
+    }
+
     const handleCancelBTN = async () => {
         try {
             const response = await cancelResponder(request._id)
@@ -145,10 +157,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const handleAcceptBtn = async () => {
         try {
             const response = await acceptRequest(nearbyRequests[0]._id)
+
             if (response.status == 200) {
                 setRequest(response.data.request)
                 socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
                 dispatch(loadUserAsync())
+
+                registerBackGroundLocationTask()
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
@@ -186,6 +201,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
         if (request) {
             getDropOffAddressForRequest()
+            registerBackGroundLocationTask()
         }
 
         return () => {
