@@ -8,14 +8,14 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Fontisto } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Ionicons } from "@expo/vector-icons"
 import { socket } from '../api/socket.io'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
-import { calculateDistance } from '../utils/locations'
+import { calculateDistance, getAddress } from '../utils/locations'
 import showToast from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
+import MapViewDirections from 'react-native-maps-directions'
 
 const { height } = Dimensions.get('window')
 
@@ -26,10 +26,12 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
     const [nearbyRequests, setNearbyRequests] = useState([])
-    const markerIcon = require('../assets/images/broken-car.png')
+    const [dropOffAddress, setDropOffAddress] = useState('')
+    const userMarkerImage = require('../assets/images/broken-car.png')
+    const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
-        return [0.28, 0.60].map(percentage => percentage * height);
+        return [0.28, 0.65].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const isFocused = useIsFocused()
@@ -92,7 +94,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }
 
     const handleFocusMap = () => {
-        mapRef.current.fitToCoordinates([region, request?.coordinates])
+        const coords = [region, request?.coordinates]
+
+        if (request?.dropOffLocation) {
+            coords.push(request.dropOffLocation)
+        }
+
+        mapRef.current.fitToCoordinates(coords)
         markerRef.current?.showCallout()
     }
 
@@ -147,6 +155,16 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         }
     }
 
+    const getDropOffAddressForPendingRequest = async () => {
+        const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
+        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+    }
+
+    const getDropOffAddressForRequest = async () => {
+        const address = await getAddress(request.dropOffLocation, mapRef)
+        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+    }
+
     useEffect(() => {
         getCurrentLocationAndRequest()
         pulseAnimation().start()
@@ -161,6 +179,14 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
     useEffect(() => {
         if (!request) pulseAnimation().start()
+
+        if (!request && nearbyRequests.length > 0) {
+            getDropOffAddressForPendingRequest()
+        }
+
+        if (request) {
+            getDropOffAddressForRequest()
+        }
 
         return () => {
             pulseAnimation().stop()
@@ -217,22 +243,47 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding, top: 120 }}
             >
-                {(nearbyRequests.length > 0 && request === null) && <Marker
-                    coordinate={nearbyRequests[0].coordinates}
-                    ref={markerRef}
-                    image={markerIcon}>
-                    <Callout>
-                        <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
-                    </Callout>
-                </Marker>}
-                {request && <Marker
-                    coordinate={request.coordinates}
-                    ref={markerRef}
-                    image={markerIcon}>
-                    <Callout>
-                        <PoppinsText>{request.type}</PoppinsText>
-                    </Callout>
-                </Marker>}
+                {(nearbyRequests.length > 0 && request === null) && <>
+                    <Marker
+                        coordinate={nearbyRequests[0].coordinates}
+                        ref={markerRef}
+                        image={userMarkerImage}>
+                        <Callout>
+                            <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
+                        </Callout>
+                    </Marker>
+                    {
+                        nearbyRequests[0].dropOffLocation && <Marker coordinate={nearbyRequests[0].dropOffLocation} image={userDropOffMarkerImage} />
+                    }
+                </>}
+                {request && <>
+                    <Marker
+                        coordinate={request.coordinates}
+                        ref={markerRef}
+                        image={userMarkerImage}>
+                        <Callout>
+                            <PoppinsText>{request.type}</PoppinsText>
+                        </Callout>
+                    </Marker>
+                    <MapViewDirections
+                        apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                        origin={region}
+                        destination={request.coordinates}
+                        strokeColor='#E48700'
+                        strokeWidth={4}
+                    />
+                    {request.dropOffLocation && <>
+                        <MapViewDirections
+                            apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                            origin={request.coordinates}
+                            destination={request.dropOffLocation}
+                            strokeColor='#E48700'
+                            strokeWidth={4}
+                            lineDashPattern={[4, 4]}
+                        />
+                        <Marker coordinate={request.dropOffLocation} image={userDropOffMarkerImage} />
+                    </>}
+                </>}
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
@@ -303,6 +354,12 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
                                 <PoppinsText>{nearbyRequests[0].vehicle.licensePlate}</PoppinsText>
                             </View>
+                            {
+                                nearbyRequests[0].type === 'Other' && <View style={styles.requestInfo}>
+                                    <PoppinsText style={styles.highLightedText}>drop off</PoppinsText>
+                                    <PoppinsText>{dropOffAddress}</PoppinsText>
+                                </View>
+                            }
                             <TouchableOpacity
                                 style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
                                 onPress={handleAcceptBtn}>
@@ -353,6 +410,10 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
                                 <PoppinsText>{request.vehicle.licensePlate}</PoppinsText>
                             </View>
+                            {request.type === 'Other' && <View style={styles.requestInfo}>
+                                <PoppinsText style={styles.highLightedText}>Drop off</PoppinsText>
+                                <PoppinsText>{dropOffAddress}</PoppinsText>
+                            </View>}
                             {
                                 request.state === 'inProgress' && <View>
                                     <View style={styles.acceptRequestView}>

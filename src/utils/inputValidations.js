@@ -226,3 +226,13 @@ export const validateSelectedEmergency = (emergency) => {
         message: 'Please choose an emergency'
     }
 }
+
+export const validateAddress = (address) => {
+    return address.length > 0 ? {
+        isValid: true,
+        message: ''
+    } : {
+        isValid: false,
+        message: 'Please enter an address or choose drop off on the map'
+    }
+}

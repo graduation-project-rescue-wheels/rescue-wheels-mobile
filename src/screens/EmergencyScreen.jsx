@@ -8,12 +8,13 @@ import CustomModal from '../components/CustomModal'
 import PoppinsText from '../components/PoppinsText'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import * as Location from 'expo-location'
-import { validateSelectedEmergency, validateSelectedVehicle } from '../utils/inputValidations'
+import { validateAddress, validateSelectedEmergency, validateSelectedVehicle } from '../utils/inputValidations'
 import { requestEmergencyAsync } from '../store/userAsyncThunks'
 import ValidationMessage from '../components/ValidationMessage'
 import showToast from '../components/Toast'
 import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
+import { getAddress } from '../utils/locations'
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -89,18 +90,39 @@ const EmergencyScreen = ({ navigation }) => {
         setVehicleValidation({ validation: vehicleValidationResult })
         setEmergencyValidation({ validation: emergencyValidationResult })
 
-        if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid) {
-            const location = await Location.getCurrentPositionAsync({})
+        if (selectedEmergency.label === 'Other') {
+            const addressValidationResult = validateAddress(selectedAddress)
 
-            dispatch(requestEmergencyAsync({
-                vehicle: selectedVehicle._id,
-                coordinates: {
-                    longitude: location.coords.longitude,
-                    latitude: location.coords.latitude
-                },
-                type: selectedEmergency.label,
-                navigation
-            }))
+            setAddressValidation({ validation: addressValidationResult })
+
+            if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid && addressValidationResult.isValid) {
+                const location = await Location.getCurrentPositionAsync({})
+
+                dispatch(requestEmergencyAsync({
+                    vehicle: selectedVehicle._id,
+                    coordinates: {
+                        longitude: location.coords.longitude,
+                        latitude: location.coords.latitude
+                    },
+                    type: selectedEmergency.label,
+                    dropOffLocation: dropOffMarkerCoordinates,
+                    navigation
+                }))
+            }
+        } else {
+            if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid) {
+                const location = await Location.getCurrentPositionAsync({})
+
+                dispatch(requestEmergencyAsync({
+                    vehicle: selectedVehicle._id,
+                    coordinates: {
+                        longitude: location.coords.longitude,
+                        latitude: location.coords.latitude
+                    },
+                    type: selectedEmergency.label,
+                    navigation
+                }))
+            }
         }
     }
 
@@ -115,7 +137,7 @@ const EmergencyScreen = ({ navigation }) => {
 
     const handleMapViewOnPress = async ({ nativeEvent }) => {
         setDropOffMarkerCoordinates(nativeEvent.coordinate)
-        const address = await mapRef.current.addressForCoordinate(nativeEvent.coordinate)
+        const address = await getAddress(nativeEvent.coordinate, mapRef)
         setSelectedAddress(`${address.name} - ${address.subAdministrativeArea}`)
     }
 
@@ -127,7 +149,6 @@ const EmergencyScreen = ({ navigation }) => {
                     style: 'default'
                 }
             ])
-            showToast("ksjvb")
         } else {
             setSelectAdressModalVisible(false)
         }
@@ -309,14 +330,17 @@ const EmergencyScreen = ({ navigation }) => {
                     state={emergencyValidation}
                 />
                 <ValidationMessage state={emergencyValidation} />
-                {selectedEmergency?.label === 'Other' && <SelectionButton
-                    placeholder={'Drop off'}
-                    value={selectedAddress ? selectedAddress : ''}
-                    Icon={() => <Ionicons name='location-outline' style={{ ...styles.icon, color: 'black' }} />}
-                    onPress={handleDropOffSelectionBtn}
-                    hasValidation={true}
-                    state={addressValidation}
-                />}
+                {selectedEmergency?.label === 'Other' && <View>
+                    <SelectionButton
+                        placeholder={'Drop off'}
+                        value={selectedAddress ? selectedAddress : ''}
+                        Icon={() => <Ionicons name='location-outline' style={{ ...styles.icon, color: 'black' }} />}
+                        onPress={handleDropOffSelectionBtn}
+                        hasValidation={true}
+                        state={addressValidation}
+                    />
+                    <ValidationMessage state={addressValidation} />
+                </View>}
                 {user.onGoingRequestId !== null ?
                     <TouchableOpacity
                         style={{ ...styles.btn, backgroundColor: '#E48700' }}

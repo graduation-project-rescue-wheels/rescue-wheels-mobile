@@ -2,3 +2,7 @@
 export const calculateDistance = (long1, lat1, long2, lat2) => {
     return Math.acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(long2 - long1)) * 6371 //6371 is Earth radius in kilometers
 }
+
+export const getAddress = async (coordinate, mapRef) => {
+    return await mapRef.current.addressForCoordinate(coordinate)
+}

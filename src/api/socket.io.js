@@ -1,9 +1,8 @@
 import { io } from 'socket.io-client'
-import { store } from '../store/store';
 
 export const socket = io(process.env.EXPO_PUBLIC_API_URL, {
     autoConnect: false,
     auth: {
-        token: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + store.getState().user.accessToken
+        token: null // intializing token with a null value to be able to modify it after successful sign in/user datat loading  
     }
 })

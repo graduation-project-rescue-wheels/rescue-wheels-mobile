@@ -1,13 +1,14 @@
 import rwClient from "./axios";
 import * as SecureStore from 'expo-secure-store'
 
-export async function requestEmergency(vehicle, coordinates, type) {
+export async function requestEmergency(vehicle, coordinates, type, dropOffLocation) {
     const { _id } = JSON.parse(await SecureStore.getItemAsync('currentUser'))
 
     return rwClient.put('/emrgencyRequest/addRequest', {
         vehicle,
         coordinates,
         type,
+        dropOffLocation,
         requestedBy: _id
     })
 }
