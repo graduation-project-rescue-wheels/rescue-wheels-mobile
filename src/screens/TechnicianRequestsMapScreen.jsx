@@ -8,7 +8,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Fontisto } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Ionicons } from "@expo/vector-icons"
 import { socket } from '../api/socket.io'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
@@ -16,6 +15,7 @@ import { calculateDistance, getAddress } from '../utils/locations'
 import showToast from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
+import MapViewDirections from 'react-native-maps-directions'
 
 const { height } = Dimensions.get('window')
 
@@ -243,24 +243,47 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding, top: 120 }}
             >
-                {(nearbyRequests.length > 0 && request === null) && <Marker
-                    coordinate={nearbyRequests[0].coordinates}
-                    ref={markerRef}
-                    image={userMarkerImage}>
-                    <Callout>
-                        <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
-                    </Callout>
-                </Marker>}
-                {(nearbyRequests.length > 0 && request === null && nearbyRequests[0].dropOffLocation) && <Marker coordinate={nearbyRequests[0].dropOffLocation} image={userDropOffMarkerImage} />}
-                {request && <Marker
-                    coordinate={request.coordinates}
-                    ref={markerRef}
-                    image={userMarkerImage}>
-                    <Callout>
-                        <PoppinsText>{request.type}</PoppinsText>
-                    </Callout>
-                </Marker>}
-                {request && request.dropOffLocation && <Marker coordinate={request.dropOffLocation} image={userDropOffMarkerImage} />}
+                {(nearbyRequests.length > 0 && request === null) && <>
+                    <Marker
+                        coordinate={nearbyRequests[0].coordinates}
+                        ref={markerRef}
+                        image={userMarkerImage}>
+                        <Callout>
+                            <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
+                        </Callout>
+                    </Marker>
+                    {
+                        nearbyRequests[0].dropOffLocation && <Marker coordinate={nearbyRequests[0].dropOffLocation} image={userDropOffMarkerImage} />
+                    }
+                </>}
+                {request && <>
+                    <Marker
+                        coordinate={request.coordinates}
+                        ref={markerRef}
+                        image={userMarkerImage}>
+                        <Callout>
+                            <PoppinsText>{request.type}</PoppinsText>
+                        </Callout>
+                    </Marker>
+                    <MapViewDirections
+                        apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                        origin={region}
+                        destination={request.coordinates}
+                        strokeColor='#E48700'
+                        strokeWidth={4}
+                    />
+                    {request.dropOffLocation && <>
+                        <MapViewDirections
+                            apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                            origin={request.coordinates}
+                            destination={request.dropOffLocation}
+                            strokeColor='#E48700'
+                            strokeWidth={4}
+                            lineDashPattern={[4, 4]}
+                        />
+                        <Marker coordinate={request.dropOffLocation} image={userDropOffMarkerImage} />
+                    </>}
+                </>}
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
