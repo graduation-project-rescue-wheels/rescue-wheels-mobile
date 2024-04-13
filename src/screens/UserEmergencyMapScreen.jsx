@@ -130,6 +130,7 @@ const UserEmergencyMapScreen = ({ route }) => {
         socket.on('request:responder-cancel', async (payload) => {
             if (id === payload._id) {
                 await fetchRequest()
+                setResponderCoordinate(null)
             }
         })
 
@@ -148,8 +149,9 @@ const UserEmergencyMapScreen = ({ route }) => {
             <MapView
                 style={styles.map}
                 provider='google'
-                initialRegion={region}
+                initialRegion={{ latitude: 30.0444, longitude: 31.2357, latitudeDelta: 0.004757, longitudeDelta: 0.006866 }}
                 showsUserLocation
+                followsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding }}
