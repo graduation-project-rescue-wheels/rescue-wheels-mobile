@@ -135,10 +135,15 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
         if (permission.granted) {
             Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
+                accuracy: Location.LocationAccuracy.BestForNavigation,
                 distanceInterval: 1,
-                showsBackgroundLocationIndicator: true
+                showsBackgroundLocationIndicator: true,
             })
         }
+    }
+
+    const unregisterBackGroundLocationTask = () => {
+        Location.stopLocationUpdatesAsync(UPDATE_LOCATION_TASK)
     }
 
     const handleCancelBTN = async () => {
@@ -147,6 +152,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             if (response.status == 200) {
                 setRequest(null)
                 socket.emit('request:responder-leave', response.data.request.requestedBy._id)
+                unregisterBackGroundLocationTask()
                 dispatch(loadUserAsync())
             }
         } catch (err) {
@@ -171,13 +177,17 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }
 
     const getDropOffAddressForPendingRequest = async () => {
-        const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
-        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        if (nearbyRequests[0].dropOffLocation) {
+            const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
+            setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        }
     }
 
     const getDropOffAddressForRequest = async () => {
-        const address = await getAddress(request.dropOffLocation, mapRef)
-        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        if (request.dropOffLocation) {
+            const address = await getAddress(request.dropOffLocation, mapRef)
+            setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        }
     }
 
     useEffect(() => {
