@@ -299,7 +299,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                     <ValidationMessage state={licensePlate} />
                 </View>
                 <View style={styles.columnView}>
-                    <PoppinsText style={styles.label}>Model year</PoppinsText>
+                    <PoppinsText style={styles.label}>Production year</PoppinsText>
                     <CustomTextInput
                         state={modelYear}
                         Icon={() => <AntDesign name="calendar"
@@ -309,7 +309,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                             }}
                         />}
                         onChangeText={e => setModelYear(prev => ({ ...prev, value: e }))}
-                        placeholder={'model year'}
+                        placeholder={'YYYY'}
                         onBlur={handleMoedlYearTextInPutOnBlur}
                         onFocus={() => setModelYear(prev => ({ ...prev, isFocused: true }))}
                         keyboardType={'numeric'}
