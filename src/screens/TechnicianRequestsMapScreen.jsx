@@ -134,7 +134,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         const permission = await Location.requestBackgroundPermissionsAsync()
 
         if (permission.granted) {
-            Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
+            await Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
                 accuracy: Location.LocationAccuracy.BestForNavigation,
                 distanceInterval: 1,
                 showsBackgroundLocationIndicator: true,
@@ -142,8 +142,8 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         }
     }
 
-    const unregisterBackGroundLocationTask = () => {
-        Location.stopLocationUpdatesAsync(UPDATE_LOCATION_TASK)
+    const unregisterBackGroundLocationTask = async () => {
+        await Location.stopLocationUpdatesAsync(UPDATE_LOCATION_TASK)
     }
 
     const handleCancelBTN = async () => {
@@ -169,7 +169,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
                 dispatch(loadUserAsync())
 
-                registerBackGroundLocationTask()
+                await registerBackGroundLocationTask()
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
@@ -224,9 +224,10 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }, [mapPadding])
 
     useEffect(() => {
-        socket.on('request:cancelled', payload => {
+        socket.on('request:cancelled', async payload => {
             if (payload._id === request?._id) {
                 setRequest(payload)
+                await unregisterBackGroundLocationTask()
             }
 
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
