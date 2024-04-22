@@ -149,10 +149,11 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const handleCancelBTN = async () => {
         try {
             const response = await cancelResponder(request._id)
+
             if (response.status == 200) {
                 setRequest(null)
                 socket.emit('request:responder-leave', response.data.request.requestedBy._id)
-                unregisterBackGroundLocationTask()
+                await unregisterBackGroundLocationTask()
                 dispatch(loadUserAsync())
             }
         } catch (err) {
@@ -266,6 +267,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 provider='google'
                 initialRegion={region}
                 showsUserLocation
+                followsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding, top: 120 }}
