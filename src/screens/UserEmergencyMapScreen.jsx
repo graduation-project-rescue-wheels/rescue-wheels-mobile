@@ -135,10 +135,16 @@ const UserEmergencyMapScreen = ({ route }) => {
         })
 
         socket.on('request:responder-coord-update', payload => {
-            console.log("updated");
+            console.log("updated", payload);
             setResponderCoordinate(payload)
         })
     }, [])
+
+    useEffect(() => {
+        if (mapRef) mapRef.current.fitToCoordinates([region, responderCoordinate])
+
+    }, [responderCoordinate?.latitude, responderCoordinate?.longitude])
+
 
     useEffect(() => {
         pulseAnimation().start()
@@ -171,10 +177,7 @@ const UserEmergencyMapScreen = ({ route }) => {
                         strokeWidth={4}
                     />
                     <Marker
-                        coordinate={{
-                            latitude: region.latitude,
-                            longitude: region.longitude
-                        }}
+                        coordinate={responderCoordinate}
                         image={techIcon}
                     >
                     </Marker>
