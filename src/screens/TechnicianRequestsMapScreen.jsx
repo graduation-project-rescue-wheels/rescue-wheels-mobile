@@ -136,7 +136,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         if (permission.granted) {
             await Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
                 accuracy: Location.LocationAccuracy.BestForNavigation,
-                distanceInterval: 1,
+                distanceInterval: 100,
                 showsBackgroundLocationIndicator: true,
             })
         }
@@ -467,7 +467,10 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 request.state === 'cancelled' && <View>
                                     <TouchableOpacity
                                         style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
-                                        onPress={() => setRequest(null)}
+                                        onPress={async () => {
+                                            await unregisterBackGroundLocationTask()
+                                            setRequest(null)
+                                        }}
                                     >
                                         <PoppinsText style={{ color: 'white' }}>Load nearby requests</PoppinsText>
                                     </TouchableOpacity>
