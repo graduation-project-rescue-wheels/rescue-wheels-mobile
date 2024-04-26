@@ -122,6 +122,8 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         )
     }
 
+    //ana get ??
+
     const openGPS = () => {
         if (Platform.OS == 'android') {
             Linking.openURL(`google.navigation:q=${request.coordinates.latitude},${request.coordinates.longitude}`)
