@@ -1,4 +1,4 @@
-import { Animated, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Animated, Dimensions, Image, Linking, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
 import MapView, { Callout, Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -25,7 +25,7 @@ const UserEmergencyMapScreen = ({ route }) => {
     const [responderCoordinate, setResponderCoordinate] = useState(null)
 
     const snappingPoints = useMemo(() => {
-        return [0.23, 0.55].map(percentage => percentage * height);
+        return [0.35, 0.45].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
@@ -106,6 +106,13 @@ const UserEmergencyMapScreen = ({ route }) => {
             console.log(err);
             showToast(SMTH_WENT_WRONG)
         }
+    }
+
+    const handleCallBtn = () => {
+        if (Platform.OS === 'android')
+            Linking.openURL(`tel:${request.responder.mobileNumber}`)
+        else if (Platform.OS === 'ios')
+            Linking.openURL(`telprompt:${request.responder.mobileNumber}`)
     }
 
     useEffect(() => {
@@ -212,7 +219,35 @@ const UserEmergencyMapScreen = ({ route }) => {
                         </View>
                     }
                     {
-                        request.state === 'inProgress' && <PoppinsText style={styles.stateMessage}>{`${request.responder?.firstName} ${request.responder?.lastName}`} is on his way</PoppinsText>
+                        request.state === 'inProgress' && <>
+                            <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>Technician info</PoppinsText>
+                            <View style={styles.userInfo}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Image
+                                        source={request.responder.profilePic.length === 0 ?
+                                            require('../assets/images/avatar.png') :
+                                            { uri: request.responder.profilePic }
+                                        }
+                                        style={styles.profilePic}
+                                    />
+                                    <View>
+                                        <PoppinsText style={{ fontSize: 18 }}>
+                                            {request.responder.firstName} {request.responder.lastName}
+                                        </PoppinsText>
+                                        <PoppinsText style={styles.highLightedText}> {request.responder.mobileNumber} </PoppinsText>
+                                    </View>
+                                </View>
+                                <TouchableOpacity
+                                    style={{padding:8, borderRadius: 50, backgroundColor:'#E48700'}}
+                                    onPress={handleCallBtn}>
+                                    <MaterialIcons name="call" size={26} color='white' />
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{ flexDirection: 'row'}}>
+                                <MaterialIcons name="star" style={{color:'#E48700', fontSize: 25 }} />
+                                <PoppinsText style={{color:'#E48700', fontSize: 20 }}> 0.0 </PoppinsText>
+                            </View>
+                        </>
                     }
                     {
                         request.state === 'cancelled' && <PoppinsText style={styles.stateMessage}>Your request has been cancelled</PoppinsText>
@@ -258,7 +293,7 @@ const styles = StyleSheet.create({
     },
     bottomSheetContainer: {
         flex: 1,
-        paddingHorizontal: 8
+        paddingHorizontal: 16,
     },
     bar: {
         height: 4,
@@ -276,10 +311,26 @@ const styles = StyleSheet.create({
     btn: {
         borderRadius: 16,
         padding: 8,
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 8
     },
     stateMessage: {
         textAlign: 'center',
         marginBottom: 16
-    }
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: "space-between",
+        marginBottom: 12
+    },
+    profilePic: {
+        height: 60,
+        width: 60,
+        borderRadius: 60,
+        marginRight: 8
+    },
+    highLightedText: {
+        color: "#878791"
+    },
 })
