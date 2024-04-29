@@ -122,8 +122,6 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         )
     }
 
-    //ana get ??
-
     const openGPS = () => {
         if (Platform.OS == 'android') {
             Linking.openURL(`google.navigation:q=${request.coordinates.latitude},${request.coordinates.longitude}`)
@@ -236,18 +234,25 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
             dispatch(loadUserAsync())
         })
-    }, [request])
+
+        return () => {
+            socket.off('request:cancelled')
+        }
+
+    }, [request?.state])
 
     useEffect(() => {
         socket.on('request:add', async payload => {
             if ((await Location.getForegroundPermissionsAsync()).granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
-
+                console.log(calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude));
                 if (calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude) <= 5) {
                     setNearbyRequests(prev => [...prev, payload])
                 }
             }
+    
         })
+
 
         socket.on('request:accepted', payload => {
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
@@ -379,7 +384,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                                <PoppinsText>{nearbyRequests[0].vehicle.make} {nearbyRequests[0].vehicle.model}</PoppinsText>
+                                <PoppinsText>{nearbyRequests[0].vehicle.make} {nearbyRequests[0].vehicle.model} {nearbyRequests[0].vehicle.modelYear}</PoppinsText>
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
@@ -435,7 +440,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                                <PoppinsText>{request.vehicle.make} {request.vehicle.model}</PoppinsText>
+                                <PoppinsText>{request.vehicle.make} {request.vehicle.model} {request.vehicle.modelYear}</PoppinsText>
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
