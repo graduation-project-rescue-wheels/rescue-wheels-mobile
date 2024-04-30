@@ -1,5 +1,5 @@
 import { View, StyleSheet, Pressable, Image } from 'react-native';
-import { AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons, FontAwesome6 } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
 function UserTabBar({ state, descriptors, navigation }) {
@@ -63,13 +63,19 @@ function UserTabBar({ state, descriptors, navigation }) {
                                             ...styles.icon,
                                             color: isFocused ? '#E48700' : '#ADADAD'
                                         }}
-                                    /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24 }}>
-                                        <Image
-                                            source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
-                                            style={styles.profilePic}
-                                            resizeMode='contain'
-                                        />
-                                    </View>
+                                    /> : label === 'RC-Stack' ?
+                                        <FontAwesome6
+                                            name="screwdriver-wrench"
+                                            style={{
+                                                ...styles.icon,
+                                                color: isFocused ? '#E48700' : '#ADADAD'
+                                            }} /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24 }}>
+                                            <Image
+                                                source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
+                                                style={styles.profilePic}
+                                                resizeMode='contain'
+                                            />
+                                        </View>
                         }
                         <View
                             style={{
