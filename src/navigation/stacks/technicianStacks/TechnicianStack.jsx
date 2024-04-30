@@ -2,8 +2,8 @@ import React from 'react'
 import TechnicianHomeScreen from '../../../screens/TechnicianHomeScreen'
 import TechnicianRequestsMapScreen from '../../../screens/TechnicianRequestsMapScreen'
 import UserProfileStack from '../userStacks/UserProfileStack'
-import UserTabBar from '../../tab_bars/UserTabBar'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import TechnicianTabBar from '../../tab_bars/TechnicianTabBar'
 
 const Tab = createBottomTabNavigator()
 
@@ -11,7 +11,7 @@ const TechnicianStack = () => {
     return (
         <Tab.Navigator
             initialRouteName="Home"
-            tabBar={(props) => <UserTabBar {...props} />}
+            tabBar={(props) => <TechnicianTabBar {...props} />}
             screenOptions={{
                 headerTitleStyle: {
                     fontFamily: 'Poppins-Medium'
