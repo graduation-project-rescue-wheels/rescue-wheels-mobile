@@ -16,6 +16,7 @@ import showToast from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
 import MapViewDirections from 'react-native-maps-directions'
+import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
 
 const { height } = Dimensions.get('window')
 
@@ -129,12 +130,30 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         }
     }
 
+    const registerBackGroundLocationTask = async () => {
+        const permission = await Location.requestBackgroundPermissionsAsync()
+
+        if (permission.granted) {
+            await Location.startLocationUpdatesAsync(UPDATE_LOCATION_TASK, {
+                accuracy: Location.LocationAccuracy.BestForNavigation,
+                distanceInterval: 100,
+                showsBackgroundLocationIndicator: true,
+            })
+        }
+    }
+
+    const unregisterBackGroundLocationTask = async () => {
+        await Location.stopLocationUpdatesAsync(UPDATE_LOCATION_TASK)
+    }
+
     const handleCancelBTN = async () => {
         try {
             const response = await cancelResponder(request._id)
+
             if (response.status == 200) {
                 setRequest(null)
                 socket.emit('request:responder-leave', response.data.request.requestedBy._id)
+                await unregisterBackGroundLocationTask()
                 dispatch(loadUserAsync())
             }
         } catch (err) {
@@ -145,10 +164,13 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const handleAcceptBtn = async () => {
         try {
             const response = await acceptRequest(nearbyRequests[0]._id)
+
             if (response.status == 200) {
                 setRequest(response.data.request)
                 socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
                 dispatch(loadUserAsync())
+
+                await registerBackGroundLocationTask()
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
@@ -156,13 +178,17 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }
 
     const getDropOffAddressForPendingRequest = async () => {
-        const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
-        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        if (nearbyRequests[0].dropOffLocation) {
+            const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
+            setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        }
     }
 
     const getDropOffAddressForRequest = async () => {
-        const address = await getAddress(request.dropOffLocation, mapRef)
-        setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        if (request.dropOffLocation) {
+            const address = await getAddress(request.dropOffLocation, mapRef)
+            setDropOffAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        }
     }
 
     useEffect(() => {
@@ -186,6 +212,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
         if (request) {
             getDropOffAddressForRequest()
+            registerBackGroundLocationTask()
         }
 
         return () => {
@@ -198,26 +225,34 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     }, [mapPadding])
 
     useEffect(() => {
-        socket.on('request:cancelled', payload => {
+        socket.on('request:cancelled', async payload => {
             if (payload._id === request?._id) {
                 setRequest(payload)
+                await unregisterBackGroundLocationTask()
             }
 
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
             dispatch(loadUserAsync())
         })
-    }, [request])
+
+        return () => {
+            socket.off('request:cancelled')
+        }
+
+    }, [request?.state])
 
     useEffect(() => {
         socket.on('request:add', async payload => {
             if ((await Location.getForegroundPermissionsAsync()).granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
-
+                console.log(calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude));
                 if (calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude) <= 5) {
                     setNearbyRequests(prev => [...prev, payload])
                 }
             }
+    
         })
+
 
         socket.on('request:accepted', payload => {
             setNearbyRequests(prev => prev.filter(req => req._id !== payload._id))
@@ -239,6 +274,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                 provider='google'
                 initialRegion={region}
                 showsUserLocation
+                followsUserLocation
                 showsMyLocationButton={false}
                 ref={mapRef}
                 mapPadding={{ bottom: mapPadding, top: 120 }}
@@ -348,7 +384,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                                <PoppinsText>{nearbyRequests[0].vehicle.make} {nearbyRequests[0].vehicle.model}</PoppinsText>
+                                <PoppinsText>{nearbyRequests[0].vehicle.make} {nearbyRequests[0].vehicle.model} {nearbyRequests[0].vehicle.modelYear}</PoppinsText>
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
@@ -404,7 +440,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car model</PoppinsText>
-                                <PoppinsText>{request.vehicle.make} {request.vehicle.model}</PoppinsText>
+                                <PoppinsText>{request.vehicle.make} {request.vehicle.model} {request.vehicle.modelYear}</PoppinsText>
                             </View>
                             <View style={styles.requestInfo}>
                                 <PoppinsText style={styles.highLightedText}>Car number</PoppinsText>
@@ -438,7 +474,10 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 request.state === 'cancelled' && <View>
                                     <TouchableOpacity
                                         style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
-                                        onPress={() => setRequest(null)}
+                                        onPress={async () => {
+                                            await unregisterBackGroundLocationTask()
+                                            setRequest(null)
+                                        }}
                                     >
                                         <PoppinsText style={{ color: 'white' }}>Load nearby requests</PoppinsText>
                                     </TouchableOpacity>

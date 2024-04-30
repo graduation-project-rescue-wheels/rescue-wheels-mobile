@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Index from './src/navigation/Index';
 import * as SplashScreen from 'expo-splash-screen'
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'expo-dev-client'
 
 SplashScreen.preventAutoHideAsync()
 
