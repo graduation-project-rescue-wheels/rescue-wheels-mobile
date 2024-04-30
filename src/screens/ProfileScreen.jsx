@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import ProfileScreenFlatListItem from '../components/ProfileScreenFlatListItem';
 import { signOutAsync } from '../store/userAsyncThunks';
 import { useMemo } from 'react';
+import * as TaskManager from 'expo-task-manager'
+import * as Location from 'expo-location'
+import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
 
 const ProfileScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -42,8 +45,12 @@ const ProfileScreen = ({ navigation }) => {
         }
     ]
 
-    const handleSignOutBtn = () => {
+    const handleSignOutBtn = async () => {
         dispatch(signOutAsync(navigation))
+
+        if (await TaskManager.isTaskRegisteredAsync(UPDATE_LOCATION_TASK)) {
+            Location.stopLocationUpdatesAsync(UPDATE_LOCATION_TASK)
+        }
     }
 
     return (
