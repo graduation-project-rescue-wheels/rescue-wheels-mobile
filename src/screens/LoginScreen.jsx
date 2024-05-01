@@ -117,6 +117,7 @@ const LoginScreen = ({ navigation }) => {
                             '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 onBlur={handleEmailTextInputOnBlur}
                 onChangeText={e => setEmail(prev => ({ ...prev, value: e }))}
                 onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
@@ -135,6 +136,7 @@ const LoginScreen = ({ navigation }) => {
                             '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 onBlur={handlePasswordTextInputOnBlur}
                 onChangeText={e => setPassword(prev => ({ ...prev, value: e }))}
                 onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
