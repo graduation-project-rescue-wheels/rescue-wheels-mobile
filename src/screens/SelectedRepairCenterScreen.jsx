@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, FlatList, Linking, Platform, StyleSheet, TouchableOpacity, View } from 'react-native'
-import MapView from 'react-native-maps'
+import MapView, { Callout, Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
@@ -16,6 +16,7 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
     const [mapPadding, setMapPadding] = useState(85)
 
     const mapRef = useRef()
+    const markerRef = useRef()
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
 
     const snappingPoints = useMemo(() => {
@@ -59,6 +60,14 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
             Linking.openURL(`telprompt:${rc.phoneNumber}`)
     }
 
+    const openGPS = () => {
+        if (Platform.OS == 'android') {
+            Linking.openURL(`google.navigation:q=${rc.location.coords.latitude},${rc.location.coords.longitude}`)
+        } else if (Platform.OS == 'ios') {
+            Linking.openURL(`maps://app?saddr=${location.latitude},${location.longitude}&daddr=${rc.location.coords.latitude},${rc.location.coords.longitude}`)
+        }
+    }
+
     useEffect(() => {
         navigation.setOptions({
             title: rc.name
@@ -66,6 +75,17 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
         getCurrentLocation()
         console.log(rc);
     }, [])
+
+    useEffect(() => {
+
+        if (mapRef) 
+            mapRef.current.fitToCoordinates([location, rc.location.coords])
+    }, [mapRef, location])
+
+    useEffect(() => {
+        markerRef.current?.showCallout()
+    }, [markerRef.current])
+    
 
     return (
         <View style={styles.container}>
@@ -78,7 +98,14 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
                 ref={mapRef}
                 provider='google'
             >
-
+                <Marker
+                    coordinate={rc.location.coords}
+                    ref={markerRef}
+                >
+                    <Callout>
+                        <PoppinsText>{rc.name}</PoppinsText>
+                    </Callout>
+                </Marker>
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
@@ -91,8 +118,11 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
                 onChange={handleSheetChanges}
             >
                 <BottomSheetView style={styles.bottomSheetContainer}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <PoppinsText style={styles.title}>{rc.name}</PoppinsText>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <View>
+                            <PoppinsText style={styles.title}>{rc.name}</PoppinsText>
+                            <PoppinsText style={styles.description}>{rc.description}</PoppinsText>
+                        </View>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity
                                 style={{ ...styles.btn, marginRight: 8 }}
@@ -101,14 +131,13 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.btn}
-                                onPress={() => mapRef.current.fitToCoordinates([location, rc?.coords])}
+                                onPress={openGPS}
                             >
                                 <MaterialCommunityIcons name='map-marker' size={26} color={'white'} />
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <PoppinsText style={styles.description}>{rc.description}</PoppinsText>
-                    <PoppinsText>Technicians</PoppinsText>
+                    <PoppinsText style={{ fontSize: 16 }}>Technicians</PoppinsText>
                     <FlatList
                         data={rc.Technicians}
                         ListEmptyComponent={<RepairCenterListEmptyComponent />}
@@ -155,6 +184,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#E48700'
     },
     description: {
-        color: '#d3d3d3'
+        color: '#969696'
     }
 })
