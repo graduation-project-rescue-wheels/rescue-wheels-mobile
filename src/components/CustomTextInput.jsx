@@ -1,10 +1,12 @@
 import { StyleSheet, TextInput, View } from 'react-native'
 
-const CustomTextInput = ({ state, placeholder, secureTextEntry, onChangeText, onFocus, onBlur, Icon, keyboardType }) => {
+const CustomTextInput = ({ hasValidation = false, state, placeholder, secureTextEntry, onChangeText, onFocus, onBlur, Icon, keyboardType }) => {
     return (
         <View style={{
             ...styles.inputView,
-            borderColor: state.isFocused ? '#E48700' : state.validation.isValid ? '#ADADAD' : 'red'
+            borderColor: hasValidation ? 
+            state.isFocused ? '#E48700':
+            state.validation.isValid ? '#ADADAD' : 'red': state.isFocused? '#E48700' : '#ADADAD'
         }}>
             <Icon />
             <TextInput

@@ -17,6 +17,7 @@ import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
 import MapViewDirections from 'react-native-maps-directions'
 import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
+import RequestBackgroundLocationAccesModal from '../components/RequestBackgroundLocationAccesModal'
 
 const { height } = Dimensions.get('window')
 
@@ -28,6 +29,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const [mapPadding, setMapPadding] = useState(85)
     const [nearbyRequests, setNearbyRequests] = useState([])
     const [dropOffAddress, setDropOffAddress] = useState('')
+    const [backgroundLocationAccessModalVisible, setBackgroundLocationAccessModalVisible] = useState(false)
     const userMarkerImage = require('../assets/images/broken-car.png')
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
@@ -163,14 +165,20 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
     const handleAcceptBtn = async () => {
         try {
-            const response = await acceptRequest(nearbyRequests[0]._id)
+            const locationPermission = await Location.getBackgroundPermissionsAsync()
 
-            if (response.status == 200) {
-                setRequest(response.data.request)
-                socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
-                dispatch(loadUserAsync())
+            if (locationPermission.granted) {
+                const response = await acceptRequest(nearbyRequests[0]._id)
 
-                await registerBackGroundLocationTask()
+                if (response.status == 200) {
+                    setRequest(response.data.request)
+                    socket.emit('request:responder-join', { requestedBy: nearbyRequests[0].requestedBy })
+                    dispatch(loadUserAsync())
+
+                    await registerBackGroundLocationTask()
+                }
+            } else {
+                setBackgroundLocationAccessModalVisible(true)
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
@@ -250,7 +258,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                     setNearbyRequests(prev => [...prev, payload])
                 }
             }
-    
+
         })
 
 
@@ -269,6 +277,10 @@ const TechnicianRequestsMapScreen = ({ route }) => {
 
     return (
         <View style={styles.continer}>
+            <RequestBackgroundLocationAccesModal
+                onRequestClose={() => setBackgroundLocationAccessModalVisible(false)}
+                visible={backgroundLocationAccessModalVisible}
+            />
             <MapView
                 style={styles.map}
                 provider='google'

@@ -208,6 +208,7 @@ const SignupScreen = ({ navigation }) => {
                                 color: firstName.isFocused ? '#E48700' : firstName.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
+                        hasValidation = {true}
                         onBlur={handleFirstNameTextInputOnBlur}
                         onChangeText={e => setFirstName({ ...firstName, value: e })}
                         onFocus={() => setFirstName({ ...firstName, isFocused: true })}
@@ -226,6 +227,7 @@ const SignupScreen = ({ navigation }) => {
                                 color: lastName.isFocused ? '#E48700' : lastName.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
+                        hasValidation = {true}
                         onBlur={handleLastNameTextInputOnBlur}
                         onChangeText={e => setLastName({ ...lastName, value: e })}
                         onFocus={() => setLastName({ ...lastName, isFocused: true })}
@@ -245,6 +247,7 @@ const SignupScreen = ({ navigation }) => {
                         color: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 keyboardType='email-address'
                 onBlur={handleEmailTextInputOnBlur}
                 onChangeText={e => setEmail({ ...email, value: e })}
@@ -262,6 +265,7 @@ const SignupScreen = ({ navigation }) => {
                         color: password.isFocused ? '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 onBlur={handlePasswordTextInputOnBlur}
                 onChangeText={e => setPassword({ ...password, value: e })}
                 onFocus={() => setPassword({ ...password, isFocused: true })}
@@ -279,6 +283,7 @@ const SignupScreen = ({ navigation }) => {
                         color: confirmPassword.isFocused ? '#E48700' : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 onBlur={handleConfirmationPasswordTextInputOnBlur}
                 onChangeText={e => setconfirmPassword({ ...confirmPassword, value: e })}
                 onFocus={() => setconfirmPassword({ ...confirmPassword, isFocused: true })}
@@ -296,6 +301,7 @@ const SignupScreen = ({ navigation }) => {
                         color: phoneNumber.isFocused ? '#E48700' : phoneNumber.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
+                hasValidation = {true}
                 placeholder='Phone Number'
                 onChangeText={e => setPhoneNumber({ ...phoneNumber, value: e })}
                 onFocus={() => setPhoneNumber({ ...phoneNumber, isFocused: true })}

@@ -3,6 +3,7 @@ import UserHomeScreen from "../../../screens/UserHomeScreen"
 import UserTabBar from "../../tab_bars/UserTabBar"
 import UserProfileStack from "./UserProfileStack"
 import UserEmergencyStack from "./UserEmergencyStack"
+import UserRepairCenterStack from "./UserRepairCenterStack"
 
 const Tab = createBottomTabNavigator()
 
@@ -19,6 +20,11 @@ const UserStack = () => {
         >
             <Tab.Screen name="Home" component={UserHomeScreen} />
             <Tab.Screen name="Emergency-stack" component={UserEmergencyStack}
+                options={{
+                    headerShown: false
+                }}
+            />
+            <Tab.Screen name="RC-Stack" component={UserRepairCenterStack}
                 options={{
                     headerShown: false
                 }}
