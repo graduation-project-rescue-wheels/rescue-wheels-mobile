@@ -6,11 +6,13 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import PoppinsText from '../components/PoppinsText'
 import RepairCenterListEmptyComponent from '../components/RepairCenterListEmptyComponent'
+import { useHeaderHeight } from '@react-navigation/elements'
 
 const { height } = Dimensions.get('window')
 
-const SelectedRepairCenterScreen = ({ route, navigation }) => {
+const SelectedRepairCenterScreen = ({ route }) => {
     const { rc } = route.params
+    const headerHeight = useHeaderHeight() / height
 
     const [location, setLocation] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
@@ -20,7 +22,7 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
 
     const snappingPoints = useMemo(() => {
-        return [0.35, 1].map(percentage => percentage * height);
+        return [0.35, 1 - headerHeight].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const handleSheetChanges = useCallback(index => {
@@ -69,29 +71,24 @@ const SelectedRepairCenterScreen = ({ route, navigation }) => {
     }
 
     useEffect(() => {
-        navigation.setOptions({
-            title: rc.name
-        })
         getCurrentLocation()
         console.log(rc);
     }, [])
 
     useEffect(() => {
-
-        if (mapRef) 
+        if (mapRef)
             mapRef.current.fitToCoordinates([location, rc.location.coords])
-    }, [mapRef, location])
+    }, [mapRef, location, mapPadding])
 
     useEffect(() => {
         markerRef.current?.showCallout()
     }, [markerRef.current])
-    
 
     return (
         <View style={styles.container}>
             <MapView
                 style={{ flex: 1 }}
-                mapPadding={{ bottom: mapPadding }}
+                mapPadding={{ bottom: mapPadding, top: 80 }}
                 showsUserLocation
                 showsMyLocationButton={false}
                 initialRegion={location}
