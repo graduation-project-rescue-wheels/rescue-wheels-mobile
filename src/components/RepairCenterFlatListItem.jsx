@@ -5,7 +5,6 @@ import MapView, { Marker } from 'react-native-maps'
 import { useEffect, useRef } from 'react'
 
 const RepairCenterFlatListItem = ({ item, navigation }) => {
-
     const mapRef = useRef()
 
     useEffect(() => {

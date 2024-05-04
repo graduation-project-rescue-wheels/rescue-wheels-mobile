@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
 import { getAllRepairCenters } from '../api/repairCenter'
 import RepairCenterFlatListItem from '../components/RepairCenterFlatListItem'
 import CustomTextInput from '../components/CustomTextInput'
@@ -12,12 +12,19 @@ const RepairCentersScreen = ({ navigation }) => {
         isFocused: false
     })
     const [filteredRCs, setfilteredRCs] = useState([])
-
+    const [isLoading, setIsLoading] = useState(false)
 
     const fetchRepairCenters = async () => {
-        const rcs = (await getAllRepairCenters()).data.data
-        setRepairCenters(rcs)
-        setfilteredRCs(rcs)
+        try {
+            setIsLoading(true)
+            const rcs = (await getAllRepairCenters()).data.data
+            setRepairCenters(rcs)
+            setfilteredRCs(rcs)
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     const handleSearch = () => {
@@ -37,7 +44,6 @@ const RepairCentersScreen = ({ navigation }) => {
 
     }, [searchQuery.value])
 
-
     return (
         <View style={styles.constainer}>
             <CustomTextInput
@@ -51,11 +57,12 @@ const RepairCentersScreen = ({ navigation }) => {
                 placeholder='Search for repair centers'
                 state={searchQuery}
             >
-
             </CustomTextInput>
             <FlatList
                 data={filteredRCs}
                 renderItem={({ item }) => <RepairCenterFlatListItem item={item} navigation={navigation} />}
+                keyExtractor={(item) => item._id}
+                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRepairCenters} colors={['#E48700']} />}
             />
         </View>
     )
