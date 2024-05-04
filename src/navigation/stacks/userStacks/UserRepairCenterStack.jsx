@@ -8,7 +8,14 @@ const UserRepairCenterStack = () => {
     return (
         <Stack.Navigator>
             <Stack.Screen name="repair centers" component={RepairCentersScreen} />
-            <Stack.Screen name="selectedRc" component={SelectedRepairCenterScreen} />
+            <Stack.Screen
+                name="selectedRc"
+                component={SelectedRepairCenterScreen}
+                options={{
+                    headerTransparent: true,
+                    headerTitle: ''
+                }}
+            />
         </Stack.Navigator>
     )
 }
