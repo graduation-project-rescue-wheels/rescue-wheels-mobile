@@ -17,7 +17,6 @@ const RepairCenterFlatListItem = ({ item, navigation }) => {
         }
     }, [mapRef])
 
-
     return (
         <TouchableOpacity
             style={styles.container}
@@ -32,11 +31,8 @@ const RepairCenterFlatListItem = ({ item, navigation }) => {
                     provider='google'
                     scrollEnabled={false}
                     ref={mapRef}
-                    style={styles.mapImage}>
-                    <Marker
-                        coordinate={item.location.coords}
-                    >
-                    </Marker>
+                    style={styles.map}>
+                    <Marker coordinate={item.location.coords} />
                 </MapView>
             </View>
             <View style={{ padding: 8 }}>
@@ -75,7 +71,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
         // tintColor:'#d3d3d3'
     },
-    mapImage: {
+    map: {
         borderRadius: 16,
         height: 90,
         width: 290
