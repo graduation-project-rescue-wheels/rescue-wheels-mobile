@@ -69,7 +69,7 @@ function UserTabBar({ state, descriptors, navigation }) {
                                             style={{
                                                 ...styles.icon,
                                                 color: isFocused ? '#E48700' : '#ADADAD'
-                                            }} /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24 }}>
+                                            }} /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
                                             <Image
                                                 source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
                                                 style={styles.profilePic}
