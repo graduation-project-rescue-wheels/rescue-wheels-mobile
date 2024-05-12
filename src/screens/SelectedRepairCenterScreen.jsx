@@ -12,7 +12,7 @@ const { height } = Dimensions.get('window')
 
 const SelectedRepairCenterScreen = ({ route }) => {
     const { rc } = route.params
-    const headerHeight = useHeaderHeight() / height
+    const headerHeight = useHeaderHeight()
 
     const [location, setLocation] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
@@ -22,7 +22,7 @@ const SelectedRepairCenterScreen = ({ route }) => {
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
 
     const snappingPoints = useMemo(() => {
-        return [0.35, 1 - headerHeight].map(percentage => percentage * height);
+        return [0.35, 1 - headerHeight / height].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const handleSheetChanges = useCallback(index => {
@@ -88,7 +88,7 @@ const SelectedRepairCenterScreen = ({ route }) => {
         <View style={styles.container}>
             <MapView
                 style={{ flex: 1 }}
-                mapPadding={{ bottom: mapPadding, top: 80 }}
+                mapPadding={{ bottom: mapPadding, top: headerHeight + 50 }}
                 showsUserLocation
                 showsMyLocationButton={false}
                 initialRegion={location}
