@@ -1,37 +1,29 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import PoppinsText from './PoppinsText'
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons'
 import MapView, { Marker } from 'react-native-maps'
-import { useEffect, useRef } from 'react'
 
 const RepairCenterFlatListItem = ({ item, navigation }) => {
-    const mapRef = useRef()
-
-    useEffect(() => {
-        if (mapRef) {
-            mapRef.current.animateToRegion({
-                ...item.location.coords,
-                latitudeDelta: 0.006866,
-                longitudeDelta: 0.004757
-            })
-        }
-    }, [mapRef])
-
     return (
-        <TouchableOpacity
+        <Pressable
             style={styles.container}
             onPress={() => navigation.navigate('selectedRc', { rc: item })}
         >
             <View style={{ borderRadius: 16, flexDirection: 'row' }}>
                 <Image
-                    source={item.photoURL ? { uri: item.photoURL } : require('../assets/images/RCAvatar.png')}
+                    source={item.Image?.secure_url ? { uri: item.Image?.secure_url } : require('../assets/images/RCAvatar.png')}
                     style={styles.image}
                 />
                 <MapView
                     provider='google'
                     scrollEnabled={false}
-                    ref={mapRef}
-                    style={styles.map}>
+                    style={styles.map}
+                    initialRegion={{
+                        ...item.location.coords,
+                        latitudeDelta: 0.006866,
+                        longitudeDelta: 0.004757
+                    }}
+                >
                     <Marker coordinate={item.location.coords} />
                 </MapView>
             </View>
@@ -50,7 +42,7 @@ const RepairCenterFlatListItem = ({ item, navigation }) => {
                     <PoppinsText style={styles.info}>{item.location.address}</PoppinsText>
                 </View>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     )
 }
 
