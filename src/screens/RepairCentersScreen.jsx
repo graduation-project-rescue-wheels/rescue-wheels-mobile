@@ -30,50 +30,38 @@ const RepairCentersScreen = ({ navigation }) => {
             useNativeDriver: true
         }).start()
         setIsAscendingOrder(prev => !prev)
-        setFilteredRCs(prev => prev.reverse())
-    }, [isAscendingOrder])
+        if (searchQuery.value.length > 0) setFilteredRCs(prev => prev.reverse())
+        else setRepairCenters(prev => prev.reverse())
+    }, [isAscendingOrder, searchQuery.value])
 
     const pickerOnValueChange = useCallback(async (value, _) => {
         setSelectedSortOption(value)
 
         if (value === SORT_ALPHABETICALLY) {
-            setFilteredRCs(prev => {
-                if (isAscendingOrder) return [...prev].sort(sortRCAlphabetically)
-                else return [...prev].sort(sortRCAlphabetically).reverse()
-            })
+            sortRcsAlphabetically()
         } else {
             const locationPermission = await Location.getForegroundPermissionsAsync()
 
             if (locationPermission.granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
+                sortRcsByLocation(currentLocation)
 
-                setFilteredRCs(prev => {
-                    if (isAscendingOrder) return [...prev].sort((a, b) => sortRCByLocation(a, b, currentLocation))
-                    else return [...prev].sort((a, b) => sortRCByLocation(a, b, currentLocation)).reverse()
-                })
             } else {
                 const locationPermission = await Location.requestForegroundPermissionsAsync()
 
                 if (locationPermission.granted) {
                     const currentLocation = await Location.getCurrentPositionAsync()
-
-                    setFilteredRCs(prev => {
-                        if (isAscendingOrder) return [...prev].sort((a, b) => sortRCByLocation(a, b, currentLocation))
-                        else return [...prev].sort((a, b) => sortRCByLocation(a, b, currentLocation)).reverse()
-                    })
+                    sortRcsByLocation(currentLocation)
                 } else {
                     showToast(LOCATION_PERMISSION_DENIED)
-                    setFilteredRCs(prev => {
-                        if (isAscendingOrder) return [...prev].sort(sortRCAlphabetically)
-                        else return [...prev].sort(sortRCAlphabetically).reverse()
-                    })
+                    sortRcsAlphabetically()
                     setSelectedSortOption(SORT_ALPHABETICALLY)
                 }
             }
         }
     }, [isAscendingOrder])
 
-    const sortRCAlphabetically = (a, b) => {
+    const compareRCAlphabetically = (a, b) => {
         const aLowerCase = a.name.toLowerCase()
         const bLowerCase = b.name.toLowerCase()
 
@@ -82,13 +70,41 @@ const RepairCentersScreen = ({ navigation }) => {
         return 0
     }
 
-    const sortRCByLocation = (a, b, location) => {
+    const compareRCByLocation = (a, b, location) => {
         const aDistance = calculateDistance(location.coords.longitude, location.coords.latitude, a.location.coords.longitude, a.location.coords.latitude)
         const bDistance = calculateDistance(location.coords.longitude, location.coords.latitude, b.location.coords.longitude, b.location.coords.latitude)
 
         if (aDistance > bDistance) return 1
         else if (bDistance > aDistance) return -1
         return 0
+    }
+
+    const sortRcsAlphabetically = () => {
+        if (searchQuery.value.length > 0) {
+            setFilteredRCs(prev => {
+                if (isAscendingOrder) return [...prev].sort(compareRCAlphabetically)
+                else return [...prev].sort(compareRCAlphabetically).reverse()
+            })
+        } else {
+            setRepairCenters(prev => {
+                if (isAscendingOrder) return [...prev].sort(compareRCAlphabetically)
+                else return [...prev].sort(compareRCAlphabetically).reverse()
+            })
+        }
+    }
+
+    const sortRcsByLocation = (location) => {
+        if (searchQuery.value.length > 0) {
+            setFilteredRCs(prev => {
+                if (isAscendingOrder) return [...prev].sort((a, b) => compareRCByLocation(a, b, location))
+                else return [...prev].sort((a, b) => compareRCByLocation(a, b, location)).reverse()
+            })
+        } else {
+            setRepairCenters(prev => {
+                if (isAscendingOrder) return [...prev].sort((a, b) => compareRCByLocation(a, b, location))
+                else return [...prev].sort((a, b) => compareRCByLocation(a, b, location)).reverse()
+            })
+        }
     }
 
     const fetchRepairCenters = async () => {
@@ -99,31 +115,37 @@ const RepairCentersScreen = ({ navigation }) => {
 
             let sortedRcs;
             if (selectedSortOption === SORT_ALPHABETICALLY) {
-                sortedRcs = rcsData.sort(sortRCAlphabetically);
+                sortedRcs = rcsData.sort(compareRCAlphabetically);
             } else {
                 const locationPermission = await Location.getForegroundPermissionsAsync();
 
                 if (locationPermission.granted) {
                     const currentLocation = await Location.getCurrentPositionAsync();
-                    sortedRcs = rcsData.sort((a, b) => sortRCByLocation(a, b, currentLocation));
+                    sortedRcs = rcsData.sort((a, b) => compareRCByLocation(a, b, currentLocation));
                 } else {
                     const locationPermission = await Location.requestForegroundPermissionsAsync();
 
                     if (locationPermission.granted) {
                         const currentLocation = await Location.getCurrentPositionAsync();
-                        sortedRcs = rcsData.sort((a, b) => sortRCByLocation(a, b, currentLocation));
+                        sortedRcs = rcsData.sort((a, b) => compareRCByLocation(a, b, currentLocation));
                     } else {
                         showToast(LOCATION_PERMISSION_DENIED);
-                        sortedRcs = rcsData.sort((a, b) => sortRCAlphabetically(a, b));
+                        sortedRcs = rcsData.sort((a, b) => compareRCAlphabetically(a, b));
                         setSelectedSortOption(SORT_ALPHABETICALLY)
                     }
                 }
             }
 
-            setRepairCenters(rcsData);
-
-            if (isAscendingOrder) setFilteredRCs(sortedRcs);
-            else setFilteredRCs(sortedRcs.reverse());
+            if (searchQuery.value.length > 0) {
+                sortedRcs = sortedRcs.filter(rc =>
+                    rc.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+                )
+                if (isAscendingOrder) setFilteredRCs(sortedRcs)
+                else setFilteredRCs(sortedRcs.reverse())
+            } else {
+                if (isAscendingOrder) setRepairCenters(sortedRcs)
+                else setRepairCenters(sortedRcs.reverse())
+            }
         } catch (err) {
             console.log(err);
         } finally {
@@ -133,63 +155,11 @@ const RepairCentersScreen = ({ navigation }) => {
 
     const handleSearch = async () => {
         if (searchQuery.value.length > 0) {
-            const filtered = repairCenters.filter(rc =>
+            setFilteredRCs(repairCenters.filter(rc =>
                 rc.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-            )
-            let sortedRcs;
+            ))
 
-            if (selectedSortOption === SORT_ALPHABETICALLY) {
-                sortedRcs = filtered.sort(sortRCAlphabetically);
-            } else {
-                const locationPermission = await Location.getForegroundPermissionsAsync();
-
-                if (locationPermission.granted) {
-                    const currentLocation = await Location.getCurrentPositionAsync();
-                    sortedRcs = filtered.sort((a, b) => sortRCByLocation(a, b, currentLocation));
-                } else {
-                    const locationPermission = await Location.requestForegroundPermissionsAsync();
-
-                    if (locationPermission.granted) {
-                        const currentLocation = await Location.getCurrentPositionAsync();
-                        sortedRcs = filtered.sort((a, b) => sortRCByLocation(a, b, currentLocation));
-                    } else {
-                        showToast(LOCATION_PERMISSION_DENIED);
-                        sortedRcs = filtered.sort((a, b) => sortRCAlphabetically(a, b));
-                        setSelectedSortOption(SORT_ALPHABETICALLY)
-                    }
-                }
-            }
-
-            if (isAscendingOrder) setFilteredRCs(sortedRcs)
-            else setFilteredRCs(sortedRcs.reverse())
-        } else {
-            let sortedRcs;
-
-            if (selectedSortOption === SORT_ALPHABETICALLY) {
-                sortedRcs = repairCenters.sort(sortRCAlphabetically);
-            } else {
-                const locationPermission = await Location.getForegroundPermissionsAsync();
-
-                if (locationPermission.granted) {
-                    const currentLocation = await Location.getCurrentPositionAsync();
-                    sortedRcs = repairCenters.sort((a, b) => sortRCByLocation(a, b, currentLocation));
-                } else {
-                    const locationPermission = await Location.requestForegroundPermissionsAsync();
-
-                    if (locationPermission.granted) {
-                        const currentLocation = await Location.getCurrentPositionAsync();
-                        sortedRcs = repairCenters.sort((a, b) => sortRCByLocation(a, b, currentLocation));
-                    } else {
-                        showToast(LOCATION_PERMISSION_DENIED);
-                        sortedRcs = repairCenters.sort((a, b) => sortRCAlphabetically(a, b));
-                        setSelectedSortOption(SORT_ALPHABETICALLY)
-                    }
-                }
-
-                if (isAscendingOrder) setFilteredRCs(sortedRcs)
-                else setFilteredRCs(sortedRcs.reverse())
-            }
-        }
+        } else setFilteredRCs(repairCenters)
     }
 
     useEffect(() => {
@@ -215,7 +185,7 @@ const RepairCentersScreen = ({ navigation }) => {
             >
             </CustomTextInput>
             <FlatList
-                data={filteredRCs}
+                data={searchQuery.value.length > 0 ? filteredRCs : repairCenters}
                 renderItem={({ item }) => <RepairCenterFlatListItem item={item} navigation={navigation} />}
                 keyExtractor={(item) => item._id}
                 refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRepairCenters} colors={['#E48700']} />}
