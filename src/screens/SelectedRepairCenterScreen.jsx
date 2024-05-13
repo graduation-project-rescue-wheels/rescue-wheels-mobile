@@ -7,6 +7,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import PoppinsText from '../components/PoppinsText'
 import RepairCenterListEmptyComponent from '../components/RepairCenterListEmptyComponent'
 import { useHeaderHeight } from '@react-navigation/elements'
+import MapViewDirections from 'react-native-maps-directions'
 
 const { height } = Dimensions.get('window')
 
@@ -95,6 +96,13 @@ const SelectedRepairCenterScreen = ({ route }) => {
                 ref={mapRef}
                 provider='google'
             >
+                <MapViewDirections 
+                    apikey= {process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                    origin={location}
+                    destination={rc.location.coords}
+                    strokeColor='#E48700'
+                    strokeWidth={4}
+                />
                 <Marker
                     coordinate={rc.location.coords}
                     ref={markerRef}
