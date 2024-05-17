@@ -327,7 +327,7 @@ const EmergencyScreen = ({ navigation }) => {
                 {selectedVehicle && <PoppinsText style={styles.requestConfirmModalText}>Vehicle: {selectedVehicle.make} {selectedVehicle.model}</PoppinsText>}
                 {selectedEmergency && <PoppinsText style={styles.requestConfirmModalText}>Emergency type: {selectedEmergency.label}</PoppinsText>}
                 <PoppinsText style={styles.requestConfirmModalText}>Estimated price: 50EGP</PoppinsText>
-                <View style={{ borderRadius: 16, overflow: 'hidden', backgroundColor: 'red', marginVertical: 8 }}>
+                <View style={{ borderRadius: 16, overflow: 'hidden', marginVertical: 8 }}>
                     <MapView
                         style={{ ...styles.requestConfirmModalMapView, width: width - 63 }}
                         showsUserLocation

@@ -13,8 +13,6 @@ const TechnicianHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const techUsername = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
-    const [technicianRate, setTechnicianRate] = useState(0.0)
-    const [totalRequests, setTotalRequests] = useState(0)
     const [onGoingRequests, setonGoingRequests] = useState(null)
     const isFocused = useIsFocused()
 
@@ -73,12 +71,12 @@ const TechnicianHomeScreen = ({ navigation }) => {
                             <PoppinsText style={styles.highLightedText}>Your rate</PoppinsText>
                             <View style={{ flexDirection: 'row' }}>
                                 <MaterialIcons name="star" size={25} color='#E48700' />
-                                <PoppinsText style={styles.orangeHighLightedText}> {technicianRate} </PoppinsText>
+                                <PoppinsText style={styles.orangeHighLightedText}> {user.rate} </PoppinsText>
                             </View>
                         </View>
                         <View style={{ justifyContent: 'center' }}>
                             <PoppinsText style={styles.highLightedText}>Total requests </PoppinsText>
-                            <PoppinsText style={styles.orangeHighLightedText}> {totalRequests} </PoppinsText>
+                            <PoppinsText style={styles.orangeHighLightedText}> {user.Requests_IDS.length} </PoppinsText>
                         </View>
                     </View>
                 </View>
