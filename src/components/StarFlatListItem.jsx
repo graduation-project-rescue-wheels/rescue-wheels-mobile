@@ -1,5 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { Pressable } from 'react-native'
 import { AntDesign } from '@expo/vector-icons';
 
 const StarFlatListItem = ({ onPress, rate, index }) => {
@@ -13,5 +12,3 @@ const StarFlatListItem = ({ onPress, rate, index }) => {
 }
 
 export default StarFlatListItem
-
-const styles = StyleSheet.create({})
