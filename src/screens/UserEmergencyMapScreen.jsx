@@ -4,7 +4,7 @@ import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import { MaterialIcons } from '@expo/vector-icons'
-import { cancelRequest, getRequestById } from '../api/EmergencyRequest'
+import { cancelRequest, finishRequest, getRequestById, rateRequest } from '../api/EmergencyRequest'
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { socket } from '../api/socket.io'
@@ -12,10 +12,14 @@ import Connecting from '../components/Connecting'
 import { useDispatch } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
 import MapViewDirections from 'react-native-maps-directions'
+import CustomModal from '../components/CustomModal'
+import { FlatList } from 'react-native-gesture-handler'
+import { RATES } from '../utils/constants'
+import StarFlatListItem from '../components/StarFlatListItem'
 
 const { height } = Dimensions.get('window')
 
-const UserEmergencyMapScreen = ({ route }) => {
+const UserEmergencyMapScreen = ({ route, navigation }) => {
     const { id } = route.params
     const dispatch = useDispatch()
 
@@ -23,9 +27,11 @@ const UserEmergencyMapScreen = ({ route }) => {
     const [request, setRequest] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
     const [responderCoordinate, setResponderCoordinate] = useState(null)
+    const [ConfirmModalVisible, setConfirmModalVisible] = useState(false)
+    const [rate, setRate] = useState(0)
 
     const snappingPoints = useMemo(() => {
-        return [0.35, 0.45].map(percentage => percentage * height);
+        return [0.33, 0.5].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
@@ -108,11 +114,43 @@ const UserEmergencyMapScreen = ({ route }) => {
         }
     }
 
+    const handleConfirmEndServiceBTN = async () => {
+        try {
+            const response = await finishRequest(request._id)
+
+            if (response.status === 200) {
+                setRequest(response.data.request)
+                setConfirmModalVisible(false)
+                dispatch(loadUserAsync())
+            }
+        } catch (error) {
+            console.log(error);
+            showToast(SMTH_WENT_WRONG)
+        }
+    }
+
     const handleCallBtn = () => {
         if (Platform.OS === 'android')
             Linking.openURL(`tel:${request.responder.mobileNumber}`)
         else if (Platform.OS === 'ios')
             Linking.openURL(`telprompt:${request.responder.mobileNumber}`)
+    }
+
+    const handleSubmitRateBtn = async () => {
+        try {
+            if (rate > 0) {
+                const response = await rateRequest(request._id, rate)
+                if (response.status == 200) {
+                    setRequest(null)
+                    navigation.goBack()
+                    showToast("Your submission has been sent.")
+                }
+            }
+            else showToast("Please rate your technician")
+        } catch (error) {
+            console.log(error.response);
+            showToast(SMTH_WENT_WRONG)
+        }
     }
 
     useEffect(() => {
@@ -145,6 +183,14 @@ const UserEmergencyMapScreen = ({ route }) => {
             console.log("updated", payload);
             setResponderCoordinate(payload)
         })
+
+        socket.on('request:inProgress', payload => {
+            setRequest(payload)
+        })
+
+        socket.on('request:notify-user', () => {
+            setConfirmModalVisible(true)
+        })
     }, [])
 
     useEffect(() => {
@@ -159,6 +205,20 @@ const UserEmergencyMapScreen = ({ route }) => {
 
     return (
         <View style={styles.continer}>
+            <CustomModal
+                visible={ConfirmModalVisible}
+                onRequestClose={() => setConfirmModalVisible(false)}
+            >
+                <PoppinsText>Confirm end of service</PoppinsText>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <TouchableOpacity style={styles.modalBtn} onPress={() => setConfirmModalVisible(false)}>
+                        <PoppinsText style={{ color: '#D3D3D3' }}>Cancel</PoppinsText>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.modalBtn} onPress={handleConfirmEndServiceBTN}>
+                        <PoppinsText style={{ color: 'green' }}>Confirm</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+            </CustomModal>
             <MapView
                 style={styles.map}
                 provider='google'
@@ -209,7 +269,11 @@ const UserEmergencyMapScreen = ({ route }) => {
                         }} />
                         <Animated.View style={{
                             ...styles.bar,
-                            opacity: request.state === 'pending' ? 0 : request.state === 'inProgress' ? barOpacity : 1
+                            opacity: request.state === 'pending' ? 0 : request.state === 'responding' ? barOpacity : 1
+                        }} />
+                        <Animated.View style={{
+                            ...styles.bar,
+                            opacity: request.state === 'pending' || request.state === 'responding' ? 0 : request.state === 'inProgress' ? barOpacity : 1
                         }} />
                     </View>
                     {
@@ -219,12 +283,12 @@ const UserEmergencyMapScreen = ({ route }) => {
                         </View>
                     }
                     {
-                        request.state === 'inProgress' && <>
+                        (request.state === 'inProgress' || request.state === 'responding' || request.state === 'done') && <>
                             <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>Technician info</PoppinsText>
                             <View style={styles.userInfo}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Image
-                                        source={request.responder.profilePic.length === 0 ?
+                                        source={request.responder?.profilePic?.length === 0 ?
                                             require('../assets/images/avatar.png') :
                                             { uri: request.responder.profilePic }
                                         }
@@ -238,14 +302,14 @@ const UserEmergencyMapScreen = ({ route }) => {
                                     </View>
                                 </View>
                                 <TouchableOpacity
-                                    style={{padding:8, borderRadius: 50, backgroundColor:'#E48700'}}
+                                    style={{ padding: 8, borderRadius: 50, backgroundColor: '#E48700' }}
                                     onPress={handleCallBtn}>
                                     <MaterialIcons name="call" size={26} color='white' />
                                 </TouchableOpacity>
                             </View>
-                            <View style={{ flexDirection: 'row'}}>
-                                <MaterialIcons name="star" style={{color:'#E48700', fontSize: 25 }} />
-                                <PoppinsText style={{color:'#E48700', fontSize: 20 }}> 0.0 </PoppinsText>
+                            <View style={{ flexDirection: 'row' }}>
+                                <MaterialIcons name="star" style={{ color: '#E48700', fontSize: 25 }} />
+                                <PoppinsText style={{ color: '#E48700', fontSize: 20 }}> {request.responder.rate} </PoppinsText>
                             </View>
                         </>
                     }
@@ -253,12 +317,43 @@ const UserEmergencyMapScreen = ({ route }) => {
                         request.state === 'cancelled' && <PoppinsText style={styles.stateMessage}>Your request has been cancelled</PoppinsText>
                     }
                     {
-                        (request.state === 'pending' || request.state === 'inProgress') && <TouchableOpacity
+                        (request.state === 'pending' || request.state === 'responding') && <TouchableOpacity
                             style={{ ...styles.btn, backgroundColor: '#F9BFBF' }}
                             onPress={handleCancelRequestBtn}
                         >
                             <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                         </TouchableOpacity>
+                    }
+                    {
+                        request.state === 'inProgress' && <PoppinsText style={{ textAlign: "center" }}>Service started</PoppinsText>
+                    }
+                    {
+                        (request.state === 'done' && !request.isResponderRated) && <>
+                            <PoppinsText style={{ margin: 8, fontSize: 16 }}>Rate {request.responder.firstName}</PoppinsText>
+                            <FlatList
+                                data={RATES}
+                                renderItem={({ item, index }) => <StarFlatListItem index={index} rate={rate} onPress={() => setRate(item)} />}
+                                horizontal
+                                keyExtractor={(item) => item}
+                                contentContainerStyle={{ flex: 1, justifyContent: 'center' }}
+                                style={{ flexGrow: 0 }}
+                                ItemSeparatorComponent={<View style={{ width: 5 }} />}
+                            />
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                                <TouchableOpacity
+                                    style={{ ...styles.btn }}
+                                    onPress={() => navigation.goBack()}
+                                >
+                                    <PoppinsText style={{ color: '#E48700' }}>Skip</PoppinsText>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                                    onPress={handleSubmitRateBtn}
+                                >
+                                    <PoppinsText style={{ color: 'white' }}>Submit</PoppinsText>
+                                </TouchableOpacity>
+                            </View>
+                        </>
                     }
                 </BottomSheetView>
             </BottomSheet>}
@@ -333,4 +428,7 @@ const styles = StyleSheet.create({
     highLightedText: {
         color: "#878791"
     },
+    modalBtn: {
+        padding: 8
+    }
 })

@@ -2,9 +2,9 @@ import { Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
-import { acceptRequest, cancelResponder, getNearbyRequests, getRequestById } from '../api/EmergencyRequest'
+import { acceptRequest, cancelResponder, getNearbyRequests, getRequestById, inProgressRequest, rateRequest } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Fontisto } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
@@ -12,16 +12,18 @@ import { socket } from '../api/socket.io'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
 import { calculateDistance, getAddress } from '../utils/locations'
-import showToast from '../components/Toast'
+import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import { sortRequests } from '../utils/sorting'
 import { useIsFocused } from '@react-navigation/native'
 import MapViewDirections from 'react-native-maps-directions'
 import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
 import RequestBackgroundLocationAccesModal from '../components/RequestBackgroundLocationAccesModal'
+import StarFlatListItem from '../components/StarFlatListItem'
+import { RATES } from '../utils/constants'
 
 const { height } = Dimensions.get('window')
 
-const TechnicianRequestsMapScreen = ({ route }) => {
+const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [region, setRegion] = useState(null)
@@ -29,6 +31,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
     const [mapPadding, setMapPadding] = useState(85)
     const [nearbyRequests, setNearbyRequests] = useState([])
     const [dropOffAddress, setDropOffAddress] = useState('')
+    const [rate, setRate] = useState(0)
     const [backgroundLocationAccessModalVisible, setBackgroundLocationAccessModalVisible] = useState(false)
     const userMarkerImage = require('../assets/images/broken-car.png')
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
@@ -185,6 +188,42 @@ const TechnicianRequestsMapScreen = ({ route }) => {
         }
     }
 
+    const handleStartServiceBTN = async () => {
+        try {
+            const response = await inProgressRequest(request._id)
+
+            if (response.status == 200) {
+                setRequest(response.data.request)
+            }
+        } catch (error) {
+
+            console.log(error.response)
+            showToast(SMTH_WENT_WRONG)
+        }
+    }
+
+    const handleServiceFinishedBTN = () => {
+        socket.emit("request:service-finish-confirm", request._id)
+    }
+
+    const handleSubmitRateBtn = async () => {
+        try {
+            if (rate > 0) {
+                const response = await rateRequest(request._id, rate)
+                if (response.status == 200) {
+                    await unregisterBackGroundLocationTask()
+                    setRequest(null)
+                    showToast("Your submission has been sent.")
+                    setRate(0)
+                }
+            }
+            else showToast("Please rate your client")
+        } catch (error) {
+            console.log(error);
+            showToast(SMTH_WENT_WRONG)
+        }
+    }
+
     const getDropOffAddressForPendingRequest = async () => {
         if (nearbyRequests[0].dropOffLocation) {
             const address = await getAddress(nearbyRequests[0].dropOffLocation, mapRef)
@@ -243,8 +282,15 @@ const TechnicianRequestsMapScreen = ({ route }) => {
             dispatch(loadUserAsync())
         })
 
+        socket.on('request:done', payload => {
+            setRequest(payload)
+            socket.emit('request:responder-leave', request.requestedBy._id)
+            dispatch(loadUserAsync())
+        })
+
         return () => {
             socket.off('request:cancelled')
+            socket.off('request:done')
         }
 
     }, [request?.state])
@@ -429,7 +475,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                             <View style={styles.userInfo}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Image
-                                        source={request.requestedBy.profilePic.length === 0 ?
+                                        source={request.requestedBy?.profilePic?.length === 0 ?
                                             require('../assets/images/avatar.png') :
                                             { uri: request.requestedBy.profilePic }
                                         }
@@ -463,7 +509,7 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                 <PoppinsText>{dropOffAddress}</PoppinsText>
                             </View>}
                             {
-                                request.state === 'inProgress' && <View>
+                                request.state === 'responding' && <View>
                                     <View style={styles.acceptRequestView}>
                                         <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
                                         <TouchableOpacity
@@ -476,11 +522,30 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                         </TouchableOpacity>
                                     </View>
                                     <TouchableOpacity
+                                        style={{ ...styles.btn, backgroundColor: "#E48700", marginTop: 8 }}
+                                        onPress={handleStartServiceBTN}>
+                                        <PoppinsText style={{ color: "white" }}>Start service</PoppinsText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
                                         style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}
                                         onPress={handleCancelBTN}>
                                         <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                     </TouchableOpacity>
+
                                 </View>
+                            }
+                            {
+                                request.state === 'inProgress' && <View>
+                                    <View style={{ alignSelf: "center" }}>
+                                        <PoppinsText>Service started</PoppinsText></View>
+                                    <TouchableOpacity
+                                        style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
+                                        onPress={handleServiceFinishedBTN}
+                                    >
+                                        <PoppinsText style={{ color: 'white' }}>Finish service</PoppinsText>
+                                    </TouchableOpacity>
+                                </View>
+
                             }
                             {
                                 request.state === 'cancelled' && <View>
@@ -494,6 +559,38 @@ const TechnicianRequestsMapScreen = ({ route }) => {
                                         <PoppinsText style={{ color: 'white' }}>Load nearby requests</PoppinsText>
                                     </TouchableOpacity>
                                 </View>
+                            }
+                            {
+                                (request.state === 'done' && !request.isUserRated) && <>
+                                    <PoppinsText style={{ margin: 8, fontSize: 16 }}>Rate {request.requestedBy.firstName}</PoppinsText>
+                                    <FlatList
+                                        data={RATES}
+                                        renderItem={({ item, index }) => <StarFlatListItem index={index} rate={rate} onPress={() => setRate(item)} />}
+                                        horizontal
+                                        keyExtractor={(item) => item}
+                                        contentContainerStyle={{ flex: 1, justifyContent: 'center' }}
+                                        style={{ flexGrow: 0 }}
+                                        ItemSeparatorComponent={<View style={{ width: 5 }} />}
+                                    />
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 8 }}>
+                                        <TouchableOpacity
+                                            style={{ ...styles.btn }}
+                                            onPress={async () => {
+                                                navigation.goBack()
+                                                await unregisterBackGroundLocationTask()
+                                                setRequest(null)
+                                            }}
+                                        >
+                                            <PoppinsText style={{ color: '#E48700' }}>Skip</PoppinsText>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                                            onPress={handleSubmitRateBtn}
+                                        >
+                                            <PoppinsText style={{ color: 'white' }}>Submit</PoppinsText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </>
                             }
                         </View>
                     }
