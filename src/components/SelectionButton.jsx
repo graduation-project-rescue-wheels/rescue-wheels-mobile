@@ -13,7 +13,7 @@ const SelectionButton = ({ state, Icon, onPress, placeholder, hasValidation, val
             <Icon />
             {
                 value.length === 0 ?
-                    <PoppinsText style={{ color: '#ADADAD' }}>{placeholder}</PoppinsText> : <PoppinsText>{value}</PoppinsText>
+                    <PoppinsText style={{ color: '#ADADAD' }}>{placeholder}</PoppinsText> : <PoppinsText style={styles.info}>{value}</PoppinsText>
             }
         </TouchableOpacity>
     )
@@ -30,5 +30,6 @@ const styles = StyleSheet.create({
         padding: 8,
         flexDirection: 'row',
         alignItems: 'center',
+        overflow: 'hidden'
     }
 })
