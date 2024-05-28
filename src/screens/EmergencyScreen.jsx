@@ -131,8 +131,8 @@ const EmergencyScreen = ({ navigation }) => {
 
     const handleDropOffMapViewOnPress = async ({ nativeEvent }) => {
         setDropOffMarkerCoordinates(nativeEvent.coordinate)
-        const address = await getAddress(nativeEvent.coordinate, mapRef)
-        setSelectedAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        const address = await getAddress(nativeEvent.coordinate)
+        setSelectedAddress(address.data.results[0].formatted_address)
     }
 
     const handleConfirmDropOffBtn = () => {
