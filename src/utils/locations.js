@@ -1,3 +1,5 @@
+import axios from "axios"
+
 //This is a function which calculates the distance in kilometers between two points. Used formula Haversine formula 
 export const calculateDistance = (long1, lat1, long2, lat2) => {
     const earthR = 6371 // 6371 is radius of Earth
@@ -14,6 +16,6 @@ export const calculateDistance = (long1, lat1, long2, lat2) => {
     return earthR * c
 }
 
-export const getAddress = async (coordinate, mapRef) => {
-    return await mapRef.current.addressForCoordinate(coordinate)
+export const getAddress = async (coordinate) => {
+    return await axios.get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${coordinate.latitude},${coordinate.longitude}&key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}`)
 }
