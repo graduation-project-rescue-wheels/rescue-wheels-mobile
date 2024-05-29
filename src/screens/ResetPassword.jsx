@@ -3,27 +3,63 @@ import { MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import BackButton from '../components/BackButton'
+import { mainColor, secondryColor } from '../colors'
+import CustomTextInput from '../components/CustomTextInput'
+import ValidationMessage from '../components/ValidationMessage'
+import { validateConfirmationPassword, validatePassword } from '../utils/inputValidations'
 
 const ResetPassword = ({ navigation }) => {
     const [password, setPassword] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
-    const [confirmPassword, setConfirmPassword] = useState({
+    const [confirmPassword, setconfirmPassword] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
 
+    const handlePasswordTextInputOnBlur = () => {
+        setPassword(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validatePassword(password.value)
+        }))
+    }
+
+    const handleConfirmationPasswordTextInputOnBlur = () => {
+        setconfirmPassword(prev => ({
+            ...prev,
+            isFocused: false,
+            validation: validateConfirmationPassword(password.value, confirmPassword.value)
+        }))
+    }
+
     const handleResetPasswordBtn = () => {
-        //TODO: Update password
-        navigation.popToTop()
+        const passwordValidationResult = validatePassword(password.value)
+        const confirmationPasswordResult = validateConfirmationPassword(password.value, confirmPassword.value)
+
+        setPassword({ ...password, validation: passwordValidationResult })
+        setconfirmPassword({ ...password, validation: confirmationPasswordResult })
+
+        if (passwordValidationResult.isValid && confirmationPasswordResult.isValid) {
+            //TODO: Update password
+            navigation.popToTop()
+        }
     }
 
     return (
         <View style={styles.container}>
             <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: '#E48700' }}
+                style={{ color: mainColor }}
             >
                 Rescue Wheels
             </PoppinsText>
@@ -31,56 +67,46 @@ const ResetPassword = ({ navigation }) => {
             <PoppinsText style={styles.title}>Reset Password</PoppinsText>
 
             <PoppinsText style={styles.label}>Enter Your New Password</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: password.isFocused ? '#E48700' : '#ADADAD'
-            }}>
-                <MaterialIcons
+            <CustomTextInput
+                Icon={() => <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: password.isFocused ? '#E48700' : '#ADADAD'
-                    }} />
-                <TextInput
-                    placeholder='Password'
-                    secureTextEntry={true}
-                    value={password.value}
-                    onChangeText={e => setPassword({ ...password, value: e })}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setPassword({ ...password, isFocused: true })}
-                    onBlur={() => setPassword({ ...password, isFocused: false })}
-                />
-            </View>
-
+                        color: password.isFocused ? mainColor : password.validation.isValid ? '#ADADAD' : 'red'
+                    }}
+                />}
+                hasValidation={true}
+                onBlur={handlePasswordTextInputOnBlur}
+                onChangeText={e => setPassword({ ...password, value: e })}
+                onFocus={() => setPassword({ ...password, isFocused: true })}
+                placeholder='Password'
+                secureTextEntry={true}
+                state={password}
+            />
+            <ValidationMessage state={password} />
             <PoppinsText style={styles.label}>Confirm Your New Password</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
-            }}>
-                <MaterialIcons
+            <CustomTextInput
+                Icon={() => <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: confirmPassword.isFocused ? '#E48700' : '#ADADAD'
-                    }} />
-                <TextInput
-                    placeholder='Password'
-                    secureTextEntry={true}
-                    value={confirmPassword.value}
-                    onChangeText={e => setConfirmPassword({ ...confirmPassword, value: e })}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setConfirmPassword({ ...confirmPassword, isFocused: true })}
-                    onBlur={() => setConfirmPassword({ ...confirmPassword, isFocused: false })}
-                />
-            </View>
-
+                        color: confirmPassword.isFocused ? mainColor : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
+                    }}
+                />}
+                hasValidation={true}
+                onBlur={handleConfirmationPasswordTextInputOnBlur}
+                onChangeText={e => setconfirmPassword({ ...confirmPassword, value: e })}
+                onFocus={() => setconfirmPassword({ ...confirmPassword, isFocused: true })}
+                placeholder='Confirm Password'
+                secureTextEntry={true}
+                state={confirmPassword}
+            />
+            <ValidationMessage state={confirmPassword} />
             <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: '#E48700' }}
+                style={{ ...styles.button, backgroundColor: secondryColor }}
                 onPress={handleResetPasswordBtn}
             >
-                <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Continue</PoppinsText>
+                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Continue</PoppinsText>
             </TouchableOpacity>
         </View>
     )

@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native'
 import PoppinsText from './PoppinsText'
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons'
 import MapView, { Marker } from 'react-native-maps'
+import { mainColor } from '../colors'
 
 const RepairCenterFlatListItem = ({ item, navigation }) => {
     return (
@@ -28,7 +29,7 @@ const RepairCenterFlatListItem = ({ item, navigation }) => {
                 </MapView>
             </View>
             <View style={{ padding: 8 }}>
-                <PoppinsText style={{ color: '#E48700' }}>{item.name}</PoppinsText>
+                <PoppinsText style={{ color: mainColor }}>{item.name}</PoppinsText>
                 <View style={styles.iconTextView}>
                     <Feather name='info' style={styles.icon} />
                     <PoppinsText style={styles.info}>{item.description}</PoppinsText>

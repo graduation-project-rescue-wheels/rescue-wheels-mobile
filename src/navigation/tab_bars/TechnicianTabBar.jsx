@@ -1,6 +1,7 @@
 import { View, StyleSheet, Pressable, Image } from 'react-native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
+import { mainColor, secondryColor } from '../../colors';
 
 function TechnicianTabBar({ state, descriptors, navigation }) {
     const { user } = useSelector(state => state.user)
@@ -54,16 +55,16 @@ function TechnicianTabBar({ state, descriptors, navigation }) {
                                     name='home'
                                     style={{
                                         ...styles.icon,
-                                        color: isFocused ? '#E48700' : '#ADADAD'
+                                        color: isFocused ? mainColor : secondryColor
                                     }}
                                 /> : label === 'Emergency-stack' ?
                                     <MaterialCommunityIcons
                                         name='car-emergency'
                                         style={{
                                             ...styles.icon,
-                                            color: isFocused ? '#E48700' : '#ADADAD'
+                                            color: isFocused ? mainColor : secondryColor
                                         }}
-                                    /> : <View style={{ borderWidth: 3, borderColor: isFocused ? '#E48700' : '#ADADAD', borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
+                                    /> : <View style={{ borderWidth: 3, borderColor: isFocused ? mainColor : secondryColor, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
                                         <Image
                                             source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
                                             style={styles.profilePic}
@@ -73,7 +74,7 @@ function TechnicianTabBar({ state, descriptors, navigation }) {
                         }
                         <View
                             style={{
-                                backgroundColor: isFocused ? '#E48700' : 'white',
+                                backgroundColor: isFocused ? mainColor : 'white',
                                 ...styles.indicator
                             }}
                         />

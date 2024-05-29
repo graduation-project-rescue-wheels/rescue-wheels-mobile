@@ -16,6 +16,7 @@ import CustomModal from '../components/CustomModal'
 import { FlatList } from 'react-native-gesture-handler'
 import { RATES } from '../utils/constants'
 import StarFlatListItem from '../components/StarFlatListItem'
+import { mainColor, secondryColor } from '../colors'
 
 const { height } = Dimensions.get('window')
 
@@ -31,7 +32,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
     const [rate, setRate] = useState(0)
 
     const snappingPoints = useMemo(() => {
-        return [0.33, 0.5].map(percentage => percentage * height);
+        return [0.33, 0.6].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const mapRef = useRef()
@@ -240,7 +241,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
                         apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
                         destination={request.coordinates}
                         origin={responderCoordinate}
-                        strokeColor='#E48700'
+                        strokeColor={mainColor}
                         strokeWidth={4}
                     />
                     <Marker
@@ -284,7 +285,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
                     }
                     {
                         (request.state === 'inProgress' || request.state === 'responding' || request.state === 'done') && <>
-                            <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>Technician info</PoppinsText>
+                            <PoppinsText style={{ color: mainColor, fontSize: 25, padding: 8 }}>Technician info</PoppinsText>
                             <View style={styles.userInfo}>
                                 <View style={{ flexDirection: 'row' }}>
                                     <Image
@@ -302,14 +303,14 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
                                     </View>
                                 </View>
                                 <TouchableOpacity
-                                    style={{ padding: 8, borderRadius: 50, backgroundColor: '#E48700' }}
+                                    style={{ padding: 8, borderRadius: 50, backgroundColor: secondryColor }}
                                     onPress={handleCallBtn}>
-                                    <MaterialIcons name="call" size={26} color='white' />
+                                    <MaterialIcons name="call" size={26} color={mainColor} />
                                 </TouchableOpacity>
                             </View>
                             <View style={{ flexDirection: 'row' }}>
-                                <MaterialIcons name="star" style={{ color: '#E48700', fontSize: 25 }} />
-                                <PoppinsText style={{ color: '#E48700', fontSize: 20 }}> {request.responder.rate} </PoppinsText>
+                                <MaterialIcons name="star" style={{ color: mainColor, fontSize: 25 }} />
+                                <PoppinsText style={{ color: mainColor, fontSize: 20 }}> {request.responder.rate} </PoppinsText>
                             </View>
                         </>
                     }
@@ -344,13 +345,13 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
                                     style={{ ...styles.btn }}
                                     onPress={() => navigation.goBack()}
                                 >
-                                    <PoppinsText style={{ color: '#E48700' }}>Skip</PoppinsText>
+                                    <PoppinsText style={{ color: mainColor }}>Skip</PoppinsText>
                                 </TouchableOpacity>
                                 <TouchableOpacity
-                                    style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                                    style={{ ...styles.btn, backgroundColor: secondryColor }}
                                     onPress={handleSubmitRateBtn}
                                 >
-                                    <PoppinsText style={{ color: 'white' }}>Submit</PoppinsText>
+                                    <PoppinsText style={{ color: mainColor }}>Submit</PoppinsText>
                                 </TouchableOpacity>
                             </View>
                         </>
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
         right: 16
     },
     myLocationBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
     },
     icon: {
         fontSize: 30,
-        color: 'white'
+        color: mainColor
     },
     bottomSheetContainer: {
         flex: 1,
@@ -392,7 +393,7 @@ const styles = StyleSheet.create({
     },
     bar: {
         height: 4,
-        backgroundColor: '#E48700',
+        backgroundColor: mainColor,
         marginHorizontal: 4,
         flex: 1,
         borderRadius: 4

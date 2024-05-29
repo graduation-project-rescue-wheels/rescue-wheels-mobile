@@ -12,6 +12,7 @@ import { validateConfirmationPassword, validateFirstName, validateLastName, vali
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
 import { deleteUserAsync, updatePasswordAsync, updateUserAsync } from '../store/userAsyncThunks'
+import { mainColor, secondryColor } from '../colors'
 
 const UserSettingsScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -306,7 +307,7 @@ const UserSettingsScreen = ({ navigation }) => {
                         name='password'
                         style={{
                             ...styles.textInputIcon,
-                            color: confirmNewPassword.isFocused ? '#E48700' : confirmNewPassword.validation.isValid ? '#ADADAD' : 'red'
+                            color: confirmNewPassword.isFocused ? mainColor : confirmNewPassword.validation.isValid ? '#ADADAD' : 'red'
                         }}
                     />}
                     onBlur={handleConfirmNewPasswordTextInputOnBlur}
@@ -326,7 +327,7 @@ const UserSettingsScreen = ({ navigation }) => {
                         name='password'
                         style={{
                             ...styles.textInputIcon,
-                            color: oldPassword.isFocused ? '#E48700' : oldPassword.validation.isValid ? '#ADADAD' : 'red'
+                            color: oldPassword.isFocused ? mainColor : oldPassword.validation.isValid ? '#ADADAD' : 'red'
                         }}
                     />}
                     onBlur={handleOldPasswordTextInputOnBlur}
@@ -351,23 +352,16 @@ const UserSettingsScreen = ({ navigation }) => {
                         style={styles.modalBtn}
                         onPress={handleUpdatePasswordConfirmBTN}
                     >
-                        <PoppinsText style={{ color: '#E48700' }}>Confirm</PoppinsText>
+                        <PoppinsText style={{ color: 'green' }}>Confirm</PoppinsText>
                     </TouchableOpacity>
                 </View>
             </CustomModal>
             <ScrollView style={{ flex: 1 }} ref={scrollViewRef} onLayout={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
                 <View style={{ ...styles.flexRow, justifyContent: 'flex-start', alignItems: 'center' }}>
-                    {
-                        user.photoURL === undefined ?
-                            <Ionicons
-                                name='person-circle-outline'
-                                style={styles.profileIcon}
-                            /> : <Image
-                                source={{ uri: user.photoURL }}
-                                style={styles.profilePhoto}
-                                resizeMode='contain'
-                            />
-                    }
+                    <Image
+                        source={user.profilePic.length > 0 ? user.profilePic : require('../assets/images/avatar.png')}
+                        style={styles.profilePhoto}
+                    />
                     <PoppinsText style={{ fontSize: 18 }}>{user.email}</PoppinsText>
                 </View>
                 <TouchableOpacity
@@ -429,7 +423,7 @@ const UserSettingsScreen = ({ navigation }) => {
                 <TouchableOpacity
                     style={{
                         ...styles.btn,
-                        backgroundColor: '#E48700'
+                        backgroundColor: secondryColor
                     }}
                     onPress={handleSaveChangesBtnOnPress}
                 >
@@ -458,19 +452,18 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         paddingHorizontal: 8
     },
-    profileIcon: {
-        fontSize: 130,
-        marginRight: 8
-    },
     profilePhoto: {
-        marginRight: 8
+        marginRight: 8,
+        height: 130,
+        width: 130,
+        borderRadius: 130,
     },
     editIcon: {
-        color: 'white',
+        color: mainColor,
         fontSize: 14
     },
     editProfilePhotoBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 6,
         borderRadius: 20,
         position: 'absolute',
@@ -520,7 +513,7 @@ const styles = StyleSheet.create({
         marginBottom: 16
     },
     saveBtnText: {
-        color: 'white'
+        color: mainColor
     },
     textInputIcon: {
         paddingRight: 8,

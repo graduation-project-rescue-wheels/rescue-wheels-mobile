@@ -20,6 +20,7 @@ import { UPDATE_LOCATION_TASK } from '../tasks/locationTasks'
 import RequestBackgroundLocationAccesModal from '../components/RequestBackgroundLocationAccesModal'
 import StarFlatListItem from '../components/StarFlatListItem'
 import { RATES } from '../utils/constants'
+import { mainColor, secondryColor } from '../colors'
 
 const { height } = Dimensions.get('window')
 
@@ -37,7 +38,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
-        return [0.28, 0.65].map(percentage => percentage * height);
+        return [0.28, 0.80].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const isFocused = useIsFocused()
@@ -363,7 +364,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                         apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
                         origin={region}
                         destination={request.coordinates}
-                        strokeColor='#E48700'
+                        strokeColor={mainColor}
                         strokeWidth={4}
                     />
                     {request.dropOffLocation && <>
@@ -371,7 +372,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                             apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
                             origin={request.coordinates}
                             destination={request.dropOffLocation}
-                            strokeColor='#E48700'
+                            strokeColor={mainColor}
                             strokeWidth={4}
                             lineDashPattern={[4, 4]}
                         />
@@ -409,7 +410,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                         (request === null && nearbyRequests.length > 0) &&
                         <View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
+                                <PoppinsText style={{ color: mainColor, fontSize: 25, padding: 8 }}>
                                     Request details
                                 </PoppinsText>
                                 <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
@@ -455,7 +456,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                                 </View>
                             }
                             <TouchableOpacity
-                                style={{ ...styles.btn, marginTop: 10, backgroundColor: '#E48700' }}
+                                style={{ ...styles.btn, marginTop: 10, backgroundColor: secondryColor }}
                                 onPress={handleAcceptBtn}>
                                 <PoppinsText style={styles.buttonText}>Accept request</PoppinsText>
                             </TouchableOpacity>
@@ -465,7 +466,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                         request &&
                         <View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <PoppinsText style={{ color: '#E48700', fontSize: 25, padding: 8 }}>
+                                <PoppinsText style={{ color: mainColor, fontSize: 25, padding: 8 }}>
                                     Request details
                                 </PoppinsText>
                                 <TouchableOpacity style={styles.navigationBTN} onPress={handleFocusMap}>
@@ -509,40 +510,36 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                                 <PoppinsText>{dropOffAddress}</PoppinsText>
                             </View>}
                             {
-                                request.state === 'responding' && <View>
-                                    <View style={styles.acceptRequestView}>
-                                        <PoppinsText style={{ fontSize: 18 }} >Request accepted</PoppinsText>
-                                        <TouchableOpacity
-                                            style={styles.navigatButton}
-                                            onPress={openGPS}>
-                                            <Fontisto name="navigate" size={24} color='#E48700' />
-                                            <PoppinsText style={styles.navigateText}>
-                                                Navigate
-                                            </PoppinsText>
-                                        </TouchableOpacity>
-                                    </View>
+                                request.state === 'responding' && <>
                                     <TouchableOpacity
-                                        style={{ ...styles.btn, backgroundColor: "#E48700", marginTop: 8 }}
+                                        style={{ ...styles.btn, backgroundColor: secondryColor }}
+                                        onPress={openGPS}>
+                                        <Fontisto name="navigate" size={20} color={mainColor} style={{ marginRight: 8 }} />
+                                        <PoppinsText style={{ color: mainColor }}>
+                                            Navigate
+                                        </PoppinsText>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ ...styles.btn, backgroundColor: secondryColor, marginTop: 8 }}
                                         onPress={handleStartServiceBTN}>
-                                        <PoppinsText style={{ color: "white" }}>Start service</PoppinsText>
+                                        <PoppinsText style={{ color: mainColor }}>Start service</PoppinsText>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={{ ...styles.btn, backgroundColor: '#F9BFBF', marginTop: 8 }}
                                         onPress={handleCancelBTN}>
                                         <PoppinsText style={{ color: 'red' }}>Cancel</PoppinsText>
                                     </TouchableOpacity>
-
-                                </View>
+                                </>
                             }
                             {
                                 request.state === 'inProgress' && <View>
                                     <View style={{ alignSelf: "center" }}>
                                         <PoppinsText>Service started</PoppinsText></View>
                                     <TouchableOpacity
-                                        style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
+                                        style={{ ...styles.btn, backgroundColor: secondryColor, marginTop: 8 }}
                                         onPress={handleServiceFinishedBTN}
                                     >
-                                        <PoppinsText style={{ color: 'white' }}>Finish service</PoppinsText>
+                                        <PoppinsText style={{ color: mainColor }}>Finish service</PoppinsText>
                                     </TouchableOpacity>
                                 </View>
 
@@ -581,13 +578,13 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                                                 setRequest(null)
                                             }}
                                         >
-                                            <PoppinsText style={{ color: '#E48700' }}>Skip</PoppinsText>
+                                            <PoppinsText style={{ color: mainColor }}>Skip</PoppinsText>
                                         </TouchableOpacity>
                                         <TouchableOpacity
-                                            style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                                            style={{ ...styles.btn, backgroundColor: secondryColor }}
                                             onPress={handleSubmitRateBtn}
                                         >
-                                            <PoppinsText style={{ color: 'white' }}>Submit</PoppinsText>
+                                            <PoppinsText style={{ color: mainColor }}>Submit</PoppinsText>
                                         </TouchableOpacity>
                                     </View>
                                 </>
@@ -610,7 +607,7 @@ const styles = StyleSheet.create({
         flex: 1
     },
     myLocationBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
@@ -623,7 +620,7 @@ const styles = StyleSheet.create({
     },
     icon: {
         fontSize: 30,
-        color: 'white'
+        color: mainColor
     },
     bottomSheetContainer: {
         flex: 1,
@@ -653,16 +650,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 10,
         borderRadius: 25,
-        marginHorizontal: 8
+        marginHorizontal: 8,
+        flexDirection: 'row'
     },
     buttonText: {
-        color: 'white',
+        color: mainColor,
         fontSize: 20
     },
     navigationBTN: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         elevation: 5,
         borderRadius: 50,
         padding: 5,
@@ -670,7 +668,7 @@ const styles = StyleSheet.create({
     },
     bar: {
         height: 4,
-        backgroundColor: '#E48700',
+        backgroundColor: mainColor,
         marginHorizontal: 8,
         borderRadius: 4,
     },
@@ -684,10 +682,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: 'center',
         marginLeft: 10,
+        backgroundColor: secondryColor
     },
     navigateText: {
         fontSize: 20,
         marginLeft: 5,
-        color: '#E48700'
+        color: mainColor
     },
 })

@@ -7,6 +7,7 @@ import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
 import NoHistory from '../components/NoHistory'
 import { getRequestById } from '../api/EmergencyRequest'
 import { useIsFocused } from '@react-navigation/native'
+import { mainColor, secondryColor } from '../colors'
 
 const TechnicianHomeScreen = ({ navigation }) => {
 
@@ -61,22 +62,22 @@ const TechnicianHomeScreen = ({ navigation }) => {
                                     color={
                                         user.status == "online" ? 'green' : 'red'
                                     } />
-                                <PoppinsText style={styles.highLightedText}> {user.status} </PoppinsText>
+                                <PoppinsText style={styles.greyText}> {user.status} </PoppinsText>
                             </View>
                         </View>
                     </View>
                     <View style={styles.line}></View>
                     <View style={styles.businessInfo}>
                         <View style={{ justifyContent: 'center' }}>
-                            <PoppinsText style={styles.highLightedText}>Your rate</PoppinsText>
+                            <PoppinsText style={styles.greyText}>Your rate</PoppinsText>
                             <View style={{ flexDirection: 'row' }}>
-                                <MaterialIcons name="star" size={25} color='#E48700' />
-                                <PoppinsText style={styles.orangeHighLightedText}> {user.rate} </PoppinsText>
+                                <MaterialIcons name="star" size={25} color={mainColor} />
+                                <PoppinsText style={styles.highLightedText}> {user.rate} </PoppinsText>
                             </View>
                         </View>
                         <View style={{ justifyContent: 'center' }}>
-                            <PoppinsText style={styles.highLightedText}>Total requests </PoppinsText>
-                            <PoppinsText style={styles.orangeHighLightedText}> {user.Requests_IDS.length} </PoppinsText>
+                            <PoppinsText style={styles.greyText}>Total requests </PoppinsText>
+                            <PoppinsText style={styles.highLightedText}> {user.Requests_IDS.length} </PoppinsText>
                         </View>
                     </View>
                 </View>
@@ -86,7 +87,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
                     {
                         onGoingRequests === null ?
                             <View style={{ alignItems: 'center' }}>
-                                <PoppinsText style={{ ...styles.highLightedText, padding: 30 }}>
+                                <PoppinsText style={{ ...styles.greyText, padding: 30 }}>
                                     You don't have any ongoing request
                                 </PoppinsText>
                             </View> :
@@ -100,7 +101,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
                                         <PoppinsText style={{ fontSize: 18 }}>
                                             {onGoingRequests?.requestedBy.firstName} {onGoingRequests?.requestedBy.lastName}
                                         </PoppinsText>
-                                        <PoppinsText style={styles.highLightedText}>
+                                        <PoppinsText style={styles.greyText}>
                                             {onGoingRequests.requestedBy.mobileNumber}
                                         </PoppinsText>
                                     </View>
@@ -111,8 +112,8 @@ const TechnicianHomeScreen = ({ navigation }) => {
                                         <TouchableOpacity
                                             style={styles.Buttons}
                                             onPress={handleCallBtn}>
-                                            <MaterialIcons name="call" size={26} color='#E48700' />
-                                            <PoppinsText style={{ ...styles.highLightedText, marginLeft: 5 }}>
+                                            <MaterialIcons name="call" size={26} color={mainColor} />
+                                            <PoppinsText style={{ ...styles.greyText, marginLeft: 5 }}>
                                                 Call
                                             </PoppinsText>
                                         </TouchableOpacity>
@@ -121,8 +122,8 @@ const TechnicianHomeScreen = ({ navigation }) => {
                                         <TouchableOpacity
                                             style={styles.Buttons}
                                             onPress={() => { navigation.navigate("Emergency-stack") }}>
-                                            <MaterialIcons name="info" size={26} color='#E48700' />
-                                            <PoppinsText style={{ ...styles.highLightedText, marginLeft: 5 }}>
+                                            <MaterialIcons name="info" size={26} color={mainColor} />
+                                            <PoppinsText style={{ ...styles.greyText, marginLeft: 5 }}>
                                                 Details
                                             </PoppinsText>
                                         </TouchableOpacity>
@@ -167,11 +168,11 @@ const styles = StyleSheet.create({
     },
     greetingText: {
         fontSize: 20,
-        color: '#E48700'
+        color: mainColor
     },
     CardView: {
         padding: 10,
-        backgroundColor: '#f2ede6',
+        backgroundColor: secondryColor,
         marginHorizontal: 2,
         marginBottom: 30,
         borderRadius: 16,
@@ -208,20 +209,20 @@ const styles = StyleSheet.create({
     },
     cardViewTitle: {
         fontSize: 16,
-        color: "#E48700"
+        color: mainColor
     },
     cardTitleView: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8
     },
-    highLightedText: {
+    greyText: {
         fontSize: 16,
         color: '#666666'
     },
-    orangeHighLightedText: {
+    highLightedText: {
         fontSize: 20,
-        color: "#E48700"
+        color: mainColor
     },
     Buttons: {
         flexDirection: "row",

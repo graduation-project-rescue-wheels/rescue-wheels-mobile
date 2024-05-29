@@ -15,6 +15,7 @@ import showToast from '../components/Toast'
 import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
 import { getAddress } from '../utils/locations'
+import { mainColor, secondryColor } from '../colors'
 
 const { width } = Dimensions.get('window')
 
@@ -389,12 +390,12 @@ const EmergencyScreen = ({ navigation }) => {
                 </View>}
                 {user.onGoingRequestId !== null ?
                     <TouchableOpacity
-                        style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                        style={styles.btn}
                         onPress={() => navigation.navigate('Map', { id: user.onGoingRequestId })}
                     >
-                        <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
-                    </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
-                        <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
+                        <PoppinsText style={{ color: mainColor }}>Go to ongoing request</PoppinsText>
+                    </TouchableOpacity> : <TouchableOpacity style={styles.btn} onPress={handleRequestHelpBtnOnPress}>
+                        <PoppinsText style={{ color: mainColor }}>Request help</PoppinsText>
                     </TouchableOpacity>
                 }
             </View>
@@ -412,7 +413,7 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 8,
-        backgroundColor: '#F6EEE3',
+        backgroundColor: secondryColor,
         borderRadius: 16,
         elevation: 5,
         marginHorizontal: 8,

@@ -2,6 +2,7 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import PoppinsText from './PoppinsText'
 import { AntDesign } from '@expo/vector-icons'
 import { useEffect, useRef } from 'react'
+import { mainColor } from '../colors'
 
 const EditableText = ({ Icon, state, onChangeText, keyboardType, placeholder, setState, onBlur, secureTextEntry }) => {
     const inputRef = useRef()
@@ -19,7 +20,7 @@ const EditableText = ({ Icon, state, onChangeText, keyboardType, placeholder, se
             <View style={{
                 ...styles.infoView,
                 borderColor: state.isFocused ?
-                    '#E48700' : state.validation.isValid ? '#ADADAD' : 'red'
+                    mainColor : state.validation.isValid ? '#ADADAD' : 'red'
             }}>
                 <Icon />
                 <View style={styles.flexRow}>
@@ -33,6 +34,7 @@ const EditableText = ({ Icon, state, onChangeText, keyboardType, placeholder, se
                         secureTextEntry={secureTextEntry}
                         editable={state.isFocused}
                         onBlur={onBlur}
+                        cursorColor={mainColor}
                     />
                     {
                         state.isFocused ? <TouchableOpacity

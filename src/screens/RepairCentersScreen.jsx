@@ -10,6 +10,7 @@ import { calculateDistance } from '../utils/locations'
 import * as Location from 'expo-location'
 import showToast, { LOCATION_PERMISSION_DENIED } from '../components/Toast'
 import PoppinsText from '../components/PoppinsText'
+import { mainColor } from '../colors'
 
 const RepairCentersScreen = ({ navigation }) => {
     const [repairCenters, setRepairCenters] = useState([])
@@ -176,19 +177,18 @@ const RepairCentersScreen = ({ navigation }) => {
                 Icon={() => <Feather
                     name="search"
                     size={24}
-                    color={searchQuery.isFocused ? '#E48700' : '#adadad'} />}
+                    color={searchQuery.isFocused ? mainColor : '#adadad'} />}
                 onBlur={() => setsearchQuery({ ...searchQuery, isFocused: false })}
                 onFocus={() => setsearchQuery({ ...searchQuery, isFocused: true })}
                 onChangeText={e => setsearchQuery({ ...searchQuery, value: e })}
                 placeholder='Search for repair centers'
                 state={searchQuery}
-            >
-            </CustomTextInput>
+            />
             <FlatList
                 data={searchQuery.value.length > 0 ? filteredRCs : repairCenters}
                 renderItem={({ item }) => <RepairCenterFlatListItem item={item} navigation={navigation} />}
                 keyExtractor={(item) => item._id}
-                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRepairCenters} colors={['#E48700']} />}
+                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRepairCenters} colors={[mainColor]} />}
                 ListFooterComponent={<View style={{ height: 80 }} />}
                 ListHeaderComponent={<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <PoppinsText>Sort</PoppinsText>

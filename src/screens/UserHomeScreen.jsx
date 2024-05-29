@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import NoHistory from '../components/NoHistory'
 import { MaterialIcons } from '@expo/vector-icons';
 import NoOffers from '../components/NoOffers'
+import { mainColor, secondryColor } from '../colors'
 
 const UserHomeScreen = () => {
     const { user } = useSelector(state => state.user)
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     },
     greetingText: {
         fontSize: 20,
-        color: '#E48700'
+        color: mainColor
     },
     historySectionTitleView: {
         flexDirection: 'row',
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
         color: '#666666'
     },
     cardView: {
-        backgroundColor: '#F6EEE3',
+        backgroundColor: secondryColor,
         borderRadius: 16,
         padding: 8,
         elevation: 5,
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     },
     supportBtn: {
         position: 'absolute',
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 8,
         borderRadius: 50,
         bottom: 85,
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     },
     supportBtnIcon: {
         fontSize: 40,
-        color: 'white'
+        color: mainColor
     },
     selectedEmergencyBtn: {
         flexDirection: 'row',

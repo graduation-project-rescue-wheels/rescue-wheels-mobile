@@ -8,6 +8,7 @@ import PoppinsText from '../components/PoppinsText'
 import RepairCenterListEmptyComponent from '../components/RepairCenterListEmptyComponent'
 import { useHeaderHeight } from '@react-navigation/elements'
 import MapViewDirections from 'react-native-maps-directions'
+import { mainColor, secondryColor } from '../colors'
 
 const { height } = Dimensions.get('window')
 
@@ -96,11 +97,11 @@ const SelectedRepairCenterScreen = ({ route }) => {
                 ref={mapRef}
                 provider='google'
             >
-                <MapViewDirections 
-                    apikey= {process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                <MapViewDirections
+                    apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
                     origin={location}
                     destination={rc.location.coords}
-                    strokeColor='#E48700'
+                    strokeColor={mainColor}
                     strokeWidth={4}
                 />
                 <Marker
@@ -132,13 +133,13 @@ const SelectedRepairCenterScreen = ({ route }) => {
                             <TouchableOpacity
                                 style={{ ...styles.btn, marginRight: 8 }}
                                 onPress={handleCallBtn}>
-                                <MaterialIcons name="call" size={26} color='white' />
+                                <MaterialIcons name="call" size={26} color={mainColor} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.btn}
                                 onPress={openGPS}
                             >
-                                <MaterialCommunityIcons name='map-marker' size={26} color={'white'} />
+                                <MaterialCommunityIcons name='map-marker' size={26} color={mainColor} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -165,7 +166,7 @@ const styles = StyleSheet.create({
         right: 16
     },
     myLocationBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
@@ -174,19 +175,19 @@ const styles = StyleSheet.create({
     },
     icon: {
         fontSize: 30,
-        color: 'white'
+        color: mainColor
     },
     bottomSheetContainer: {
         paddingHorizontal: 8
     },
     title: {
-        color: '#E48700',
+        color: mainColor,
         fontSize: 20
     },
     btn: {
         padding: 8,
         borderRadius: 50,
-        backgroundColor: '#E48700'
+        backgroundColor: secondryColor
     },
     description: {
         color: '#969696'
