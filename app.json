@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "rescue-wheels-mobile",
-    "slug": "rescue-wheels-mobile",
+    "name": "ResWee",
+    "slug": "ResWee",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

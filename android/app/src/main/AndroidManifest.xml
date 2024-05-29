@@ -33,6 +33,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.youssef_negm.rescuewheelsmobile"/>
         <data android:scheme="exp+rescue-wheels-mobile"/>
+        <data android:scheme="exp+reswee"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
