@@ -5,7 +5,6 @@ import * as Location from 'expo-location'
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import PoppinsText from '../components/PoppinsText'
-import RepairCenterListEmptyComponent from '../components/RepairCenterListEmptyComponent'
 import { useHeaderHeight } from '@react-navigation/elements'
 import MapViewDirections from 'react-native-maps-directions'
 import { mainColor, secondryColor } from '../colors'
@@ -144,10 +143,6 @@ const SelectedRepairCenterScreen = ({ route }) => {
                         </View>
                     </View>
                     <PoppinsText style={{ fontSize: 16 }}>Technicians</PoppinsText>
-                    <FlatList
-                        data={rc.Technicians}
-                        ListEmptyComponent={<RepairCenterListEmptyComponent />}
-                    />
                 </BottomSheetView>
             </BottomSheet>
         </View>
