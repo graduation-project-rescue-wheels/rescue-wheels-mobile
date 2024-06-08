@@ -1,12 +1,13 @@
 import { StyleSheet, TextInput, View } from 'react-native'
+import { mainColor } from '../colors'
 
-const CustomTextInput = ({ hasValidation = false, state, placeholder, secureTextEntry, onChangeText, onFocus, onBlur, Icon, keyboardType }) => {
+const CustomTextInput = ({ hasValidation = false, state, placeholder, secureTextEntry, onChangeText, onFocus, onBlur, Icon, keyboardType, autoCapitalize }) => {
     return (
         <View style={{
             ...styles.inputView,
-            borderColor: hasValidation ? 
-            state.isFocused ? '#E48700':
-            state.validation.isValid ? '#ADADAD' : 'red': state.isFocused? '#E48700' : '#ADADAD'
+            borderColor: hasValidation ?
+                state.isFocused ? mainColor :
+                    state.validation.isValid ? '#ADADAD' : 'red' : state.isFocused ? mainColor : '#ADADAD'
         }}>
             <Icon />
             <TextInput
@@ -19,7 +20,8 @@ const CustomTextInput = ({ hasValidation = false, state, placeholder, secureText
                 onFocus={onFocus}
                 onBlur={onBlur}
                 keyboardType={keyboardType}
-                cursorColor={'#E48700'}
+                cursorColor={mainColor}
+                autoCapitalize={autoCapitalize}
             />
         </View>
     )

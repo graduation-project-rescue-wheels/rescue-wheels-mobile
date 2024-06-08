@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import VehicleFlatListItem from '../components/VehicleFlatListItem'
 import { AntDesign } from '@expo/vector-icons'
 import { loadUserAsync } from '../store/userAsyncThunks'
+import { mainColor, secondryColor } from '../colors'
 
 const UserVehiclesScreen = () => {
     const { user } = useSelector(state => state.user)
@@ -27,7 +28,7 @@ const UserVehiclesScreen = () => {
                 data={user.vehicles_IDS}
                 renderItem={({ item }) => <VehicleFlatListItem id={item} />}
                 ListEmptyComponent={<NoVehicles onPress={() => setAddVehicleModalVisible(true)} />}
-                refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={['#E48700']} />}
+                refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={[mainColor]} />}
             />
             <TouchableOpacity style={styles.addBtn} onPress={() => setAddVehicleModalVisible(true)}>
                 <AntDesign
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     },
     addBtn: {
         position: 'absolute',
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 8,
         borderRadius: 50,
         bottom: 85,
@@ -59,6 +60,6 @@ const styles = StyleSheet.create({
     },
     addBtnIcon: {
         fontSize: 40,
-        color: 'white'
+        color: mainColor
     }
 })

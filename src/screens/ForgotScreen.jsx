@@ -1,58 +1,71 @@
-import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
-import { Fontisto, Ionicons } from '@expo/vector-icons'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Fontisto } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
 import BackButton from '../components/BackButton'
+import CustomTextInput from '../components/CustomTextInput'
+import { mainColor, secondryColor } from '../colors'
+import { validateEmail } from '../utils/inputValidations'
+import ValidationMessage from '../components/ValidationMessage'
 
 const ForgotPassword = ({ navigation }) => {
     const [email, setEmail] = useState({
         value: "",
-        isFocused: false
+        isFocused: false,
+        validation: {
+            isValid: true,
+            message: ''
+        }
     })
 
     const handleForgotPassowrdBtn = () => {
-        //TODO: Send E-mail
-        navigation.navigate('Reset password')
+        const emailValidationResult = validateEmail(email.value)
+
+        setEmail({ ...email, validation: emailValidationResult })
+
+        if (emailValidationResult.isValid) {
+            //TODO: Send E-mail
+            navigation.navigate('Reset password')
+        }
     }
 
     return (
         <View style={styles.container}>
-            <BackButton navigation={navigation}/>
+            <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: '#E48700' }}
+                style={{ color: mainColor }}
             >
                 Rescue Wheels
             </PoppinsText>
             </PoppinsText>
             <PoppinsText style={styles.title}>Forgot Password</PoppinsText>
             <PoppinsText style={styles.label}>Please enter your registered email address, so we will send you link to your email</PoppinsText>
-            <View style={{
-                ...styles.inputView,
-                borderColor: email.isFocused ? '#E48700' : '#ADADAD'
-            }}>
-                <Fontisto
+            <CustomTextInput
+                Icon={() => <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ? '#E48700' : '#ADADAD'
-                    }} />
-                <TextInput
-                    placeholder='E-mail'
-                    keyboardType='email-address'
-                    value={email.value}
-                    onChangeText={e => setEmail({ ...email, value: e })}
-                    style={styles.textInput}
-                    placeholderTextColor={'#ADADAD'}
-                    onFocus={() => setEmail({ ...email, isFocused: true })}
-                    onBlur={() => setEmail({ ...email, isFocused: false })}
-                />
-            </View>
-
+                        color: email.isFocused ?
+                            mainColor : email.validation.isValid ? '#ADADAD' : 'red'
+                    }}
+                />}
+                autoCapitalize='none'
+                keyboardType={'email-address'}
+                onBlur={() => {
+                    setEmail({ ...email, isFocused: false, validation: validateEmail(email.value) })
+                }}
+                onChangeText={e => setEmail({ ...email, value: e })}
+                onFocus={() => setEmail({ ...email, isFocused: true })}
+                placeholder='E-mail'
+                state={email}
+                hasValidation={true}
+            />
+            <ValidationMessage state={email} />
             <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: '#E48700' }}
+                style={{ ...styles.button, backgroundColor: secondryColor }}
                 onPress={handleForgotPassowrdBtn}
             >
-                <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Send</PoppinsText>
+                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Send</PoppinsText>
             </TouchableOpacity>
         </View>
     )

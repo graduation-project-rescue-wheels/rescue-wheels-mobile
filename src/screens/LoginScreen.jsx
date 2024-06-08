@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
@@ -8,6 +8,7 @@ import { validateEmail, validatePassword } from '../utils/inputValidations'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
 import { signInAsync } from '../store/userAsyncThunks'
+import { mainColor, secondryColor } from '../colors'
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -81,7 +82,7 @@ const LoginScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: '#E48700' }}
+                style={{ color: mainColor }}
             >
                 Rescue Wheels
             </PoppinsText>
@@ -99,7 +100,8 @@ const LoginScreen = ({ navigation }) => {
                     <PoppinsText style={styles.signUpText}>Don't have an account?</PoppinsText>
                     <PoppinsText
                         style={{
-                            color: '#E48700'
+                            color: mainColor,
+                            textDecorationLine: 'underline'
                         }}
                         onPress={handleSignUpOnPress}
                     >
@@ -109,15 +111,16 @@ const LoginScreen = ({ navigation }) => {
             </View>
             <PoppinsText style={styles.label}>Enter your username or E-mail</PoppinsText>
             <CustomTextInput
+                autoCapitalize='none'
                 Icon={() => <Fontisto
                     name='email'
                     style={{
                         ...styles.icon,
                         color: email.isFocused ?
-                            '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
+                            mainColor : email.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 onBlur={handleEmailTextInputOnBlur}
                 onChangeText={e => setEmail(prev => ({ ...prev, value: e }))}
                 onFocus={() => setEmail(prev => ({ ...prev, isFocused: true }))}
@@ -128,15 +131,16 @@ const LoginScreen = ({ navigation }) => {
             <ValidationMessage state={email} />
             <PoppinsText style={styles.label}>Enter your password</PoppinsText>
             <CustomTextInput
+                autoCapitalize='none'
                 Icon={() => <MaterialIcons
                     name='password'
                     style={{
                         ...styles.icon,
                         color: password.isFocused ?
-                            '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
+                            mainColor : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 onBlur={handlePasswordTextInputOnBlur}
                 onChangeText={e => setPassword(prev => ({ ...prev, value: e }))}
                 onFocus={() => setPassword(prev => ({ ...prev, isFocused: true }))}
@@ -152,14 +156,14 @@ const LoginScreen = ({ navigation }) => {
                 Forgot password?
             </PoppinsText>
             <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: '#E48700' }}
+                style={{ ...styles.button, backgroundColor: secondryColor }}
                 onPress={handleSignInBtn}
             >
-                <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Sign in</PoppinsText>
+                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Sign in</PoppinsText>
             </TouchableOpacity>
             <PoppinsText style={styles.orText}>or</PoppinsText>
             <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: '#FFF4E3', flexDirection: 'row' }}
+                style={{ ...styles.button, backgroundColor: secondryColor, flexDirection: 'row' }}
                 onPress={handleSignInWithGoogleBtn}
             >
                 <AntDesign name='google' style={styles.googleIcon} />
@@ -220,12 +224,12 @@ const styles = StyleSheet.create({
     },
     googleIcon: {
         fontSize: 20,
-        color: '#E48700',
+        color: mainColor,
         marginVertical: 8
     },
     googleText: {
         fontSize: 20,
-        color: '#E48700',
+        color: mainColor,
         textAlign: 'center',
         width: '100%'
     }

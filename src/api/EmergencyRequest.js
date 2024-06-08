@@ -32,3 +32,15 @@ export async function getNearbyRequests(long, lat) {
 export async function acceptRequest(id) {
     return rwClient.put('/emrgencyRequest/acceptRequest', { id })
 }
+
+export async function inProgressRequest(id) {
+    return rwClient.put(`/emrgencyRequest/inProgressRequest/${id}`)
+}
+
+export async function finishRequest(id){
+    return rwClient.put(`/emrgencyRequest/finishRequest/${id}`)
+}
+
+export async function rateRequest(id, rate){
+    return rwClient.put(`/emrgencyRequest/rateRequest/${id}/${rate}`)
+}

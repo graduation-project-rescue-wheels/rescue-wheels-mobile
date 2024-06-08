@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import SelectionButton from '../components/SelectionButton'
 import { useEffect, useRef, useState } from 'react'
 import { AntDesign, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
@@ -15,6 +15,9 @@ import showToast from '../components/Toast'
 import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
 import { getAddress } from '../utils/locations'
+import { mainColor, secondryColor } from '../colors'
+
+const { width } = Dimensions.get('window')
 
 const EmergencyScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -47,6 +50,7 @@ const EmergencyScreen = ({ navigation }) => {
         }
     })
     const [dropOffMarkerCoordinates, setDropOffMarkerCoordinates] = useState(null)
+    const [confirmRequestModalVisible, setConfirmRequestModalVisible] = useState(false)
 
     const containerRef = useRef()
     const mapRef = useRef()
@@ -86,42 +90,33 @@ const EmergencyScreen = ({ navigation }) => {
         const res = await Location.requestForegroundPermissionsAsync()
         const vehicleValidationResult = validateSelectedVehicle(selectedVehicle)
         const emergencyValidationResult = validateSelectedEmergency(selectedEmergency)
+        const locationPermission = await Location.requestForegroundPermissionsAsync()
 
         setVehicleValidation({ validation: vehicleValidationResult })
         setEmergencyValidation({ validation: emergencyValidationResult })
 
-        if (selectedEmergency.label === 'Other') {
-            const addressValidationResult = validateAddress(selectedAddress)
+        if (locationPermission.granted) {
+            const location = await Location.getCurrentPositionAsync()
 
-            setAddressValidation({ validation: addressValidationResult })
+            setRegion({
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.006866,
+                longitudeDelta: 0.004757
+            })
 
-            if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid && addressValidationResult.isValid) {
-                const location = await Location.getCurrentPositionAsync({})
+            if (selectedEmergency.label === 'Other') {
+                const addressValidationResult = validateAddress(selectedAddress)
 
-                dispatch(requestEmergencyAsync({
-                    vehicle: selectedVehicle._id,
-                    coordinates: {
-                        longitude: location.coords.longitude,
-                        latitude: location.coords.latitude
-                    },
-                    type: selectedEmergency.label,
-                    dropOffLocation: dropOffMarkerCoordinates,
-                    navigation
-                }))
-            }
-        } else {
-            if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid) {
-                const location = await Location.getCurrentPositionAsync({})
+                setAddressValidation({ validation: addressValidationResult })
 
-                dispatch(requestEmergencyAsync({
-                    vehicle: selectedVehicle._id,
-                    coordinates: {
-                        longitude: location.coords.longitude,
-                        latitude: location.coords.latitude
-                    },
-                    type: selectedEmergency.label,
-                    navigation
-                }))
+                if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid && addressValidationResult.isValid) {
+                    setConfirmRequestModalVisible(true)
+                }
+            } else {
+                if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid) {
+                    setConfirmRequestModalVisible(true)
+                }
             }
         }
     }
@@ -135,10 +130,10 @@ const EmergencyScreen = ({ navigation }) => {
         mapRef.current.animateToRegion(region)
     }
 
-    const handleMapViewOnPress = async ({ nativeEvent }) => {
+    const handleDropOffMapViewOnPress = async ({ nativeEvent }) => {
         setDropOffMarkerCoordinates(nativeEvent.coordinate)
-        const address = await getAddress(nativeEvent.coordinate, mapRef)
-        setSelectedAddress(`${address.name} - ${address.subAdministrativeArea}`)
+        const address = await getAddress(nativeEvent.coordinate)
+        setSelectedAddress(address.data.results[0].formatted_address)
     }
 
     const handleConfirmDropOffBtn = () => {
@@ -178,6 +173,20 @@ const EmergencyScreen = ({ navigation }) => {
         }
     }
 
+    const handleConfirmRequestBtn = async () => {
+        dispatch(requestEmergencyAsync({
+            vehicle: selectedVehicle._id,
+            coordinates: {
+                longitude: region.longitude,
+                latitude: region.latitude
+            },
+            type: selectedEmergency.label,
+            dropOffLocation: dropOffMarkerCoordinates,
+            navigation
+        }))
+        setConfirmRequestModalVisible(false)
+    }
+
     useEffect(() => {
         if (selectVehicleModalVisible) {
             fetchVehicles()
@@ -192,6 +201,7 @@ const EmergencyScreen = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="always" ref={containerRef}>
+            {/* vehicle selection modal */}
             <CustomModal visible={selectVehicleModalVisible} onRequestClose={() => setSelectVehicleModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
                 <ScrollView style={{ flexGrow: 0 }}>
@@ -224,6 +234,7 @@ const EmergencyScreen = ({ navigation }) => {
                     <PoppinsText style={styles.modalBtnText}>Cancel</PoppinsText>
                 </TouchableOpacity>
             </CustomModal>
+            {/* Emergency type selection modal */}
             <CustomModal visible={selectEmergencyModalVisible} onRequestClose={() => setSelectEmergencyModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select emergency</PoppinsText>
                 <ScrollView style={{ flexGrow: 0 }}>
@@ -251,6 +262,7 @@ const EmergencyScreen = ({ navigation }) => {
                     <PoppinsText style={styles.modalBtnText}>Cancel</PoppinsText>
                 </TouchableOpacity>
             </CustomModal>
+            {/* drop-off selection modal */}
             <Modal
                 visible={selectAdressModalVisible}
                 onRequestClose={() => {
@@ -265,7 +277,7 @@ const EmergencyScreen = ({ navigation }) => {
                     provider='google'
                     showsUserLocation
                     region={region}
-                    onPress={handleMapViewOnPress}
+                    onPress={handleDropOffMapViewOnPress}
                     ref={mapRef}
                     mapPadding={{ bottom: 90, top: 120, right: 70 }}
                     showsMyLocationButton={false}
@@ -307,6 +319,41 @@ const EmergencyScreen = ({ navigation }) => {
                     <MaterialIcons name='my-location' style={{ color: 'white', fontSize: 30 }} />
                 </TouchableOpacity>
             </Modal>
+            {/* request confirmation modal */}
+            <CustomModal
+                visible={confirmRequestModalVisible}
+                onRequestClose={() => setConfirmRequestModalVisible(false)}
+            >
+                <PoppinsText style={styles.modalTitle}>Confirm your request</PoppinsText>
+                {selectedVehicle && <PoppinsText style={styles.requestConfirmModalText}>Vehicle: {selectedVehicle.make} {selectedVehicle.model}</PoppinsText>}
+                {selectedEmergency && <PoppinsText style={styles.requestConfirmModalText}>Emergency type: {selectedEmergency.label}</PoppinsText>}
+                <PoppinsText style={styles.requestConfirmModalText}>Estimated price: 50EGP</PoppinsText>
+                <View style={{ borderRadius: 16, overflow: 'hidden', marginVertical: 8 }}>
+                    <MapView
+                        style={{ ...styles.requestConfirmModalMapView, width: width - 63 }}
+                        showsUserLocation
+                        scrollEnabled={false}
+                        region={region}
+                        provider='google'
+                        showsMyLocationButton={false}
+                        onUserLocationChange={({ nativeEvent }) => {
+                            setRegion(prev => ({
+                                ...prev,
+                                latitude: nativeEvent.coordinate.latitude,
+                                longitude: nativeEvent.coordinate.longitude
+                            }))
+                        }}
+                    />
+                </View>
+                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                    <TouchableOpacity style={styles.modalBtn} onPress={() => setConfirmRequestModalVisible(false)}>
+                        <PoppinsText style={{ color: '#D3D3D3' }}>Cancel</PoppinsText>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.modalBtn} onPress={handleConfirmRequestBtn}>
+                        <PoppinsText style={{ color: 'green' }}>Confirm</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+            </CustomModal>
             <View style={styles.card}>
                 <SelectionButton
                     placeholder={'Select vehicle'}
@@ -343,12 +390,12 @@ const EmergencyScreen = ({ navigation }) => {
                 </View>}
                 {user.onGoingRequestId !== null ?
                     <TouchableOpacity
-                        style={{ ...styles.btn, backgroundColor: '#E48700' }}
+                        style={styles.btn}
                         onPress={() => navigation.navigate('Map', { id: user.onGoingRequestId })}
                     >
-                        <PoppinsText style={{ color: 'white' }}>Go to ongoing request</PoppinsText>
-                    </TouchableOpacity> : <TouchableOpacity style={{ ...styles.btn, backgroundColor: '#F9BFBF' }} onPress={handleRequestHelpBtnOnPress}>
-                        <PoppinsText style={{ color: 'red' }}>Request help</PoppinsText>
+                        <PoppinsText style={{ color: mainColor }}>Go to ongoing request</PoppinsText>
+                    </TouchableOpacity> : <TouchableOpacity style={styles.btn} onPress={handleRequestHelpBtnOnPress}>
+                        <PoppinsText style={{ color: mainColor }}>Request help</PoppinsText>
                     </TouchableOpacity>
                 }
             </View>
@@ -366,7 +413,7 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 8,
-        backgroundColor: '#F6EEE3',
+        backgroundColor: secondryColor,
         borderRadius: 16,
         elevation: 5,
         marginHorizontal: 8,
@@ -379,7 +426,8 @@ const styles = StyleSheet.create({
         fontSize: 20
     },
     modalTitle: {
-        fontSize: 16
+        fontSize: 16,
+        marginBottom: 8
     },
     modalBtnText: {
         fontSize: 14,
@@ -431,5 +479,12 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 100,
         right: 16
+    },
+    requestConfirmModalText: {
+        alignSelf: 'flex-start'
+    },
+    requestConfirmModalMapView: {
+        width: 100,
+        height: 100
     }
 })

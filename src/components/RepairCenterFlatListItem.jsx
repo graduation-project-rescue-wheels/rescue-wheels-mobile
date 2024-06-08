@@ -1,46 +1,35 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, Pressable, StyleSheet, View } from 'react-native'
 import PoppinsText from './PoppinsText'
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons'
 import MapView, { Marker } from 'react-native-maps'
-import { useEffect, useRef } from 'react'
+import { mainColor } from '../colors'
 
 const RepairCenterFlatListItem = ({ item, navigation }) => {
-    const mapRef = useRef()
-
-    useEffect(() => {
-        if (mapRef) {
-            mapRef.current.animateToRegion({
-                ...item.location.coords,
-                latitudeDelta: 0.006866,
-                longitudeDelta: 0.004757
-            })
-        }
-    }, [mapRef])
-
-
     return (
-        <TouchableOpacity
+        <Pressable
             style={styles.container}
             onPress={() => navigation.navigate('selectedRc', { rc: item })}
         >
             <View style={{ borderRadius: 16, flexDirection: 'row' }}>
                 <Image
-                    source={item.photoURL ? { uri: item.photoURL } : require('../assets/images/RCAvatar.png')}
+                    source={item.Image?.secure_url ? { uri: item.Image?.secure_url } : require('../assets/images/RCAvatar.png')}
                     style={styles.image}
                 />
                 <MapView
                     provider='google'
                     scrollEnabled={false}
-                    ref={mapRef}
-                    style={styles.mapImage}>
-                    <Marker
-                        coordinate={item.location.coords}
-                    >
-                    </Marker>
+                    style={styles.map}
+                    initialRegion={{
+                        ...item.location.coords,
+                        latitudeDelta: 0.006866,
+                        longitudeDelta: 0.004757
+                    }}
+                >
+                    <Marker coordinate={item.location.coords} />
                 </MapView>
             </View>
             <View style={{ padding: 8 }}>
-                <PoppinsText style={{ color: '#E48700' }}>{item.name}</PoppinsText>
+                <PoppinsText style={{ color: mainColor }}>{item.name}</PoppinsText>
                 <View style={styles.iconTextView}>
                     <Feather name='info' style={styles.icon} />
                     <PoppinsText style={styles.info}>{item.description}</PoppinsText>
@@ -54,7 +43,7 @@ const RepairCenterFlatListItem = ({ item, navigation }) => {
                     <PoppinsText style={styles.info}>{item.location.address}</PoppinsText>
                 </View>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     )
 }
 
@@ -75,7 +64,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
         // tintColor:'#d3d3d3'
     },
-    mapImage: {
+    map: {
         borderRadius: 16,
         height: 90,
         width: 290

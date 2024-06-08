@@ -8,6 +8,7 @@ import { validateConfirmationPassword, validateEmail, validateFirstName, validat
 import CustomTextInput from '../components/CustomTextInput';
 import ValidationMessage from '../components/ValidationMessage';
 import { signUpAsync } from '../store/userAsyncThunks';
+import { mainColor, secondryColor } from '../colors';
 
 const SignupScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
@@ -172,7 +173,7 @@ const SignupScreen = ({ navigation }) => {
         <ScrollView style={styles.container}>
             <BackButton navigation={navigation} />
             <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: '#E48700' }}
+                style={{ color: mainColor }}
             >
                 Rescue Wheels
             </PoppinsText>
@@ -188,7 +189,8 @@ const SignupScreen = ({ navigation }) => {
                     <PoppinsText style={styles.label}>Already have an account?</PoppinsText>
                     <PoppinsText
                         style={{
-                            color: '#E48700'
+                            color: mainColor,
+                            textDecorationLine: 'underline'
                         }}
                         onPress={handleSignInOnPress}
                     >
@@ -205,10 +207,10 @@ const SignupScreen = ({ navigation }) => {
                             name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: firstName.isFocused ? '#E48700' : firstName.validation.isValid ? '#ADADAD' : 'red'
+                                color: firstName.isFocused ? mainColor : firstName.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
-                        hasValidation = {true}
+                        hasValidation={true}
                         onBlur={handleFirstNameTextInputOnBlur}
                         onChangeText={e => setFirstName({ ...firstName, value: e })}
                         onFocus={() => setFirstName({ ...firstName, isFocused: true })}
@@ -224,10 +226,10 @@ const SignupScreen = ({ navigation }) => {
                         Icon={() => <MaterialIcons name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: lastName.isFocused ? '#E48700' : lastName.validation.isValid ? '#ADADAD' : 'red'
+                                color: lastName.isFocused ? mainColor : lastName.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
-                        hasValidation = {true}
+                        hasValidation={true}
                         onBlur={handleLastNameTextInputOnBlur}
                         onChangeText={e => setLastName({ ...lastName, value: e })}
                         onFocus={() => setLastName({ ...lastName, isFocused: true })}
@@ -244,10 +246,10 @@ const SignupScreen = ({ navigation }) => {
                     name="email"
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ? '#E48700' : email.validation.isValid ? '#ADADAD' : 'red'
+                        color: email.isFocused ? mainColor : email.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 keyboardType='email-address'
                 onBlur={handleEmailTextInputOnBlur}
                 onChangeText={e => setEmail({ ...email, value: e })}
@@ -262,10 +264,10 @@ const SignupScreen = ({ navigation }) => {
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: password.isFocused ? '#E48700' : password.validation.isValid ? '#ADADAD' : 'red'
+                        color: password.isFocused ? mainColor : password.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 onBlur={handlePasswordTextInputOnBlur}
                 onChangeText={e => setPassword({ ...password, value: e })}
                 onFocus={() => setPassword({ ...password, isFocused: true })}
@@ -280,10 +282,10 @@ const SignupScreen = ({ navigation }) => {
                     name='password'
                     style={{
                         ...styles.icon,
-                        color: confirmPassword.isFocused ? '#E48700' : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
+                        color: confirmPassword.isFocused ? mainColor : confirmPassword.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 onBlur={handleConfirmationPasswordTextInputOnBlur}
                 onChangeText={e => setconfirmPassword({ ...confirmPassword, value: e })}
                 onFocus={() => setconfirmPassword({ ...confirmPassword, isFocused: true })}
@@ -298,10 +300,10 @@ const SignupScreen = ({ navigation }) => {
                     name="local-phone"
                     style={{
                         ...styles.icon,
-                        color: phoneNumber.isFocused ? '#E48700' : phoneNumber.validation.isValid ? '#ADADAD' : 'red'
+                        color: phoneNumber.isFocused ? mainColor : phoneNumber.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                hasValidation = {true}
+                hasValidation={true}
                 placeholder='Phone Number'
                 onChangeText={e => setPhoneNumber({ ...phoneNumber, value: e })}
                 onFocus={() => setPhoneNumber({ ...phoneNumber, isFocused: true })}
@@ -311,10 +313,10 @@ const SignupScreen = ({ navigation }) => {
             />
             <ValidationMessage state={phoneNumber} />
             <TouchableOpacity
-                style={{ ...styles.button, backgroundColor: '#E48700' }}
+                style={{ ...styles.button, backgroundColor: secondryColor }}
                 onPress={handleSignUpBtn}
             >
-                <PoppinsText style={{ ...styles.buttonText, color: 'white' }}>Sign Up</PoppinsText>
+                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Sign Up</PoppinsText>
             </TouchableOpacity>
         </ScrollView>
     )

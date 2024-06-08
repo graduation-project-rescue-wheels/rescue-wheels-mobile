@@ -5,14 +5,15 @@ import * as Location from 'expo-location'
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import PoppinsText from '../components/PoppinsText'
-import RepairCenterListEmptyComponent from '../components/RepairCenterListEmptyComponent'
 import { useHeaderHeight } from '@react-navigation/elements'
+import MapViewDirections from 'react-native-maps-directions'
+import { mainColor, secondryColor } from '../colors'
 
 const { height } = Dimensions.get('window')
 
 const SelectedRepairCenterScreen = ({ route }) => {
     const { rc } = route.params
-    const headerHeight = useHeaderHeight() / height
+    const headerHeight = useHeaderHeight()
 
     const [location, setLocation] = useState(null)
     const [mapPadding, setMapPadding] = useState(85)
@@ -22,7 +23,7 @@ const SelectedRepairCenterScreen = ({ route }) => {
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
 
     const snappingPoints = useMemo(() => {
-        return [0.35, 1 - headerHeight].map(percentage => percentage * height);
+        return [0.35, 1 - headerHeight / height].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const handleSheetChanges = useCallback(index => {
@@ -88,13 +89,20 @@ const SelectedRepairCenterScreen = ({ route }) => {
         <View style={styles.container}>
             <MapView
                 style={{ flex: 1 }}
-                mapPadding={{ bottom: mapPadding, top: 80 }}
+                mapPadding={{ bottom: mapPadding, top: headerHeight + 50 }}
                 showsUserLocation
                 showsMyLocationButton={false}
                 initialRegion={location}
                 ref={mapRef}
                 provider='google'
             >
+                <MapViewDirections
+                    apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
+                    origin={location}
+                    destination={rc.location.coords}
+                    strokeColor={mainColor}
+                    strokeWidth={4}
+                />
                 <Marker
                     coordinate={rc.location.coords}
                     ref={markerRef}
@@ -124,21 +132,17 @@ const SelectedRepairCenterScreen = ({ route }) => {
                             <TouchableOpacity
                                 style={{ ...styles.btn, marginRight: 8 }}
                                 onPress={handleCallBtn}>
-                                <MaterialIcons name="call" size={26} color='white' />
+                                <MaterialIcons name="call" size={26} color={mainColor} />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.btn}
                                 onPress={openGPS}
                             >
-                                <MaterialCommunityIcons name='map-marker' size={26} color={'white'} />
+                                <MaterialCommunityIcons name='map-marker' size={26} color={mainColor} />
                             </TouchableOpacity>
                         </View>
                     </View>
                     <PoppinsText style={{ fontSize: 16 }}>Technicians</PoppinsText>
-                    <FlatList
-                        data={rc.Technicians}
-                        ListEmptyComponent={<RepairCenterListEmptyComponent />}
-                    />
                 </BottomSheetView>
             </BottomSheet>
         </View>
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
         right: 16
     },
     myLocationBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',
@@ -166,19 +170,19 @@ const styles = StyleSheet.create({
     },
     icon: {
         fontSize: 30,
-        color: 'white'
+        color: mainColor
     },
     bottomSheetContainer: {
         paddingHorizontal: 8
     },
     title: {
-        color: '#E48700',
+        color: mainColor,
         fontSize: 20
     },
     btn: {
         padding: 8,
         borderRadius: 50,
-        backgroundColor: '#E48700'
+        backgroundColor: secondryColor
     },
     description: {
         color: '#969696'

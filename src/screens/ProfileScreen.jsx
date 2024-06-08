@@ -33,7 +33,7 @@ const ProfileScreen = ({ navigation }) => {
             icon: <MaterialIcons name='history' style={styles.icon} />,
             label: 'Your history',
             onPress: () => {
-                //TODO
+                navigation.navigate('History')
             }
         },
         {

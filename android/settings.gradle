@@ -1,4 +1,4 @@
-rootProject.name = 'rescue-wheels-mobile'
+rootProject.name = 'ResWee'
 
 dependencyResolutionManagement {
   versionCatalogs {
