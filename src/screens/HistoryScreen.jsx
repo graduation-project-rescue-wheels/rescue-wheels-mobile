@@ -5,7 +5,7 @@ import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyCom
 import { useState } from 'react'
 import { loadUserAsync } from '../store/userAsyncThunks'
 
-const HistoryScreen = () => {
+const HistoryScreen = ({navigation}) => {
     const { user } = useSelector(state => state.user)
     const dispatch = useDispatch()
     const [isLoading, setIsLoading] = useState(false)
@@ -18,8 +18,10 @@ const HistoryScreen = () => {
     return (
         <View style={styles.container}>
             <FlatList
-                data={user.Requests_IDS}
-                renderItem={({ item }) => <HistoryFlatListItem item={item} />}
+                data={[...user.Requests_IDS].reverse().map(e => {
+                    return e
+                })}
+                renderItem={({ item }) => <HistoryFlatListItem item={item} navigation={navigation} />}
                 keyExtractor={(item, _) => item}
                 ListFooterComponent={<View style={{ height: 80 }} />}
                 ListEmptyComponent={<HistoryFlatListEmptyComponent />}
