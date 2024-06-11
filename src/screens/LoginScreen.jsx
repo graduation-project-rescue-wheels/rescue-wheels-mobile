@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { AntDesign, Fontisto, MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
@@ -80,13 +80,15 @@ const LoginScreen = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
-            <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: mainColor }}
-            >
-                Rescue Wheels
-            </PoppinsText>
-            </PoppinsText>
+        <ScrollView style={styles.container}>
+            <PoppinsText style={styles.welcomeText}>Welcome to</PoppinsText>
+            <View style={{ alignItems: 'center' }}>
+                <Image
+                    source={require('../../assets/icon.png')}
+                    style={{ width: 200, height: 200 }}
+                />
+                <PoppinsText style={{ ...styles.welcomeText, color: mainColor }}>Rescue Wheels</PoppinsText>
+            </View>
             <View
                 style={{
                     width: '100%',
@@ -169,7 +171,7 @@ const LoginScreen = ({ navigation }) => {
                 <AntDesign name='google' style={styles.googleIcon} />
                 <PoppinsText style={styles.googleText}>Sign in with Google</PoppinsText>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     )
 }
 

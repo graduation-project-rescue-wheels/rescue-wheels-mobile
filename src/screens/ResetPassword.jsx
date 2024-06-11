@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
@@ -56,14 +56,16 @@ const ResetPassword = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <BackButton navigation={navigation} />
-            <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: mainColor }}
-            >
-                Rescue Wheels
-            </PoppinsText>
-            </PoppinsText>
+            <PoppinsText style={styles.welcomeText}>Welcome to</PoppinsText>
+            <View style={{ alignItems: 'center' }}>
+                <Image
+                    source={require('../../assets/icon.png')}
+                    style={{ width: 200, height: 200 }}
+                />
+                <PoppinsText style={{ ...styles.welcomeText, color: mainColor }}>Rescue Wheels</PoppinsText>
+            </View>
             <PoppinsText style={styles.title}>Reset Password</PoppinsText>
 
             <PoppinsText style={styles.label}>Enter Your New Password</PoppinsText>
@@ -108,7 +110,7 @@ const ResetPassword = ({ navigation }) => {
             >
                 <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Continue</PoppinsText>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     )
 }
 
