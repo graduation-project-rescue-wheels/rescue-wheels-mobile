@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Animated, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Animated, FlatList, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { getAllRepairCenters } from '../api/repairCenter'
 import RepairCenterFlatListItem from '../components/RepairCenterFlatListItem'
 import CustomTextInput from '../components/CustomTextInput'
@@ -10,7 +10,9 @@ import { calculateDistance } from '../utils/locations'
 import * as Location from 'expo-location'
 import showToast, { LOCATION_PERMISSION_DENIED } from '../components/Toast'
 import PoppinsText from '../components/PoppinsText'
-import { mainColor } from '../colors'
+import { mainColor, secondryColor } from '../colors'
+import FilteredFlatListItem from '../components/FilteredFlatListItem'
+
 
 const RepairCentersScreen = ({ navigation }) => {
     const [repairCenters, setRepairCenters] = useState([])
@@ -22,6 +24,16 @@ const RepairCentersScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(false)
     const [selectedSortOption, setSelectedSortOption] = useState(SORT_BY_LOCATION)
     const [isAscendingOrder, setIsAscendingOrder] = useState(true)
+    const [selectedCategories, setSelectedCategories] = useState([])
+    const categoriesList = useMemo(() => [
+        "Tyre shop",
+        "Electrician",
+        "Automechanic",
+        "Air conditioner",
+        "Body shop",
+        "Exhaust system",
+    ], [])
+    const [unSelectedCategories, setUnSelectedCategories] = useState(categoriesList)
 
     const sortingDirection = useRef(new Animated.Value(0)).current
 
@@ -171,6 +183,32 @@ const RepairCentersScreen = ({ navigation }) => {
         handleSearch()
     }, [searchQuery.value])
 
+    useEffect(() => {
+        if (selectedCategories.length > 0) {
+            if (searchQuery.value.length > 0) {
+                setFilteredRCs(() => {
+                    let rcs = filteredRCs
+                    let filtered = []
+                    selectedCategories.forEach(e => {
+                        filtered = [...filtered, ...rcs.filter(item => item.description === e)]
+                    })
+                    return filtered
+                })
+            }
+            else {
+                setFilteredRCs(() => {
+                    let rcs = repairCenters
+                    let filtered = []
+                    selectedCategories.forEach(e => {
+                        filtered = [...filtered, ...rcs.filter(item => item.description === e)]
+                    })
+                    return filtered
+                })
+            }
+        }
+    }, [selectedCategories.length])
+
+
     return (
         <View style={styles.constainer}>
             <CustomTextInput
@@ -185,12 +223,12 @@ const RepairCentersScreen = ({ navigation }) => {
                 state={searchQuery}
             />
             <FlatList
-                data={searchQuery.value.length > 0 ? filteredRCs : repairCenters}
+                data={searchQuery.value.length > 0 || selectedCategories.length > 0 ? filteredRCs : repairCenters}
                 renderItem={({ item }) => <RepairCenterFlatListItem item={item} navigation={navigation} />}
                 keyExtractor={(item) => item._id}
                 refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRepairCenters} colors={[mainColor]} />}
                 ListFooterComponent={<View style={{ height: 80 }} />}
-                ListHeaderComponent={<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                ListHeaderComponent={<View><View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <PoppinsText>Sort</PoppinsText>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 0.7 }}>
                         <Picker
@@ -219,6 +257,33 @@ const RepairCentersScreen = ({ navigation }) => {
                             </Animated.View>
                         </TouchableOpacity>
                     </View>
+                </View>
+                    <ScrollView
+                        horizontal={true}>
+                        {
+                            selectedCategories.map((item, index) => <FilteredFlatListItem
+                                label={item}
+                                key={index}
+                                containerStyle={{ backgroundColor: mainColor }}
+                                labelStyle={{ color: secondryColor }}
+                                onPress={() => {
+                                    setSelectedCategories(prev => prev.filter(e => item !== e))
+                                    setUnSelectedCategories(prev => [item, ...prev])
+                                }} />)
+                        }
+                        {
+                            unSelectedCategories.map((item, index) => <FilteredFlatListItem
+                                label={item}
+                                key={index}
+                                containerStyle={{ backgroundColor: secondryColor }}
+                                labelStyle={{ color: mainColor }}
+                                onPress={() => {
+                                    setUnSelectedCategories(prev => prev.filter(e => item !== e))
+                                    setSelectedCategories(prev => [item, ...prev])
+                                }} />)
+                        }
+
+                    </ScrollView>
                 </View>}
             />
         </View>
