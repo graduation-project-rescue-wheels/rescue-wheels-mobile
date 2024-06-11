@@ -146,13 +146,13 @@ const TechnicianHomeScreen = ({ navigation }) => {
                 <View style={styles.CardView}>
                     <View style={styles.cardTitleView}>
                         <PoppinsText style={styles.cardViewTitle}>Completed requests</PoppinsText>
-                        <TouchableOpacity onPress={() => {navigation.navigate("History")}}>
+                        <TouchableOpacity onPress={() => {navigation.navigate('Profile-stack', {screen: 'History'})}}>
                             <PoppinsText style={{ color: '#666666' }}>see all</PoppinsText>
                         </TouchableOpacity>
                     </View>
                     <FlatList
                         data={recentHistory?.slice(0,5)}
-                        renderItem={({ item }) => <HistoryFlatListItem item={item} navigation={navigation} />}
+                        renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack',{screen: 'selectedHistory', params: {sHistory: item} })} />}
                         keyExtractor={(item, _) => item}
                         ListFooterComponent={<View style={{ height: 80 }} />}
                         ListEmptyComponent={<HistoryFlatListEmptyComponent />}

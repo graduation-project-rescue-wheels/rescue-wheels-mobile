@@ -6,8 +6,9 @@ import PoppinsText from './PoppinsText'
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import { getAddress } from '../utils/locations'
 import { useSelector } from 'react-redux'
+import { mainColor } from '../colors'
 
-const HistoryFlatListItem = ({ item, navigation }) => {
+const HistoryFlatListItem = ({ item, onPress }) => {
     const { user } = useSelector(state => state.user)
     const [request, setRequest] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -19,6 +20,7 @@ const HistoryFlatListItem = ({ item, navigation }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true)
                 const response = await getRequestById(item)
 
                 if (response.status === 200) {
@@ -50,11 +52,11 @@ const HistoryFlatListItem = ({ item, navigation }) => {
     return (
         <Pressable
             style={styles.container}
-            onPress={() => navigation.navigate('selectedHistory', { sHistory: item })}
+            onPress={onPress}
         >
             {
                 isLoading ?
-                    <ActivityIndicator size={'large'} color={'#E48700'} /> : error ?
+                    <ActivityIndicator size={'large'} color={mainColor} /> : error ?
                         <View style={styles.errorView}>
                             <MaterialIcons name='error-outline' style={styles.errorIcon} />
                             <PoppinsText style={styles.errorText}>Something went wrong</PoppinsText>
@@ -81,7 +83,7 @@ const HistoryFlatListItem = ({ item, navigation }) => {
                                             <PoppinsText style={styles.infoText}>{request.requestedBy.firstName} {request.requestedBy.lastName}</PoppinsText>
                                         }
                                         {
-                                            user.role === "user" &&
+                                            user.role === "User" &&
                                             <PoppinsText style={styles.infoText}>{request.responder.firstName} {request.responder.lastName}</PoppinsText>
                                         }
                                     </View>

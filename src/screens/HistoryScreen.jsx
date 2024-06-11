@@ -4,6 +4,7 @@ import HistoryFlatListItem from '../components/HistoryFlatListItem'
 import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
 import { useState } from 'react'
 import { loadUserAsync } from '../store/userAsyncThunks'
+import { mainColor } from '../colors'
 
 const HistoryScreen = ({navigation}) => {
     const { user } = useSelector(state => state.user)
@@ -21,11 +22,11 @@ const HistoryScreen = ({navigation}) => {
                 data={[...user.Requests_IDS].reverse().map(e => {
                     return e
                 })}
-                renderItem={({ item }) => <HistoryFlatListItem item={item} navigation={navigation} />}
+                renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('selectedHistory', { sHistory: item })} />}
                 keyExtractor={(item, _) => item}
                 ListFooterComponent={<View style={{ height: 80 }} />}
                 ListEmptyComponent={<HistoryFlatListEmptyComponent />}
-                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={['#E48700']} />}
+                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={[mainColor]} />}
             />
         </View>
     )
