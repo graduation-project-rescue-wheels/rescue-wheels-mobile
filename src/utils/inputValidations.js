@@ -236,3 +236,25 @@ export const validateAddress = (address) => {
         message: 'Please enter an address or choose drop off on the map'
     }
 }
+
+export const validateDateAndTime = (date) => {
+    const currentDate = new Date()
+
+    return date < currentDate ? {
+        isValid: false,
+        message: `You can't make reservation before ${currentDate.toLocaleString()}`
+    } : {
+        isValid: true,
+        message: ''
+    }
+}
+
+export const validateReservationTitle = (title) => {
+    return title.length > 0 ? {
+        isValid: true,
+        message: ''
+    } : {
+        isValid: false,
+        message: 'Provide a title please'
+    }
+}
