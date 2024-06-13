@@ -413,11 +413,10 @@ const styles = StyleSheet.create({
         color: '#969696'
     },
     btn: {
-        justifyContent: 'center',
+        borderRadius: 16,
+        padding: 8,
         alignItems: 'center',
-        backgroundColor: secondryColor,
-        borderRadius: 50,
-        padding: 5,
-        marginHorizontal: 8
+        marginTop: 8,
+        backgroundColor: secondryColor
     }
 })
