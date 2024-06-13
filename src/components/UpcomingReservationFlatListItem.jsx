@@ -1,14 +1,14 @@
-import { StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { mainColor, secondryColor } from '../colors'
 import PoppinsText from './PoppinsText'
 import { useMemo } from 'react'
 
-const UpcomingReservationFlatListItem = ({ item }) => {
+const UpcomingReservationFlatListItem = ({ item, onPress }) => {
     const startDate = useMemo(() => new Date(Date.parse(item.startDate)), [item.startDate])
     const endDate = useMemo(() => new Date(Date.parse(item.endDate)), [item.endDate])
 
     return (
-        <View style={styles.container}>
+        <Pressable style={styles.container} onPress={onPress}>
             <PoppinsText style={{ color: mainColor }} numberOfLines={1}>{item.title}</PoppinsText>
             <PoppinsText style={{ color: '#ADADAD', fontSize: 11 }} numberOfLines={1}>{item.description}</PoppinsText>
             <PoppinsText>{startDate.toLocaleDateString()} {startDate.toLocaleTimeString()}</PoppinsText>
@@ -26,7 +26,7 @@ const UpcomingReservationFlatListItem = ({ item }) => {
                 }} />
                 <PoppinsText>{item.status}</PoppinsText>
             </View>
-        </View>
+        </Pressable>
     )
 }
 
