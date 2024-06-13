@@ -1,15 +1,19 @@
 import { StyleSheet, View } from 'react-native'
 import { mainColor, secondryColor } from '../colors'
 import PoppinsText from './PoppinsText'
+import { useMemo } from 'react'
 
 const UpcomingReservationFlatListItem = ({ item }) => {
+    const startDate = useMemo(() => new Date(Date.parse(item.startDate)), [item.startDate])
+    const endDate = useMemo(() => new Date(Date.parse(item.endDate)), [item.endDate])
+
     return (
         <View style={styles.container}>
-            <PoppinsText style={{ color: mainColor }}>{item.title}</PoppinsText>
-            <PoppinsText style={{ color: '#ADADAD' }}>{item.description}</PoppinsText>
-            <PoppinsText>{new Date(Date.parse(item.startDate)).toLocaleTimeString()}</PoppinsText>
+            <PoppinsText style={{ color: mainColor }} numberOfLines={1}>{item.title}</PoppinsText>
+            <PoppinsText style={{ color: '#ADADAD', fontSize: 11 }} numberOfLines={1}>{item.description}</PoppinsText>
+            <PoppinsText>{startDate.toLocaleDateString()} {startDate.toLocaleTimeString()}</PoppinsText>
             <View style={{ width: 2, height: 30, borderRadius: 2, backgroundColor: mainColor, left: 5 }} />
-            <PoppinsText>{new Date(Date.parse(item.endDate)).toLocaleTimeString()}</PoppinsText>
+            <PoppinsText>{endDate.toLocaleDateString()} {endDate.toLocaleTimeString()}</PoppinsText>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{
                     backgroundColor: item.status === 'pending' ?
@@ -35,6 +39,6 @@ const styles = StyleSheet.create({
         padding: 8,
         backgroundColor: secondryColor,
         margin: 8,
-        // width: '100%'
+        width: 200
     }
 })
