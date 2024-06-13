@@ -24,7 +24,7 @@ import LoadingModal from '../components/LoadingModal'
 const { height } = Dimensions.get('window')
 
 const SelectedRepairCenterScreen = ({ route }) => {
-    const { rc } = route.params
+    const { rc, id } = route.params
     const headerHeight = useHeaderHeight()
 
     const [repairCenter, setRepairCenter] = useState(rc)
@@ -173,19 +173,33 @@ const SelectedRepairCenterScreen = ({ route }) => {
 
     useEffect(() => {
         getCurrentLocation()
-        getUpcomingReservations(repairCenter._id)
+        repairCenter && getUpcomingReservations(repairCenter._id)
             .then(res => setUpcomingReservations(res.data.reservations))
             .catch(err => {
                 console.log(err);
                 showToast("Couldn't get your upcoming reservations. Please try again later.")
             })
 
-        console.log(repairCenter);
+        if (id) {
+            getRepairCenterById(id)
+                .then(res => setRepairCenter(res.data.data))
+                .catch(err => {
+                    console.log(err);
+                    showToast("Couldn't get repair center info. Please try again later.")
+                })
+
+            getUpcomingReservations(id)
+                .then(res => setUpcomingReservations(res.data.reservations))
+                .catch(err => {
+                    console.log(err);
+                    showToast("Couldn't get your upcoming reservations. Please try again later.")
+                })
+        }
     }, [])
 
     useEffect(() => {
         if (mapRef)
-            mapRef.current.fitToCoordinates([location, repairCenter.location.coords])
+            mapRef.current.fitToCoordinates([location, repairCenter?.location.coords])
     }, [mapRef, location, mapPadding])
 
     useEffect(() => {
@@ -193,26 +207,28 @@ const SelectedRepairCenterScreen = ({ route }) => {
     }, [markerRef.current])
 
     useEffect(() => {
-        const filteredReservations = repairCenter.Reservations.filter(reservation => date.value.toDateString() === new Date(reservation.startDate).toDateString())
-        filteredReservations.sort((a, b) => new Date(Date.parse(a.startDate)) - new Date(Date.parse(b.startDate)))
-        let prevTime = startOfDay
-        const availableTimes = []
+        if (repairCenter) {
+            const filteredReservations = repairCenter.Reservations.filter(reservation => date.value.toDateString() === new Date(reservation.startDate).toDateString())
+            filteredReservations.sort((a, b) => new Date(Date.parse(a.startDate)) - new Date(Date.parse(b.startDate)))
+            let prevTime = startOfDay
+            const availableTimes = []
 
-        for (let i = 0; i < filteredReservations.length; i++) {
-            const reservationStartDate = new Date(filteredReservations[i].startDate)
+            for (let i = 0; i < filteredReservations.length; i++) {
+                const reservationStartDate = new Date(filteredReservations[i].startDate)
 
-            if (prevTime < reservationStartDate) {
-                availableTimes.push({ start: prevTime, end: reservationStartDate })
+                if (prevTime < reservationStartDate) {
+                    availableTimes.push({ start: prevTime, end: reservationStartDate })
+                }
+                prevTime = new Date(filteredReservations[i].endDate)
             }
-            prevTime = new Date(filteredReservations[i].endDate)
-        }
 
-        if (prevTime < endOfDay) {
-            availableTimes.push({ start: prevTime, end: endOfDay })
-        }
+            if (prevTime < endOfDay) {
+                availableTimes.push({ start: prevTime, end: endOfDay })
+            }
 
-        setAvailableTimes(availableTimes)
-    }, [date.value.toDateString(), repairCenter.Reservations.length])
+            setAvailableTimes(availableTimes)
+        }
+    }, [date.value.toDateString(), repairCenter?.Reservations.length])
 
     return (
         <View style={styles.container}>
@@ -243,18 +259,20 @@ const SelectedRepairCenterScreen = ({ route }) => {
                 <MapViewDirections
                     apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
                     origin={location}
-                    destination={repairCenter.location.coords}
+                    destination={repairCenter?.location.coords}
                     strokeColor={mainColor}
                     strokeWidth={4}
                 />
-                <Marker
-                    coordinate={repairCenter.location.coords}
-                    ref={markerRef}
-                >
-                    <Callout>
-                        <PoppinsText>{repairCenter.name}</PoppinsText>
-                    </Callout>
-                </Marker>
+                {
+                    repairCenter && <Marker
+                        coordinate={repairCenter.location.coords}
+                        ref={markerRef}
+                    >
+                        <Callout>
+                            <PoppinsText>{repairCenter?.name}</PoppinsText>
+                        </Callout>
+                    </Marker>
+                }
             </MapView>
             <Animated.View style={{ bottom: snappingPoints[0] / 3, transform: [{ translateY: myLocationBtnBottom }], ...styles.myLocationBtnView }}>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
@@ -269,8 +287,8 @@ const SelectedRepairCenterScreen = ({ route }) => {
                 <BottomSheetView style={styles.bottomSheetContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <View>
-                            <PoppinsText style={styles.title}>{repairCenter.name}</PoppinsText>
-                            <PoppinsText style={styles.description}>{repairCenter.description}</PoppinsText>
+                            <PoppinsText style={styles.title}>{repairCenter?.name}</PoppinsText>
+                            <PoppinsText style={styles.description}>{repairCenter?.description}</PoppinsText>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
                             <TouchableOpacity
