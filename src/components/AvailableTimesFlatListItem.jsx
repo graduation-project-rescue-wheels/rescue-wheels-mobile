@@ -20,6 +20,6 @@ const styles = StyleSheet.create({
         elevation: 5,
         padding: 8,
         backgroundColor: secondryColor,
-        marginVertical: 8
+        margin: 8
     }
 })
