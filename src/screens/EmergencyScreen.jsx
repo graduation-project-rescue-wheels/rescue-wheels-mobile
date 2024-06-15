@@ -206,7 +206,7 @@ const EmergencyScreen = ({ navigation }) => {
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
                 <ScrollView style={{ flexGrow: 0 }}>
                     {isLoadingVehicles ?
-                        <ActivityIndicator color={'#E48700'} size={'large'} /> : vehicles.length === 0 ?
+                        <ActivityIndicator color={mainColor} size={'large'} /> : vehicles.length === 0 ?
                             <NoVehicles onPress={handleNoVehicleOnPress} /> :
                             vehicles.map(vehicle => (
                                 <SelectionButton
