@@ -32,7 +32,6 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.youssef_negm.rescuewheelsmobile"/>
-        <data android:scheme="exp+rescue-wheels-mobile"/>
         <data android:scheme="exp+reswee"/>
       </intent-filter>
     </activity>
