@@ -32,7 +32,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.youssef_negm.rescuewheelsmobile"
+      "package": "com.youssef_negm.rescuewheelsmobile",
+      "googleServicesFile": "./android/app/google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,7 +41,12 @@
     "plugins": [
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c8851005-0d7f-47d8-a178-bbcf246e9a96"
+      }
+    }
   },
   "plugins": [
     [
@@ -67,6 +73,14 @@
       "expo-location",
       {
         "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+      }
+    ],
+    "@react-native-firebase/app",
+    [
+      "expo-notifications",
+      {
+        "icon": "./assets/notification-icon.png",
+        "defaultChannel": "default"
       }
     ]
   ]
