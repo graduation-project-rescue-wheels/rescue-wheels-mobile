@@ -33,7 +33,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.youssef_negm.rescuewheelsmobile",
-      "googleServicesFile": "./android/app/google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyB4BFqNlmu7N27rHdSydssJiyHvpvgzSc8"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
