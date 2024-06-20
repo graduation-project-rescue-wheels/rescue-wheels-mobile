@@ -171,6 +171,22 @@ const SelectedRepairCenterScreen = ({ route }) => {
         }
     }
 
+    const fetchRepairCenter = (id) => {
+        getRepairCenterById(id)
+        .then(res => setRepairCenter(res.data.data))
+        .catch(err => {
+            console.log(err);
+            showToast("Couldn't get repair center info. Please try again later.")
+        })
+
+    getUpcomingReservations(id)
+        .then(res => setUpcomingReservations(res.data.reservations))
+        .catch(err => {
+            console.log(err);
+            showToast("Couldn't get your upcoming reservations. Please try again later.")
+        })
+    }
+
     useEffect(() => {
         getCurrentLocation()
         repairCenter && getUpcomingReservations(repairCenter._id)
@@ -181,19 +197,7 @@ const SelectedRepairCenterScreen = ({ route }) => {
             })
 
         if (id) {
-            getRepairCenterById(id)
-                .then(res => setRepairCenter(res.data.data))
-                .catch(err => {
-                    console.log(err);
-                    showToast("Couldn't get repair center info. Please try again later.")
-                })
-
-            getUpcomingReservations(id)
-                .then(res => setUpcomingReservations(res.data.reservations))
-                .catch(err => {
-                    console.log(err);
-                    showToast("Couldn't get your upcoming reservations. Please try again later.")
-                })
+            fetchRepairCenter(id)
         }
     }, [])
 
@@ -208,7 +212,7 @@ const SelectedRepairCenterScreen = ({ route }) => {
 
     useEffect(() => {
         if (repairCenter) {
-            const filteredReservations = repairCenter.Reservations.filter(reservation => date.value.toDateString() === new Date(reservation.startDate).toDateString())
+            const filteredReservations = repairCenter.Reservations.filter(reservation => date.value.toDateString() === new Date(reservation.startDate).toDateString() && reservation.status !== "cancel")
             filteredReservations.sort((a, b) => new Date(Date.parse(a.startDate)) - new Date(Date.parse(b.startDate)))
             let prevTime = startOfDay
             const availableTimes = []
@@ -311,7 +315,9 @@ const SelectedRepairCenterScreen = ({ route }) => {
                             <PoppinsText>Upcoming reservations</PoppinsText>
                             <View style={{ flexDirection: 'row' }}>
                                 <BottomSheetScrollView horizontal={true} ref={upcomingReservationsScrollViewRef}>
-                                    {upcomingReservations.map(item => <UpcomingReservationFlatListItem item={item} key={item._id} />)}
+                                    {upcomingReservations.map(item => <UpcomingReservationFlatListItem item={item} key={item._id} showCancelBTN={true} onCancelCallBack={() => {
+                                        fetchRepairCenter(repairCenter._id)
+                                    }} />)}
                                 </BottomSheetScrollView>
                             </View>
                         </>
