@@ -4,10 +4,28 @@ import UserTabBar from "../../tab_bars/UserTabBar"
 import UserProfileStack from "./UserProfileStack"
 import UserEmergencyStack from "./UserEmergencyStack"
 import UserRepairCenterStack from "./UserRepairCenterStack"
+import * as Notifications from 'expo-notifications'
+import { useEffect } from "react"
+import { registerForNotifications } from "../../../utils/notifications"
 
 const Tab = createBottomTabNavigator()
 
 const UserStack = () => {
+    useEffect(() => {
+        Notifications.getPermissionsAsync().then(async permission => {
+            if (permission.granted) {
+                await registerForNotifications()
+                console.log('registered');
+            } else {
+                const permissionResult = await Notifications.requestPermissionsAsync()
+
+                if (permissionResult.granted) {
+                    await registerForNotifications()
+                }
+            }
+        })
+    }, [])
+
     return (
         <Tab.Navigator
             initialRouteName="Home"
