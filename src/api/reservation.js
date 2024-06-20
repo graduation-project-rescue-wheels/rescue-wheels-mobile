@@ -19,3 +19,7 @@ export async function getUpcomingReservations(repairCenterId) {
 export async function getUpcomingReservationsForCurrentUser() {
     return await rwClient.get('/Reservation/getUpcomingReservationsForUser')
 }
+
+export async function cancelReservation(reservationId) {
+    return await rwClient.get(`/Reservation/cancelReservation/${reservationId}`)
+}

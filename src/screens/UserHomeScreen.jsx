@@ -71,6 +71,7 @@ const UserHomeScreen = ({ navigation }) => {
                                 screen: 'selectedRc',
                                 params: { id: item.RepairCenterId }
                             })}
+                            showCancelBTN={false}
                         />}
                         ListEmptyComponent={<NoUpcomingReservations />}
                     />
