@@ -38,7 +38,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
-        return [0.28, 0.80].map(percentage => percentage * height);
+        return [0.28, 0.60].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const isFocused = useIsFocused()

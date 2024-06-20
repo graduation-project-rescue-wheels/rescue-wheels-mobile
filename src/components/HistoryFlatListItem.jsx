@@ -1,12 +1,15 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { getRequestById } from '../api/EmergencyRequest'
 import MapView, { Marker } from 'react-native-maps'
 import PoppinsText from './PoppinsText'
 import { MaterialIcons, Ionicons } from '@expo/vector-icons'
 import { getAddress } from '../utils/locations'
+import { useSelector } from 'react-redux'
+import { mainColor } from '../colors'
 
-const HistoryFlatListItem = ({ item }) => {
+const HistoryFlatListItem = ({ item, onPress }) => {
+    const { user } = useSelector(state => state.user)
     const [request, setRequest] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -17,12 +20,13 @@ const HistoryFlatListItem = ({ item }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true)
                 const response = await getRequestById(item)
 
                 if (response.status === 200) {
                     const date = new Date(response.data.request.createdAt)
                     getAddress(response.data.request.coordinates).then(address => {
-                        setAddress(address.data.results[0].formatted_address)
+                        setAddress(`${address.data.results[0].address_components[2].long_name}, ${address.data.results[0].address_components[3].long_name}, ${address.data.results[0].address_components[4].long_name}`)
                     })
                     setRequest(response.data.request)
                     setDateAndTime(`${date.toDateString()} ${date.toLocaleTimeString()}`)
@@ -46,10 +50,13 @@ const HistoryFlatListItem = ({ item }) => {
     }, [mapRef?.current, request?._id])
 
     return (
-        <View style={styles.container}>
+        <Pressable
+            style={styles.container}
+            onPress={onPress}
+        >
             {
                 isLoading ?
-                    <ActivityIndicator size={'large'} color={'#E48700'} /> : error ?
+                    <ActivityIndicator size={'large'} color={mainColor} /> : error ?
                         <View style={styles.errorView}>
                             <MaterialIcons name='error-outline' style={styles.errorIcon} />
                             <PoppinsText style={styles.errorText}>Something went wrong</PoppinsText>
@@ -71,7 +78,14 @@ const HistoryFlatListItem = ({ item }) => {
                                 <View style={{ marginHorizontal: 8 }}>
                                     <View style={styles.rowView}>
                                         <Ionicons name='person-outline' style={styles.icon} />
-                                        <PoppinsText style={styles.infoText}>{request.responder.firstName} {request.responder.lastName}</PoppinsText>
+                                        {
+                                            user.role === "Technician" &&
+                                            <PoppinsText style={styles.infoText}>{request.requestedBy.firstName} {request.requestedBy.lastName}</PoppinsText>
+                                        }
+                                        {
+                                            user.role === "User" &&
+                                            <PoppinsText style={styles.infoText}>{request.responder.firstName} {request.responder.lastName}</PoppinsText>
+                                        }
                                     </View>
                                     <View style={styles.rowView}>
                                         <Ionicons name='location-outline' style={{ ...styles.icon, alignSelf: 'flex-start' }} />
@@ -85,7 +99,7 @@ const HistoryFlatListItem = ({ item }) => {
                             </>}
                         </>
             }
-        </View >
+        </Pressable>
     )
 }
 

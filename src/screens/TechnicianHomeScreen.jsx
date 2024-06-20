@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Image, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Image, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { MaterialIcons } from '@expo/vector-icons'
 import PoppinsText from '../components/PoppinsText'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
-import NoHistory from '../components/NoHistory'
 import { getRequestById } from '../api/EmergencyRequest'
 import { useIsFocused } from '@react-navigation/native'
 import { mainColor, secondryColor } from '../colors'
+import HistoryFlatListItem from '../components/HistoryFlatListItem'
+import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
 
 const TechnicianHomeScreen = ({ navigation }) => {
 
@@ -16,6 +17,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const [onGoingRequests, setonGoingRequests] = useState(null)
     const isFocused = useIsFocused()
+    const [recentHistory, setRecentHistory] = useState(null)
 
     const getOnGoingRequests = async () => {
         if (user.onGoingRequestId) {
@@ -31,6 +33,14 @@ const TechnicianHomeScreen = ({ navigation }) => {
             Linking.openURL(`telprompt:${onGoingRequests?.requestedBy.mobileNumber}`)
     }
 
+
+
+    useEffect(() => {
+        setRecentHistory([...user.Requests_IDS].reverse().map(e => {
+            return e
+        }))
+    }, [])
+    
     useEffect(() => {
         if (isFocused) {
             getOnGoingRequests()
@@ -136,18 +146,18 @@ const TechnicianHomeScreen = ({ navigation }) => {
                 <View style={styles.CardView}>
                     <View style={styles.cardTitleView}>
                         <PoppinsText style={styles.cardViewTitle}>Completed requests</PoppinsText>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => {navigation.navigate('Profile-stack', {screen: 'History'})}}>
                             <PoppinsText style={{ color: '#666666' }}>see all</PoppinsText>
                         </TouchableOpacity>
                     </View>
                     <FlatList
-                        style={{ marginBottom: 32 }}
-                        data={[]}
-                        keyExtractor={(item) => item._id}
+                        data={recentHistory?.slice(0,5)}
+                        renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack',{screen: 'selectedHistory', params: {sHistory: item} })} />}
+                        keyExtractor={(item, _) => item}
+                        ListFooterComponent={<View style={{ height: 80 }} />}
+                        ListEmptyComponent={<HistoryFlatListEmptyComponent />}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
-                        ListEmptyComponent={<NoHistory message="You don't have any completed requests yet" />}
-                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
             </ScrollView>
