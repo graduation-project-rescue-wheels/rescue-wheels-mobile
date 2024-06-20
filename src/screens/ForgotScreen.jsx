@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Fontisto } from '@expo/vector-icons'
 import { useState } from 'react'
 import PoppinsText from '../components/PoppinsText'
@@ -30,14 +30,16 @@ const ForgotPassword = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <BackButton navigation={navigation} />
-            <PoppinsText style={styles.welcomeText}>Welcome to <PoppinsText
-                style={{ color: mainColor }}
-            >
-                Rescue Wheels
-            </PoppinsText>
-            </PoppinsText>
+            <PoppinsText style={styles.welcomeText}>Welcome to</PoppinsText>
+            <View style={{ alignItems: 'center' }}>
+                <Image
+                    source={require('../../assets/icon.png')}
+                    style={{ width: 200, height: 200 }}
+                />
+                <PoppinsText style={{ ...styles.welcomeText, color: mainColor }}>Rescue Wheels</PoppinsText>
+            </View>
             <PoppinsText style={styles.title}>Forgot Password</PoppinsText>
             <PoppinsText style={styles.label}>Please enter your registered email address, so we will send you link to your email</PoppinsText>
             <CustomTextInput
@@ -67,7 +69,7 @@ const ForgotPassword = ({ navigation }) => {
             >
                 <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Send</PoppinsText>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     )
 }
 

@@ -1,16 +1,38 @@
 import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import PoppinsText from '../components/PoppinsText'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import NoHistory from '../components/NoHistory'
 import { MaterialIcons } from '@expo/vector-icons';
 import NoOffers from '../components/NoOffers'
 import { mainColor, secondryColor } from '../colors'
+import NoUpcomingReservations from '../components/NoUpcomingReservations'
+import UpcomingReservationFlatListItem from '../components/UpcomingReservationFlatListItem'
+import { getUpcomingReservationsForCurrentUser } from '../api/reservation'
+import showToast from '../components/Toast'
 
-const UserHomeScreen = () => {
+const UserHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
+    const [upcomingReservations, setUpcomingReservations] = useState([])
+
+    const fetchUpcomingReservations = async () => {
+        try {
+            const response = await getUpcomingReservationsForCurrentUser()
+
+            if (response.status === 200) {
+                setUpcomingReservations(response.data.reservations)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't get your reservations. Please try again later.")
+        }
+    }
+
+    useEffect(() => {
+        fetchUpcomingReservations()
+    }, [])
 
     return (
         <View style={styles.container}>
@@ -36,6 +58,21 @@ const UserHomeScreen = () => {
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoOffers />}
                         contentContainerStyle={{ alignItems: 'center', flex: 1 }}
+                    />
+                </View>
+                <PoppinsText style={styles.sectionTitle}>Upcoming reservations</PoppinsText>
+                <View style={styles.cardView}>
+                    <FlatList
+                        horizontal={true}
+                        data={upcomingReservations}
+                        renderItem={({ item }) => <UpcomingReservationFlatListItem
+                            item={item}
+                            onPress={() => navigation.navigate('RC-Stack', {
+                                screen: 'selectedRc',
+                                params: { id: item.RepairCenterId }
+                            })}
+                        />}
+                        ListEmptyComponent={<NoUpcomingReservations />}
                     />
                 </View>
                 <PoppinsText style={styles.sectionTitle}>History</PoppinsText>
