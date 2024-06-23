@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { getUserReservationHistory } from '../api/reservation'
 import showToast from '../components/Toast'
-import PoppinsText from '../components/PoppinsText'
 import ReservationHistoryFlatListItem from '../components/ReservationHistoryFlatListItem'
 
 const RepairCenterHistory = () => {
@@ -13,7 +12,6 @@ const RepairCenterHistory = () => {
             const response = await getUserReservationHistory()
 
             if (response.status === 200) {
-                console.log(response.data.reservations);
                 setReservations(response.data.reservations)
             }
         } catch (err) {
