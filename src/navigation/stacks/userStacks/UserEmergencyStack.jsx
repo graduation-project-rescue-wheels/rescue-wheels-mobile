@@ -6,7 +6,13 @@ const Stack = createNativeStackNavigator()
 
 const UserEmergencyStack = () => {
     return (
-        <Stack.Navigator initialRouteName="Emergency">
+        <Stack.Navigator
+            initialRouteName="Emergency"
+            screenOptions={{
+                headerTitleStyle: {
+                    fontFamily: 'Poppins-Medium'
+                }
+            }}>
             <Stack.Screen name="Emergency" component={EmergencyScreen} />
             <Stack.Screen name="Map" component={UserEmergencyMapScreen} options={{
                 headerTransparent: true,
