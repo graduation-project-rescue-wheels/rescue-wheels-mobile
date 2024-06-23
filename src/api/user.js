@@ -45,3 +45,15 @@ export async function getCurrnetUser() {
         }
     })
 }
+
+export async function forgotPassowrd(email) {
+    return await rwClient.post('/user/forgetPassword', { email })
+}
+
+export async function verifyOtp(otp, email) {
+    return await rwClient.post('/user/otpverification', { email, otp })
+}
+
+export async function changePassword(email, password, ConfirmNewPassword) {
+    return await rwClient.post('/user/ResetPassword', { email, password, ConfirmNewPassword })
+}

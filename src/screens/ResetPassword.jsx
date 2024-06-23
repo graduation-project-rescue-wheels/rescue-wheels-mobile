@@ -7,8 +7,11 @@ import { mainColor, secondryColor } from '../colors'
 import CustomTextInput from '../components/CustomTextInput'
 import ValidationMessage from '../components/ValidationMessage'
 import { validateConfirmationPassword, validatePassword } from '../utils/inputValidations'
+import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
+import { changePassword } from '../api/user'
 
-const ResetPassword = ({ navigation }) => {
+const ResetPassword = ({ navigation, route }) => {
+    const { email } = route.params
     const [password, setPassword] = useState({
         value: "",
         isFocused: false,
@@ -42,16 +45,25 @@ const ResetPassword = ({ navigation }) => {
         }))
     }
 
-    const handleResetPasswordBtn = () => {
-        const passwordValidationResult = validatePassword(password.value)
-        const confirmationPasswordResult = validateConfirmationPassword(password.value, confirmPassword.value)
+    const handleResetPasswordBtn = async () => {
+        try {
+            const passwordValidationResult = validatePassword(password.value)
+            const confirmationPasswordResult = validateConfirmationPassword(password.value, confirmPassword.value)
 
-        setPassword({ ...password, validation: passwordValidationResult })
-        setconfirmPassword({ ...password, validation: confirmationPasswordResult })
+            setPassword({ ...password, validation: passwordValidationResult })
+            setconfirmPassword({ ...password, validation: confirmationPasswordResult })
 
-        if (passwordValidationResult.isValid && confirmationPasswordResult.isValid) {
-            //TODO: Update password
-            navigation.popToTop()
+            if (passwordValidationResult.isValid && confirmationPasswordResult.isValid) {
+                const response = await changePassword(email, password.value, confirmPassword.value)
+
+                if (response.status === 200) {
+                    navigation.popToTop()
+                    showToast('Password updated!')
+                }
+            }
+        } catch (err) {
+            console.log(err);
+            showToast(SMTH_WENT_WRONG)
         }
     }
 

@@ -258,3 +258,13 @@ export const validateReservationTitle = (title) => {
         message: 'Provide a title please'
     }
 }
+
+export const validateOTP = (OTP) => {
+    return OTP.length === 6 ? {
+        isValid: true,
+        message: ''
+    } : {
+        isValid: false,
+        message: 'OTP must be a 6-digit string'
+    }
+}
