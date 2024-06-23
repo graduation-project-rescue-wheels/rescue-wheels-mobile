@@ -23,3 +23,11 @@ export async function getUpcomingReservationsForCurrentUser() {
 export async function cancelReservation(reservationId) {
     return await rwClient.get(`/Reservation/cancelReservation/${reservationId}`)
 }
+
+export async function getRecentReservationHistory() {
+    return await rwClient.get('/Reservation/getRecentReservationsHistory')
+}
+
+export async function getUserReservationHistory() {
+    return await rwClient.get('/Reservation/getUserReservationHistory')
+}
