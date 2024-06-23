@@ -74,7 +74,7 @@ function UserTabBar({ state, descriptors, navigation }) {
                                             <Image
                                                 source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
                                                 style={styles.profilePic}
-                                                resizeMode='contain'
+                                                resizeMode='cover'
                                             />
                                         </View>
                         }
