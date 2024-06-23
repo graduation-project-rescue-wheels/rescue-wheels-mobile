@@ -14,11 +14,11 @@ export const registerForNotifications = async () => {
             })
 
             const token = await messaging().getToken()
-            const isNotificationTokenRegistered = await SecureStore.getItemAsync('notificationTokenRegistered')
+            const isNotificationTokenRegistered = JSON.parse(await SecureStore.getItemAsync('notificationTokenRegistered'))
 
             if (token && !isNotificationTokenRegistered) {
                 await addNotificationToken(token)
-                await SecureStore.setItemAsync('notificationTokenRegistered', true)
+                await SecureStore.setItemAsync('notificationTokenRegistered', JSON.stringify(true))
             }
         }
     } catch (err) {
