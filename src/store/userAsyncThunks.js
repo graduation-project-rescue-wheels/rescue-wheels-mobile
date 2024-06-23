@@ -110,13 +110,9 @@ export const signUpAsync = createAsyncThunk('user/signUpAsync', async ({
     }
 })
 
-export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async ({
-    firstName,
-    lastName,
-    mobileNumber
-}) => {
+export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async ( data ) => {
     try {
-        const response = await updateUser(firstName, lastName, mobileNumber)
+        const response = await updateUser(data)
 
         if (response.status === 200) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.updatedUser))
