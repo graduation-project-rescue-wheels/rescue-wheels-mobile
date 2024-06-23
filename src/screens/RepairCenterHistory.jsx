@@ -19,6 +19,7 @@ const RepairCenterHistory = () => {
             showToast("Couldn't get your previous reservations. Try again later.")
         }
     }
+    
     useEffect(() => {
         fetchReservations()
     }, [])
