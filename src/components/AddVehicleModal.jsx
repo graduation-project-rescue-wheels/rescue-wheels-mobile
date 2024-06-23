@@ -366,7 +366,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                     style={styles.modalBtn}
                     onPress={handleAddBtnOnPress}
                 >
-                    <PoppinsText style={{ ...styles.modalBtnText, color: '#E48700' }}>Add</PoppinsText>
+                    <PoppinsText style={{ ...styles.modalBtnText, color: 'green' }}>Add</PoppinsText>
                 </TouchableOpacity>
             </View>
         </CustomModal>
