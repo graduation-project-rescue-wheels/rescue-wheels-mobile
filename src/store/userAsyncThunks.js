@@ -7,6 +7,8 @@ import * as SplashScreen from 'expo-splash-screen'
 import { requestEmergency } from "../api/EmergencyRequest";
 import rwClient from "../api/axios";
 import { socket } from "../api/socket.io";
+import messaging from '@react-native-firebase/messaging'
+import { deleteNotificationToken } from "../api/notificationToken";
 
 export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, passowrd }) => {
     try {
@@ -40,9 +42,19 @@ export const signInAsync = createAsyncThunk('user/signInAsync', async ({ email, 
 })
 
 export const signOutAsync = createAsyncThunk('user/signOutAsync', async (navigation) => {
-    navigation.navigate('Home')
-    await SecureStore.deleteItemAsync('accessToken')
-    await SecureStore.deleteItemAsync('currentUser')
+    try {
+        navigation.navigate('Home')
+        const token = await messaging().getToken()
+        const response = await deleteNotificationToken(token)
+
+        if (response.status === 200) {
+            await messaging().deleteToken()
+            await SecureStore.deleteItemAsync('accessToken')
+            await SecureStore.deleteItemAsync('currentUser')
+        }
+    } catch (err) {
+        showToast("Couldn't sign out. Try again later.")
+    }
 })
 
 export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => {
