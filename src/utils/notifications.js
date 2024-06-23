@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging'
 import * as Notifications from 'expo-notifications'
 import { addNotificationToken } from '../api/notificationToken'
+import * as SecureStore from 'expo-secure-store'
 
 export const registerForNotifications = async () => {
     try {
@@ -13,9 +14,11 @@ export const registerForNotifications = async () => {
             })
 
             const token = await messaging().getToken()
+            const isNotificationTokenRegistered = await SecureStore.getItemAsync('notificationTokenRegistered')
 
-            if (token) {
+            if (token && !isNotificationTokenRegistered) {
                 await addNotificationToken(token)
+                await SecureStore.setItemAsync('notificationTokenRegistered', true)
             }
         }
     } catch (err) {
