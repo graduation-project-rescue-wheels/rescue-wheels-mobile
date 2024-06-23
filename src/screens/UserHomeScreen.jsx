@@ -14,7 +14,7 @@ import showToast from '../components/Toast'
 const UserHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
-    const username = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
+    const username = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const [upcomingReservations, setUpcomingReservations] = useState([])
 
     const fetchUpcomingReservations = async () => {

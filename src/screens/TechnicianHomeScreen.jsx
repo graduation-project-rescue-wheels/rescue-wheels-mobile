@@ -12,14 +12,14 @@ import { mainColor, secondryColor } from '../colors'
 const TechnicianHomeScreen = ({ navigation }) => {
 
     const { user } = useSelector(state => state.user)
-    const techUsername = useMemo(() => `${user.firstName} ${user.lastName}`, [user.firstName, user.lastName])
+    const techUsername = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const [onGoingRequests, setonGoingRequests] = useState(null)
     const isFocused = useIsFocused()
 
     const getOnGoingRequests = async () => {
-        if (user.onGoingRequestId) {
-            const requestData = await getRequestById(user.onGoingRequestId)
+        if (user?.onGoingRequestId) {
+            const requestData = await getRequestById(user?.onGoingRequestId)
             setonGoingRequests(requestData.data.request)
         } else setonGoingRequests(null)
     }
@@ -48,7 +48,7 @@ const TechnicianHomeScreen = ({ navigation }) => {
                 <View style={{ ...styles.CardView, marginTop: 20 }}>
                     <View style={{ flexDirection: 'row' }}>
                         <Image
-                            source={user.profilePic.length === 0 ? require('../assets/images/avatar.png') : { uri: user.profilePic }}
+                            source={user?.profilePic.length === 0 ? require('../assets/images/avatar.png') : { uri: user?.profilePic }}
                             style={styles.profilePic}
                         />
                         <View style={{ justifyContent: 'center' }}>
@@ -60,9 +60,9 @@ const TechnicianHomeScreen = ({ navigation }) => {
                                     name="online-prediction"
                                     size={24}
                                     color={
-                                        user.status == "online" ? 'green' : 'red'
+                                        user?.status == "online" ? 'green' : 'red'
                                     } />
-                                <PoppinsText style={styles.greyText}> {user.status} </PoppinsText>
+                                <PoppinsText style={styles.greyText}> {user?.status} </PoppinsText>
                             </View>
                         </View>
                     </View>
@@ -72,12 +72,12 @@ const TechnicianHomeScreen = ({ navigation }) => {
                             <PoppinsText style={styles.greyText}>Your rate</PoppinsText>
                             <View style={{ flexDirection: 'row' }}>
                                 <MaterialIcons name="star" size={25} color={mainColor} />
-                                <PoppinsText style={styles.highLightedText}> {user.rate} </PoppinsText>
+                                <PoppinsText style={styles.highLightedText}> {user?.rate} </PoppinsText>
                             </View>
                         </View>
                         <View style={{ justifyContent: 'center' }}>
                             <PoppinsText style={styles.greyText}>Total requests </PoppinsText>
-                            <PoppinsText style={styles.highLightedText}> {user.Requests_IDS.length} </PoppinsText>
+                            <PoppinsText style={styles.highLightedText}> {user?.Requests_IDS.length} </PoppinsText>
                         </View>
                     </View>
                 </View>
