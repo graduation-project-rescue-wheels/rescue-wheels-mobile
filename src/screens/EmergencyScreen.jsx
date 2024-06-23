@@ -1,4 +1,4 @@
-import { ActivityIndicator, Alert, Dimensions, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Dimensions, FlatList, Modal, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import SelectionButton from '../components/SelectionButton'
 import { useEffect, useRef, useState } from 'react'
 import { AntDesign, MaterialIcons, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons'
@@ -16,6 +16,10 @@ import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
 import { getAddress } from '../utils/locations'
 import { mainColor, secondryColor } from '../colors'
+import LoadingModal from '../components/LoadingModal'
+import { getRecentRequestHistory } from '../api/EmergencyRequest'
+import HistoryFlatListItem from '../components/HistoryFlatListItem'
+import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
 
 const { width } = Dimensions.get('window')
 
@@ -31,6 +35,7 @@ const EmergencyScreen = ({ navigation }) => {
     const [selectAdressModalVisible, setSelectAdressModalVisible] = useState(false)
     const [isLoadingVehicles, setIsLoadingVehicles] = useState(false)
     const [region, setRegion] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [vehicleValidation, setVehicleValidation] = useState({
         validation: {
             isValid: true,
@@ -51,6 +56,8 @@ const EmergencyScreen = ({ navigation }) => {
     })
     const [dropOffMarkerCoordinates, setDropOffMarkerCoordinates] = useState(null)
     const [confirmRequestModalVisible, setConfirmRequestModalVisible] = useState(false)
+    const [recentHistory, setRecentHistory] = useState(null)
+    const [isHistoryLoading, setIsHistoryLoading] = useState(false)
 
     const containerRef = useRef()
     const mapRef = useRef()
@@ -83,6 +90,22 @@ const EmergencyScreen = ({ navigation }) => {
             showToast("Couldn't load your vehicles")
         } finally {
             setIsLoadingVehicles(false)
+        }
+    }
+
+    const fetchRecentRequests = async () => {
+        try {
+            setIsHistoryLoading(true)
+            const response = await getRecentRequestHistory()
+
+            if (response.status === 200) {
+                setRecentHistory(response.data.requests)
+            }
+        } catch (err) {
+            showToast("Couldn't get recent requests. Try again later.")
+            console.log(err);
+        } finally {
+            setIsHistoryLoading(false)
         }
     }
 
@@ -182,7 +205,8 @@ const EmergencyScreen = ({ navigation }) => {
             },
             type: selectedEmergency.label,
             dropOffLocation: dropOffMarkerCoordinates,
-            navigation
+            navigation,
+            setIsLoading
         }))
         setConfirmRequestModalVisible(false)
     }
@@ -199,8 +223,13 @@ const EmergencyScreen = ({ navigation }) => {
         }
     }, [dropOffMarkerCoordinates?.longitude, dropOffMarkerCoordinates?.latitude])
 
+    useEffect(() => {
+        fetchRecentRequests()
+    }, [])
+
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="always" ref={containerRef}>
+            <LoadingModal visible={isLoading} />
             {/* vehicle selection modal */}
             <CustomModal visible={selectVehicleModalVisible} onRequestClose={() => setSelectVehicleModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
@@ -354,6 +383,7 @@ const EmergencyScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </CustomModal>
+            <PoppinsText style={styles.title}>Make a request</PoppinsText>
             <View style={styles.card}>
                 <SelectionButton
                     placeholder={'Select vehicle'}
@@ -399,6 +429,29 @@ const EmergencyScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 }
             </View>
+            <PoppinsText style={styles.title}>Your history</PoppinsText>
+            <View style={styles.card}>
+                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
+                    <PoppinsText>Previous emergencies</PoppinsText>
+                    <TouchableOpacity onPress={() => {
+                        navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                    }}>
+                        <PoppinsText style={{ color: '#666666' }}>See all</PoppinsText>
+                    </TouchableOpacity>
+                </View>
+                <FlatList
+                    data={recentHistory}
+                    renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack', { screen: 'selectedHistory', params: { item } })} />}
+                    keyExtractor={(item, _) => item._id}
+                    ListFooterComponent={<View style={{ height: 80 }} />}
+                    ListEmptyComponent={isHistoryLoading ?
+                        <ActivityIndicator color={mainColor} size={'large'} /> : <HistoryFlatListEmptyComponent />
+                    }
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}
+                />
+            </View>
         </ScrollView>
     )
 }
@@ -410,6 +463,10 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
         padding: 8
+    },
+    title: {
+        fontSize: 20,
+        color: mainColor
     },
     card: {
         padding: 8,

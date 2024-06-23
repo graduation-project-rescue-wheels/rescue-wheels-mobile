@@ -1,104 +1,70 @@
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native'
-import { useEffect, useRef, useState } from 'react'
-import { getRequestById } from '../api/EmergencyRequest'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { useEffect, useState } from 'react'
 import MapView, { Marker } from 'react-native-maps'
 import PoppinsText from './PoppinsText'
-import { MaterialIcons, Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { getAddress } from '../utils/locations'
 import { useSelector } from 'react-redux'
-import { mainColor } from '../colors'
 
 const HistoryFlatListItem = ({ item, onPress }) => {
     const { user } = useSelector(state => state.user)
-    const [request, setRequest] = useState(null)
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState(null)
     const [address, setAddress] = useState('')
     const [dateAndTime, setDateAndTime] = useState('')
-    const mapRef = useRef()
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setIsLoading(true)
-                const response = await getRequestById(item)
-
-                if (response.status === 200) {
-                    const date = new Date(response.data.request.createdAt)
-                    getAddress(response.data.request.coordinates).then(address => {
-                        setAddress(`${address.data.results[0].address_components[2].long_name}, ${address.data.results[0].address_components[3].long_name}, ${address.data.results[0].address_components[4].long_name}`)
-                    })
-                    setRequest(response.data.request)
-                    setDateAndTime(`${date.toDateString()} ${date.toLocaleTimeString()}`)
-                    setError(null)
-                }
+                const date = new Date(item.createdAt)
+                getAddress(item.coordinates).then(address => {
+                    setAddress(`${address.data.results[0].address_components[2].long_name}, ${address.data.results[0].address_components[3].long_name}, ${address.data.results[0].address_components[4].long_name}`)
+                })
+                setDateAndTime(`${date.toDateString()} ${date.toLocaleTimeString()}`)
             } catch (err) {
                 console.log(err);
-                setError(err)
-            } finally {
-                setIsLoading(false)
             }
         }
 
         fetchData()
     }, [])
 
-    useEffect(() => {
-        if (mapRef.current && request) {
-
-        }
-    }, [mapRef?.current, request?._id])
-
     return (
         <Pressable
             style={styles.container}
             onPress={onPress}
         >
-            {
-                isLoading ?
-                    <ActivityIndicator size={'large'} color={mainColor} /> : error ?
-                        <View style={styles.errorView}>
-                            <MaterialIcons name='error-outline' style={styles.errorIcon} />
-                            <PoppinsText style={styles.errorText}>Something went wrong</PoppinsText>
-                        </View> : <>
-                            {request && <>
-                                <MapView
-                                    ref={mapRef}
-                                    provider='google'
-                                    region={request && {
-                                        ...request.coordinates,
-                                        latitudeDelta: 0.006866,
-                                        longitudeDelta: 0.004757
-                                    }}
-                                    style={styles.map}
-                                    scrollEnabled={false}
-                                >
-                                    <Marker coordinate={request.coordinates} />
-                                </MapView>
-                                <View style={{ marginHorizontal: 8 }}>
-                                    <View style={styles.rowView}>
-                                        <Ionicons name='person-outline' style={styles.icon} />
-                                        {
-                                            user.role === "Technician" &&
-                                            <PoppinsText style={styles.infoText}>{request.requestedBy.firstName} {request.requestedBy.lastName}</PoppinsText>
-                                        }
-                                        {
-                                            user.role === "User" &&
-                                            <PoppinsText style={styles.infoText}>{request.responder.firstName} {request.responder.lastName}</PoppinsText>
-                                        }
-                                    </View>
-                                    <View style={styles.rowView}>
-                                        <Ionicons name='location-outline' style={{ ...styles.icon, alignSelf: 'flex-start' }} />
-                                        <PoppinsText style={styles.infoText}>{address}</PoppinsText>
-                                    </View>
-                                    <View style={styles.rowView}>
-                                        <Ionicons name='calendar-outline' style={styles.icon} />
-                                        <PoppinsText style={styles.infoText}>{dateAndTime}</PoppinsText>
-                                    </View>
-                                </View>
-                            </>}
-                        </>
-            }
+            <MapView
+                provider='google'
+                region={item && {
+                    ...item.coordinates,
+                    latitudeDelta: 0.006866,
+                    longitudeDelta: 0.004757
+                }}
+                style={styles.map}
+                scrollEnabled={false}
+            >
+                <Marker coordinate={item.coordinates} />
+            </MapView>
+            <View style={{ marginHorizontal: 8 }}>
+                <View style={styles.rowView}>
+                    <Ionicons name='person-outline' style={styles.icon} />
+                    {
+                        user.role === "Technician" &&
+                        <PoppinsText style={styles.infoText}>{item.requestedBy.firstName} {item.requestedBy.lastName}</PoppinsText>
+                    }
+                    {
+                        user.role === "User" &&
+                        <PoppinsText style={styles.infoText}>{item.responder.firstName} {item.responder.lastName}</PoppinsText>
+                    }
+                </View>
+                <View style={styles.rowView}>
+                    <Ionicons name='location-outline' style={{ ...styles.icon, alignSelf: 'flex-start' }} />
+                    <PoppinsText style={styles.infoText}>{address}</PoppinsText>
+                </View>
+                <View style={styles.rowView}>
+                    <Ionicons name='calendar-outline' style={styles.icon} />
+                    <PoppinsText style={styles.infoText}>{dateAndTime}</PoppinsText>
+                </View>
+            </View>
         </Pressable>
     )
 }

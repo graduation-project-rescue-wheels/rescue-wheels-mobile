@@ -1,4 +1,4 @@
-import { Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from 'react-native'
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import MapView, { Callout, Marker } from 'react-native-maps'
@@ -21,6 +21,7 @@ import RequestBackgroundLocationAccesModal from '../components/RequestBackground
 import StarFlatListItem from '../components/StarFlatListItem'
 import { RATES } from '../utils/constants'
 import { mainColor, secondryColor } from '../colors'
+import LoadingModal from '../components/LoadingModal'
 
 const { height } = Dimensions.get('window')
 
@@ -34,6 +35,8 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const [dropOffAddress, setDropOffAddress] = useState('')
     const [rate, setRate] = useState(0)
     const [backgroundLocationAccessModalVisible, setBackgroundLocationAccessModalVisible] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isLoadingFSBTN, setIsLoadingFSBTN] = useState(false)
     const userMarkerImage = require('../assets/images/broken-car.png')
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
@@ -154,6 +157,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
 
     const handleCancelBTN = async () => {
         try {
+            setIsLoading(true)
             const response = await cancelResponder(request._id)
 
             if (response.status == 200) {
@@ -164,11 +168,12 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
             }
         } catch (err) {
             showToast("Couldn't leave request.")
-        }
+        } finally { setIsLoading(false) }
     }
 
     const handleAcceptBtn = async () => {
         try {
+            setIsLoading(true)
             const locationPermission = await Location.getBackgroundPermissionsAsync()
 
             if (locationPermission.granted) {
@@ -186,11 +191,12 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
             }
         } catch (err) {
             showToast("Couldn't take request. Please try again later.")
-        }
+        } finally { setIsLoading(false) }
     }
 
     const handleStartServiceBTN = async () => {
         try {
+            setIsLoading(true)
             const response = await inProgressRequest(request._id)
 
             if (response.status == 200) {
@@ -200,10 +206,11 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
 
             console.log(error.response)
             showToast(SMTH_WENT_WRONG)
-        }
+        } finally { setIsLoading(false) }
     }
 
     const handleServiceFinishedBTN = () => {
+        setIsLoadingFSBTN(true)
         socket.emit("request:service-finish-confirm", request._id)
     }
 
@@ -287,6 +294,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
             setRequest(payload)
             socket.emit('request:responder-leave', request.requestedBy._id)
             dispatch(loadUserAsync())
+            setIsLoadingFSBTN(false)
         })
 
         return () => {
@@ -324,6 +332,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.continer}>
+            <LoadingModal visible={isLoading} />
             <RequestBackgroundLocationAccesModal
                 onRequestClose={() => setBackgroundLocationAccessModalVisible(false)}
                 visible={backgroundLocationAccessModalVisible}
@@ -539,7 +548,11 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                                         style={{ ...styles.btn, backgroundColor: secondryColor, marginTop: 8 }}
                                         onPress={handleServiceFinishedBTN}
                                     >
-                                        <PoppinsText style={{ color: mainColor }}>Finish service</PoppinsText>
+                                        {
+                                            !isLoadingFSBTN ?
+                                                <PoppinsText style={{ color: mainColor }}>Finish service</PoppinsText> :
+                                                <ActivityIndicator color={mainColor} size={'small'} />
+                                        }
                                     </TouchableOpacity>
                                 </View>
 

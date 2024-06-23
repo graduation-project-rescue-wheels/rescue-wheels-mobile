@@ -7,7 +7,7 @@ const NoVehicles = ({ onPress }) => {
         <View style={styles.container}>
             <MaterialIcons name='car-crash' style={styles.icon} />
             <PoppinsText style={styles.text}>You don't have any registered vehicles. <PoppinsText
-                style={{ color: '#E48700' }}
+                style={{ color: 'green' }}
                 onPress={onPress}
             >
                 Add vehicle
