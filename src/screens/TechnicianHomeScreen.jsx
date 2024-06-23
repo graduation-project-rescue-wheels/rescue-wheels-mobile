@@ -1,23 +1,24 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Image, Linking, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { MaterialIcons } from '@expo/vector-icons'
 import PoppinsText from '../components/PoppinsText'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
-import { getRequestById } from '../api/EmergencyRequest'
+import { getRecentRequestHistory, getRequestById } from '../api/EmergencyRequest'
 import { useIsFocused } from '@react-navigation/native'
 import { mainColor, secondryColor } from '../colors'
 import HistoryFlatListItem from '../components/HistoryFlatListItem'
 import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
+import showToast from '../components/Toast'
 
 const TechnicianHomeScreen = ({ navigation }) => {
-
     const { user } = useSelector(state => state.user)
     const techUsername = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const [onGoingRequests, setonGoingRequests] = useState(null)
     const isFocused = useIsFocused()
     const [recentHistory, setRecentHistory] = useState(null)
+    const [isHistoryLoading, setIsHistoryLoading] = useState(false)
 
     const getOnGoingRequests = async () => {
         if (user?.onGoingRequestId) {
@@ -33,17 +34,26 @@ const TechnicianHomeScreen = ({ navigation }) => {
             Linking.openURL(`telprompt:${onGoingRequests?.requestedBy.mobileNumber}`)
     }
 
+    const fetchRecentRequests = async () => {
+        try {
+            setIsHistoryLoading(true)
+            const response = await getRecentRequestHistory()
 
+            if (response.status === 200) {
+                setRecentHistory(response.data.requests)
+            }
+        } catch (err) {
+            showToast("Couldn't get recent requests. Try again later.")
+            console.log(err);
+        } finally {
+            setIsHistoryLoading(false)
+        }
+    }
 
-    useEffect(() => {
-        setRecentHistory([...user.Requests_IDS].reverse().map(e => {
-            return e
-        }))
-    }, [])
-    
     useEffect(() => {
         if (isFocused) {
             getOnGoingRequests()
+            fetchRecentRequests()
         }
     }, [isFocused])
 
@@ -146,18 +156,21 @@ const TechnicianHomeScreen = ({ navigation }) => {
                 <View style={styles.CardView}>
                     <View style={styles.cardTitleView}>
                         <PoppinsText style={styles.cardViewTitle}>Completed requests</PoppinsText>
-                        <TouchableOpacity onPress={() => {navigation.navigate('Profile-stack', {screen: 'History'})}}>
+                        <TouchableOpacity onPress={() => { navigation.navigate('Profile-stack', { screen: 'History' }) }}>
                             <PoppinsText style={{ color: '#666666' }}>see all</PoppinsText>
                         </TouchableOpacity>
                     </View>
                     <FlatList
-                        data={recentHistory?.slice(0,5)}
-                        renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack',{screen: 'selectedHistory', params: {sHistory: item} })} />}
-                        keyExtractor={(item, _) => item}
+                        data={recentHistory}
+                        renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack', { screen: 'selectedHistory', params: { item } })} />}
+                        keyExtractor={(item, _) => item._id}
                         ListFooterComponent={<View style={{ height: 80 }} />}
-                        ListEmptyComponent={<HistoryFlatListEmptyComponent />}
+                        ListEmptyComponent={isHistoryLoading ?
+                            <ActivityIndicator color={mainColor} size={'large'} /> : <HistoryFlatListEmptyComponent />
+                        }
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}
                     />
                 </View>
             </ScrollView>

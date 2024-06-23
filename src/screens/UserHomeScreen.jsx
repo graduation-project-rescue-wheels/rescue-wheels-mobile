@@ -8,7 +8,7 @@ import NoOffers from '../components/NoOffers'
 import { mainColor, secondryColor } from '../colors'
 import NoUpcomingReservations from '../components/NoUpcomingReservations'
 import UpcomingReservationFlatListItem from '../components/UpcomingReservationFlatListItem'
-import { getUpcomingReservationsForCurrentUser } from '../api/reservation'
+import { getRecentReservationHistory, getUpcomingReservationsForCurrentUser } from '../api/reservation'
 import showToast from '../components/Toast'
 
 const UserHomeScreen = ({ navigation }) => {
@@ -16,6 +16,7 @@ const UserHomeScreen = ({ navigation }) => {
     const isFirstHalfOfDay = useMemo(() => new Date().getHours() < 12, [])
     const username = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const [upcomingReservations, setUpcomingReservations] = useState([])
+    const [recentReservations, setRecentReservations] = useState([])
 
     const fetchUpcomingReservations = async () => {
         try {
@@ -30,8 +31,22 @@ const UserHomeScreen = ({ navigation }) => {
         }
     }
 
+    const fetchRecentReservations = async () => {
+        try {
+            const response = await getRecentReservationHistory()
+
+            if (response.status === 200) {
+                setRecentReservations(response.data.reservations)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't get your reservation history. Try again later.")
+        }
+    }
+
     useEffect(() => {
         fetchUpcomingReservations()
+        fetchRecentReservations()
     }, [])
 
     return (
@@ -80,28 +95,29 @@ const UserHomeScreen = ({ navigation }) => {
                 <View style={styles.cardView}>
                     <View style={styles.historySectionTitleView}>
                         <PoppinsText>Previous repair center visits</PoppinsText>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => {
+                            navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                        }}>
                             <PoppinsText style={styles.seeAllText}>see all</PoppinsText>
                         </TouchableOpacity>
                     </View>
                     <FlatList
-                        style={{ marginBottom: 32 }}
-                        data={[]}
+                        data={recentReservations}
+                        renderItem={({ item }) => <UpcomingReservationFlatListItem item={item} />}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoHistory message="You didn't visit any of our repair centers" />}
-                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <View style={{ height: 80 }} />
             </ScrollView>
-            <TouchableOpacity style={styles.supportBtn}>
+            {/* <TouchableOpacity style={styles.supportBtn}>
                 <MaterialIcons
                     name='support-agent'
                     style={styles.supportBtnIcon}
                 />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     )
 }
