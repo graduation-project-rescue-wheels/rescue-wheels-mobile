@@ -231,14 +231,15 @@ export const deleteVehicleAsync = createAsyncThunk('user/deleteVehicleAsync', as
     }
 })
 
-export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsync', async ({ vehicle, coordinates, type, dropOffLocation = null, navigation }) => {
+export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsync', async ({ vehicle, coordinates, type, dropOffLocation = null, navigation, setIsLoading }) => {
     try {
+        setIsLoading(true)
         const response = await requestEmergency(vehicle, coordinates, type, dropOffLocation)
 
         if (response.status === 201) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.user))
             navigation.navigate('Map', { id: response.data.request._id })
-
+            setIsLoading(false)
             return {
                 isValid: true,
                 data: response.data.user
@@ -247,7 +248,7 @@ export const requestEmergencyAsync = createAsyncThunk('user/requestEmergencyAsyn
     } catch (err) {
         console.log(err.response.data);
         showToast(SMTH_WENT_WRONG)
-
+        setIsLoading(false)
         return {
             isValid: false
         }
