@@ -19,12 +19,9 @@ export async function signUp(firstName, lastName, email, password, mobileNumber)
     })
 }
 
-export async function updateUser(firstName, lastName, mobileNumber) {
-    return await rwClient.put('/user/UpdateUserData', {
-        firstName,
-        lastName,
-        mobileNumber,
-    })
+export async function updateUser(data) {
+    return await rwClient.put('/user/UpdateUserData', data,
+        { headers: { 'Content-Type': 'multipart/form-data', } })
 }
 
 export async function deleteUser() {
