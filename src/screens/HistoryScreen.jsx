@@ -1,32 +1,44 @@
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
 import HistoryFlatListItem from '../components/HistoryFlatListItem'
 import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
-import { useState } from 'react'
-import { loadUserAsync } from '../store/userAsyncThunks'
+import { useEffect, useState } from 'react'
 import { mainColor } from '../colors'
+import { getUserHistory } from '../api/EmergencyRequest'
+import showToast from '../components/Toast'
 
-const HistoryScreen = ({navigation}) => {
-    const { user } = useSelector(state => state.user)
-    const dispatch = useDispatch()
+const HistoryScreen = ({ navigation }) => {
     const [isLoading, setIsLoading] = useState(false)
-    const onRefresh = () => {
-        setIsLoading(true)
-        dispatch(loadUserAsync())
-        setIsLoading(false)
+    const [requests, setRequests] = useState([])
+
+    const fetchRequests = async () => {
+        try {
+            setIsLoading(true)
+            const response = await getUserHistory()
+
+            if (response.status === 200) {
+                setRequests(response.data.requests)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't load your history. Please try again later.")
+        } finally {
+            setIsLoading(false)
+        }
     }
+
+    useEffect(() => {
+        fetchRequests()
+    }, [])
 
     return (
         <View style={styles.container}>
             <FlatList
-                data={[...user.Requests_IDS].reverse().map(e => {
-                    return e
-                })}
-                renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('selectedHistory', { sHistory: item })} />}
-                keyExtractor={(item, _) => item}
+                data={requests}
+                renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('selectedHistory', { item })} />}
+                keyExtractor={(item, _) => item._id}
                 ListFooterComponent={<View style={{ height: 80 }} />}
                 ListEmptyComponent={<HistoryFlatListEmptyComponent />}
-                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={[mainColor]} />}
+                refreshControl={<RefreshControl refreshing={isLoading} onRefresh={fetchRequests} colors={[mainColor]} />}
             />
         </View>
     )
