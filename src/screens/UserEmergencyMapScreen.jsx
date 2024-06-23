@@ -8,7 +8,6 @@ import { cancelRequest, finishRequest, getRequestById, rateRequest } from '../ap
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
 import { socket } from '../api/socket.io'
-import Connecting from '../components/Connecting'
 import { useDispatch } from 'react-redux'
 import { loadUserAsync } from '../store/userAsyncThunks'
 import MapViewDirections from 'react-native-maps-directions'
@@ -17,6 +16,7 @@ import { FlatList } from 'react-native-gesture-handler'
 import { RATES } from '../utils/constants'
 import StarFlatListItem from '../components/StarFlatListItem'
 import { mainColor, secondryColor } from '../colors'
+import LoadingModal from '../components/LoadingModal'
 
 const { height } = Dimensions.get('window')
 
@@ -26,6 +26,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
 
     const [region, setRegion] = useState(null)
     const [request, setRequest] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [mapPadding, setMapPadding] = useState(85)
     const [responderCoordinate, setResponderCoordinate] = useState(null)
     const [ConfirmModalVisible, setConfirmModalVisible] = useState(false)
@@ -104,6 +105,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
 
     const handleCancelRequestBtn = async () => {
         try {
+            setIsLoading(true)
             const response = await cancelRequest(request._id)
 
             if (response.status === 200) {
@@ -112,11 +114,12 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
         } catch (err) {
             console.log(err);
             showToast(SMTH_WENT_WRONG)
-        }
+        } finally { setIsLoading(false) }
     }
 
     const handleConfirmEndServiceBTN = async () => {
         try {
+            setIsLoading(true)
             const response = await finishRequest(request._id)
 
             if (response.status === 200) {
@@ -127,7 +130,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
         } catch (error) {
             console.log(error);
             showToast(SMTH_WENT_WRONG)
-        }
+        } finally { setIsLoading(false) }
     }
 
     const handleCallBtn = () => {
@@ -206,6 +209,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
 
     return (
         <View style={styles.continer}>
+            <LoadingModal visible={isLoading} />
             <CustomModal
                 visible={ConfirmModalVisible}
                 onRequestClose={() => setConfirmModalVisible(false)}
