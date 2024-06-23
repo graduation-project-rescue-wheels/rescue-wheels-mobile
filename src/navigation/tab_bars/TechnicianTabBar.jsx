@@ -66,7 +66,7 @@ function TechnicianTabBar({ state, descriptors, navigation }) {
                                         }}
                                     /> : <View style={{ borderWidth: 3, borderColor: isFocused ? mainColor : secondryColor, borderRadius: 24, alignItems: 'center', justifyContent: 'center' }}>
                                         <Image
-                                            source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../../assets/images/avatar.png')}
+                                            source={user?.profilePic.length !== 0 ? { uri: user?.profilePic } : require('../../assets/images/avatar.png')}
                                             style={styles.profilePic}
                                             resizeMode='cover'
                                         />
