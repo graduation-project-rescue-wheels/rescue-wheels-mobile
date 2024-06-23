@@ -16,6 +16,7 @@ import NoVehicles from '../components/NoVehicles'
 import MapView, { Marker } from 'react-native-maps'
 import { getAddress } from '../utils/locations'
 import { mainColor, secondryColor } from '../colors'
+import LoadingModal from '../components/LoadingModal'
 
 const { width } = Dimensions.get('window')
 
@@ -31,6 +32,7 @@ const EmergencyScreen = ({ navigation }) => {
     const [selectAdressModalVisible, setSelectAdressModalVisible] = useState(false)
     const [isLoadingVehicles, setIsLoadingVehicles] = useState(false)
     const [region, setRegion] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [vehicleValidation, setVehicleValidation] = useState({
         validation: {
             isValid: true,
@@ -182,7 +184,8 @@ const EmergencyScreen = ({ navigation }) => {
             },
             type: selectedEmergency.label,
             dropOffLocation: dropOffMarkerCoordinates,
-            navigation
+            navigation,
+            setIsLoading
         }))
         setConfirmRequestModalVisible(false)
     }
@@ -201,6 +204,7 @@ const EmergencyScreen = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container} keyboardShouldPersistTaps="always" ref={containerRef}>
+            <LoadingModal visible={isLoading}/>
             {/* vehicle selection modal */}
             <CustomModal visible={selectVehicleModalVisible} onRequestClose={() => setSelectVehicleModalVisible(false)}>
                 <PoppinsText style={styles.modalTitle}>Select vehicle</PoppinsText>
