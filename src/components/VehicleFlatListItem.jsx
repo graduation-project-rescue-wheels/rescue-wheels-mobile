@@ -6,6 +6,7 @@ import { MaterialIcons, AntDesign, MaterialCommunityIcons } from '@expo/vector-i
 import CustomModal from './CustomModal'
 import { useDispatch } from 'react-redux'
 import { deleteVehicleAsync } from '../store/userAsyncThunks'
+import { mainColor } from '../colors'
 
 const VehicleFlatListItem = ({ id }) => {
     const [vehicle, setVehicle] = useState(null)
@@ -72,7 +73,7 @@ const VehicleFlatListItem = ({ id }) => {
             </CustomModal>
             {
                 isLoading ?
-                    <ActivityIndicator size={'large'} color={'#E48700'} /> : error ?
+                    <ActivityIndicator size={'large'} color={mainColor} /> : error ?
                         <View style={styles.errorView}>
                             <MaterialIcons name='error-outline' style={styles.errorIcon} />
                             <PoppinsText style={styles.errorText}>Something went wrong</PoppinsText>
