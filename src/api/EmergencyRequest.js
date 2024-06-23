@@ -37,10 +37,18 @@ export async function inProgressRequest(id) {
     return rwClient.put(`/emrgencyRequest/inProgressRequest/${id}`)
 }
 
-export async function finishRequest(id){
+export async function finishRequest(id) {
     return rwClient.put(`/emrgencyRequest/finishRequest/${id}`)
 }
 
-export async function rateRequest(id, rate){
+export async function rateRequest(id, rate) {
     return rwClient.put(`/emrgencyRequest/rateRequest/${id}/${rate}`)
+}
+
+export async function getRecentRequestHistory() {
+    return await rwClient.get('/emrgencyRequest/getRecentRequestHistory')
+}
+
+export async function getUserHistory() {
+    return await rwClient.get('/emrgencyRequest/getUserHistory')
 }
