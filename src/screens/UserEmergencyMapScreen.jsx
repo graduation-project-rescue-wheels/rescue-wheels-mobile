@@ -227,7 +227,7 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
             <MapView
                 style={styles.map}
                 provider='google'
-                initialRegion={{ latitude: region.latitude, longitude: region.longitude, latitudeDelta: 0.004757, longitudeDelta: 0.006866 }}
+                region={region && { latitude: region?.latitude, longitude: region?.longitude, latitudeDelta: 0.004757, longitudeDelta: 0.006866 }}
                 showsUserLocation
                 followsUserLocation
                 showsMyLocationButton={false}
