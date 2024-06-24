@@ -41,7 +41,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
-        return [0.28, 0.60].map(percentage => percentage * height);
+        return [0.28, 0.7].map(percentage => percentage * height);
     }, [height]); //Snapping points must be in an ascending order
 
     const isFocused = useIsFocused()
@@ -431,7 +431,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                                     <Image
                                         source={nearbyRequests[0].requestedBy?.profilePic?.length === 0 ?
                                             require('../assets/images/avatar.png') :
-                                            { uri: nearbyRequests[0].requestedByprofilePic }
+                                            { uri: nearbyRequests[0].requestedBy.profilePic }
                                         }
                                         style={styles.profilePic}
                                     />
@@ -560,13 +560,13 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                             {
                                 request.state === 'cancelled' && <View>
                                     <TouchableOpacity
-                                        style={{ ...styles.btn, backgroundColor: '#E48700', marginTop: 8 }}
+                                        style={{ ...styles.btn, backgroundColor: secondryColor, marginTop: 8 }}
                                         onPress={async () => {
                                             await unregisterBackGroundLocationTask()
                                             setRequest(null)
                                         }}
                                     >
-                                        <PoppinsText style={{ color: 'white' }}>Load nearby requests</PoppinsText>
+                                        <PoppinsText style={{ color: mainColor }}>Load nearby requests</PoppinsText>
                                     </TouchableOpacity>
                                 </View>
                             }
