@@ -67,9 +67,9 @@ const LoginScreen = ({ navigation }) => {
         }
     }
 
-    const handleSignInWithGoogleBtn = () => {
-        //TODO
-    }
+    // const handleSignInWithGoogleBtn = () => {
+    //     //TODO
+    // }
 
     const handleForgotPasswordOnPress = () => {
         navigation.navigate('Forgot password')
@@ -163,14 +163,14 @@ const LoginScreen = ({ navigation }) => {
             >
                 <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Sign in</PoppinsText>
             </TouchableOpacity>
-            <PoppinsText style={styles.orText}>or</PoppinsText>
+            {/* <PoppinsText style={styles.orText}>or</PoppinsText>
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: secondryColor, flexDirection: 'row' }}
                 onPress={handleSignInWithGoogleBtn}
             >
                 <AntDesign name='google' style={styles.googleIcon} />
                 <PoppinsText style={styles.googleText}>Sign in with Google</PoppinsText>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </ScrollView>
     )
 }
