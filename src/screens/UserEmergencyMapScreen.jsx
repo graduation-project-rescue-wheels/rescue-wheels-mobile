@@ -58,7 +58,6 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
 
         if (locationPermission.granted) {
             const location = await Location.getCurrentPositionAsync({})
-            console.log(location.coords);
 
             setRegion({
                 longitude: location.coords.longitude,

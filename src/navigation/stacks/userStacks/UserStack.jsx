@@ -15,7 +15,6 @@ const UserStack = () => {
         Notifications.getPermissionsAsync().then(async permission => {
             if (permission.granted) {
                 await registerForNotifications()
-                console.log('registered');
             } else {
                 const permissionResult = await Notifications.requestPermissionsAsync()
 
