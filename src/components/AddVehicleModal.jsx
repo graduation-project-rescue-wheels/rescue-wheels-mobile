@@ -9,6 +9,7 @@ import { validateLicensePlate, validateModelYear, validateVehicleEnergySource, v
 import { useDispatch } from "react-redux"
 import ValidationMessage from "./ValidationMessage"
 import { addVehicleAsync } from "../store/userAsyncThunks"
+import { mainColor } from "../colors"
 
 const AddVehicleModal = ({ onRequestClose, visible }) => {
     const [make, setMake] = useState({
@@ -252,7 +253,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                         Icon={() => <MaterialIcons name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: make.isFocused ? '#E48700' : make.validation.isValid ? '#ADADAD' : 'red'
+                                color: make.isFocused ? mainColor : make.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
                         onChangeText={e => setMake(prev => ({ ...prev, value: e }))}
@@ -269,7 +270,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                         Icon={() => <MaterialIcons name="drive-file-rename-outline"
                             style={{
                                 ...styles.icon,
-                                color: model.isFocused ? '#E48700' : model.validation.isValid ? '#ADADAD' : 'red'
+                                color: model.isFocused ? mainColor : model.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
                         onChangeText={e => setModel(prev => ({ ...prev, value: e }))}
@@ -287,7 +288,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                         Icon={() => <FontAwesome name="drivers-license-o"
                             style={{
                                 ...styles.icon,
-                                color: licensePlate.isFocused ? '#E48700' : licensePlate.validation.isValid ? '#ADADAD' : 'red'
+                                color: licensePlate.isFocused ? mainColor : licensePlate.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
                         state={licensePlate}
@@ -305,7 +306,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                         Icon={() => <AntDesign name="calendar"
                             style={{
                                 ...styles.icon,
-                                color: modelYear.isFocused ? '#E48700' : modelYear.validation.isValid ? '#ADADAD' : 'red'
+                                color: modelYear.isFocused ? mainColor : modelYear.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         />}
                         onChangeText={e => setModelYear(prev => ({ ...prev, value: e }))}
@@ -326,7 +327,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                             name="select1"
                             style={{
                                 ...styles.icon, color: type.isFocused ?
-                                    '#E48700' : type.validation.isValid ? '#ADADAD' : 'red'
+                                    mainColor : type.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         /> : <type.Icon />}
                         placeholder={'Type'}
@@ -344,7 +345,7 @@ const AddVehicleModal = ({ onRequestClose, visible }) => {
                             name="select1"
                             style={{
                                 ...styles.icon, color: energySource.isFocused ?
-                                    '#E48700' : energySource.validation.isValid ? '#ADADAD' : 'red'
+                                    mainColor : energySource.validation.isValid ? '#ADADAD' : 'red'
                             }}
                         /> : <energySource.Icon />}
                         placeholder={'Energy source'}

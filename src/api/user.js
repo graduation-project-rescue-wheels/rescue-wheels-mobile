@@ -19,12 +19,9 @@ export async function signUp(firstName, lastName, email, password, mobileNumber)
     })
 }
 
-export async function updateUser(firstName, lastName, mobileNumber) {
-    return await rwClient.put('/user/UpdateUserData', {
-        firstName,
-        lastName,
-        mobileNumber,
-    })
+export async function updateUser(data) {
+    return await rwClient.put('/user/UpdateUserData', data,
+        { headers: { 'Content-Type': 'multipart/form-data', } })
 }
 
 export async function deleteUser() {
@@ -47,4 +44,16 @@ export async function getCurrnetUser() {
             accesstoken: process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + accessToken
         }
     })
+}
+
+export async function forgotPassowrd(email) {
+    return await rwClient.post('/user/forgetPassword', { email })
+}
+
+export async function verifyOtp(otp, email) {
+    return await rwClient.post('/user/otpverification', { email, otp })
+}
+
+export async function changePassword(email, password, ConfirmNewPassword) {
+    return await rwClient.post('/user/ResetPassword', { email, password, ConfirmNewPassword })
 }

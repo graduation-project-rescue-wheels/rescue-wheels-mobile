@@ -51,6 +51,7 @@ export const signOutAsync = createAsyncThunk('user/signOutAsync', async (navigat
             await messaging().deleteToken()
             await SecureStore.deleteItemAsync('accessToken')
             await SecureStore.deleteItemAsync('currentUser')
+            await SecureStore.setItemAsync('notificationTokenRegistered', JSON.stringify(false))
         }
     } catch (err) {
         showToast("Couldn't sign out. Try again later.")
@@ -110,13 +111,9 @@ export const signUpAsync = createAsyncThunk('user/signUpAsync', async ({
     }
 })
 
-export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async ({
-    firstName,
-    lastName,
-    mobileNumber
-}) => {
+export const updateUserAsync = createAsyncThunk('user/updateUserAsync', async (data) => {
     try {
-        const response = await updateUser(firstName, lastName, mobileNumber)
+        const response = await updateUser(data)
 
         if (response.status === 200) {
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.updatedUser))

@@ -173,18 +173,18 @@ const SelectedRepairCenterScreen = ({ route }) => {
 
     const fetchRepairCenter = (id) => {
         getRepairCenterById(id)
-        .then(res => setRepairCenter(res.data.data))
-        .catch(err => {
-            console.log(err);
-            showToast("Couldn't get repair center info. Please try again later.")
-        })
+            .then(res => setRepairCenter(res.data.data))
+            .catch(err => {
+                console.log(err);
+                showToast("Couldn't get repair center info. Please try again later.")
+            })
 
-    getUpcomingReservations(id)
-        .then(res => setUpcomingReservations(res.data.reservations))
-        .catch(err => {
-            console.log(err);
-            showToast("Couldn't get your upcoming reservations. Please try again later.")
-        })
+        getUpcomingReservations(id)
+            .then(res => setUpcomingReservations(res.data.reservations))
+            .catch(err => {
+                console.log(err);
+                showToast("Couldn't get your upcoming reservations. Please try again later.")
+            })
     }
 
     useEffect(() => {

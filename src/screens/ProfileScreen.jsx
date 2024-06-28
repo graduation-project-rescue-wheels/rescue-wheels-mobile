@@ -59,7 +59,7 @@ const ProfileScreen = ({ navigation }) => {
                 <Image
                     source={user.profilePic.length !== 0 ? { uri: user.profilePic } : require('../assets/images/avatar.png')}
                     style={styles.profilePhoto}
-                    resizeMode='contain'
+                    resizeMode='cover'
                 />
                 <PoppinsText style={styles.usernameText}>{username}</PoppinsText>
             </View>

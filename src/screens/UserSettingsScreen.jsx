@@ -21,6 +21,7 @@ const UserSettingsScreen = ({ navigation }) => {
     const [confirmPhotoModalVisible, setConfirmPhotoModalVisible] = useState(false)
     const [confirmDeleteUserModalVisible, setConfirmDeleteUserModalVisible] = useState(false)
     const [confirmNewPasswordModalVisible, setConfirmNewPasswordModalVisible] = useState(false)
+    const data = new FormData()
     const [firstName, setFirstName] = useState({
         value: user.firstName,
         isFocused: false,
@@ -80,7 +81,7 @@ const UserSettingsScreen = ({ navigation }) => {
         })
 
         if (!result.canceled) {
-            setImage(result.assets[0].uri)
+            setImage(result.assets[0])
             setConfirmPhotoModalVisible(true)
         }
     }
@@ -155,11 +156,13 @@ const UserSettingsScreen = ({ navigation }) => {
         if (firstNameValidationResult &&
             lastNameValidationResult &&
             mobileNumberValidationResult) {
-            dispatch(updateUserAsync({
-                firstName: firstName.value !== user.firstName && firstName.value,
-                lastName: lastName.value !== user.lastName && lastName.value,
-                mobileNumber: mobileNumber.value !== user.mobileNumber && mobileNumber.value
-            }))
+
+            data.append("firstname", firstName.value)
+            data.append("lastName", lastName.value)
+            data.append("mobileNumber", mobileNumber.value)
+            data.append("image", {uri: image.uri  , type: image.mimeType, name: image.fileName})
+            
+            dispatch(updateUserAsync(data))
         }
 
         if (newPassword.value.length > 0) {
@@ -244,7 +247,7 @@ const UserSettingsScreen = ({ navigation }) => {
                 {
                     image !== null && <Image
                         style={styles.imageModal}
-                        source={{ uri: image }}
+                        source={{ uri: image.uri }}
                     />
                 }
                 <View style={styles.modalBtnsView}>
@@ -260,7 +263,7 @@ const UserSettingsScreen = ({ navigation }) => {
                     <TouchableOpacity
                         style={styles.modalBtn}
                         onPress={() => {
-                            //TODO
+                            setConfirmPhotoModalVisible(false)
                         }}
                     >
                         <PoppinsText style={{ color: 'green' }}>Yes</PoppinsText>
@@ -359,7 +362,7 @@ const UserSettingsScreen = ({ navigation }) => {
             <ScrollView style={{ flex: 1 }} ref={scrollViewRef} onLayout={() => scrollViewRef.current.scrollToEnd({ animated: true })}>
                 <View style={{ ...styles.flexRow, justifyContent: 'flex-start', alignItems: 'center' }}>
                     <Image
-                        source={user.profilePic.length > 0 ? user.profilePic : require('../assets/images/avatar.png')}
+                        source={user.profilePic.length > 0 ? {uri: user.profilePic} : require('../assets/images/avatar.png')}
                         style={styles.profilePhoto}
                     />
                     <PoppinsText style={{ fontSize: 18 }}>{user.email}</PoppinsText>

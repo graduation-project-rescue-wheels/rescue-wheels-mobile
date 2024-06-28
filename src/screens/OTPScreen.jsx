@@ -1,17 +1,18 @@
 import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Fontisto, MaterialIcons } from '@expo/vector-icons'
-import { useState } from 'react'
-import PoppinsText from '../components/PoppinsText'
 import BackButton from '../components/BackButton'
+import PoppinsText from '../components/PoppinsText'
 import CustomTextInput from '../components/CustomTextInput'
-import { mainColor, secondryColor } from '../colors'
-import { validateEmail, validateOTP } from '../utils/inputValidations'
 import ValidationMessage from '../components/ValidationMessage'
-import { forgotPassowrd } from '../api/user'
+import { useState } from 'react'
+import { mainColor, secondryColor } from '../colors'
+import { MaterialIcons } from '@expo/vector-icons'
+import { validateOTP } from '../utils/inputValidations'
+import { verifyOtp } from '../api/user'
 import showToast, { SMTH_WENT_WRONG } from '../components/Toast'
 
-const ForgotPassword = ({ navigation }) => {
-    const [email, setEmail] = useState({
+const OTPScreen = ({ navigation, route }) => {
+    const { email } = route.params
+    const [otp, setOtp] = useState({
         value: "",
         isFocused: false,
         validation: {
@@ -20,18 +21,17 @@ const ForgotPassword = ({ navigation }) => {
         }
     })
 
-    const handleForgotPassowrdBtn = async () => {
+    const handleVerifyBtn = async () => {
         try {
-            const emailValidationResult = validateEmail(email.value)
+            const otpVerificationResult = validateOTP(otp.value)
 
-            setEmail({ ...email, validation: emailValidationResult })
+            setOtp(prev => ({ ...prev, validation: otpVerificationResult }))
 
-            if (emailValidationResult.isValid) {
-                const response = await forgotPassowrd(email.value)
+            if (otpVerificationResult.isValid) {
+                const response = await verifyOtp(otp.value, email)
 
-                if (response.status === 201) {
-                    navigation.navigate('OTP', { email: email.value })
-                    showToast("Please check your e-mail")
+                if (response.status === 200) {
+                    navigation.navigate('Reset password', { email })
                 }
             }
         } catch (err) {
@@ -53,38 +53,36 @@ const ForgotPassword = ({ navigation }) => {
             </View>
             <PoppinsText style={styles.title}>Forgot Password</PoppinsText>
             <PoppinsText style={styles.label}>Please enter your registered email address, so we will send you an OTP</PoppinsText>
+            <PoppinsText>Enter OTP</PoppinsText>
             <CustomTextInput
-                Icon={() => <Fontisto
-                    name='email'
+                Icon={() => <MaterialIcons
+                    name='password'
                     style={{
                         ...styles.icon,
-                        color: email.isFocused ?
-                            mainColor : email.validation.isValid ? '#ADADAD' : 'red'
+                        color: otp.isFocused ?
+                            mainColor : otp.validation.isValid ? '#ADADAD' : 'red'
                     }}
                 />}
-                autoCapitalize='none'
-                keyboardType={'email-address'}
-                onBlur={() => {
-                    setEmail({ ...email, isFocused: false, validation: validateEmail(email.value) })
-                }}
-                onChangeText={e => setEmail({ ...email, value: e })}
-                onFocus={() => setEmail({ ...email, isFocused: true })}
-                placeholder='E-mail'
-                state={email}
+                keyboardType={'numeric'}
+                onChangeText={e => setOtp(prev => ({ ...prev, value: e }))}
+                onBlur={() => setOtp(prev => ({ ...prev, isFocused: false, validation: validateOTP(otp.value) }))}
+                onFocus={() => setOtp(prev => ({ ...prev, isFocused: true }))}
+                placeholder={'OTP'}
+                state={otp}
                 hasValidation={true}
             />
-            <ValidationMessage state={email} />
+            <ValidationMessage state={otp} />
             <TouchableOpacity
                 style={{ ...styles.button, backgroundColor: secondryColor }}
-                onPress={handleForgotPassowrdBtn}
+                onPress={handleVerifyBtn}
             >
-                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Send</PoppinsText>
+                <PoppinsText style={{ ...styles.buttonText, color: mainColor }}>Verify</PoppinsText>
             </TouchableOpacity>
         </ScrollView>
     )
 }
 
-export default ForgotPassword
+export default OTPScreen
 
 const styles = StyleSheet.create({
     container: {
