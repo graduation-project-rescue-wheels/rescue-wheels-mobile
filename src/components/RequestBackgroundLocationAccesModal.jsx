@@ -44,8 +44,7 @@ const styles = StyleSheet.create({
         height: 300,
         width: 300,
         borderRadius: 16,
-        marginVertical: 8,
-        backgroundColor: 'red'
+        marginVertical: 8
     },
     btn: {
         padding: 8
