@@ -34,7 +34,10 @@ const HistoryScreen = ({ navigation }) => {
         <View style={styles.container}>
             <FlatList
                 data={requests}
-                renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('selectedHistory', { item })} />}
+                renderItem={({ item }) => <HistoryFlatListItem
+                    item={item}
+                    onPress={() => navigation.navigate('selectedHistory', { item })}
+                />}
                 keyExtractor={(item, _) => item._id}
                 ListFooterComponent={<View style={{ height: 80 }} />}
                 ListEmptyComponent={<HistoryFlatListEmptyComponent />}

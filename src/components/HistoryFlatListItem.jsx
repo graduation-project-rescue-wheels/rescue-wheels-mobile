@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         backgroundColor: 'white',
         height: 200,
-        overflow: 'hidden',
+        overflow: 'hidden'
     },
     errorView: {
         alignItems: 'center',

@@ -456,7 +456,13 @@ const EmergencyScreen = ({ navigation }) => {
                             {
                                 screen: 'History-stack',
                                 initial: false,
-                                params: { screen: 'Emergency' }
+                                params: {
+                                    screen: 'EmergencyStack',
+                                    initial: false,
+                                    params: {
+                                        screen: 'Emergency'
+                                    }
+                                }
                             })
                     }}>
                         <PoppinsText style={{ color: '#666666' }}>See all</PoppinsText>
@@ -472,10 +478,10 @@ const EmergencyScreen = ({ navigation }) => {
                                 screen: 'History-stack',
                                 initial: false,
                                 params: {
-                                    screen: 'Emergency',
+                                    screen: 'EmergencyStack',
                                     initial: false,
                                     params: {
-                                        screen: 'selectedHistory',
+                                        screen: 'SelectedHistory',
                                         initial: false,
                                         params: { item }
                                     }
