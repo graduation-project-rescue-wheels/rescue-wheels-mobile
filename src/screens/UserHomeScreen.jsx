@@ -10,6 +10,9 @@ import NoUpcomingReservations from '../components/NoUpcomingReservations'
 import UpcomingReservationFlatListItem from '../components/UpcomingReservationFlatListItem'
 import { getRecentReservationHistory, getUpcomingReservationsForCurrentUser } from '../api/reservation'
 import showToast from '../components/Toast'
+import { getAllOffers } from '../api/Offer'
+import OfferFlatlistItem from '../components/OfferFlatlistItem'
+import { CommonActions } from '@react-navigation/native'
 
 const UserHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -17,6 +20,7 @@ const UserHomeScreen = ({ navigation }) => {
     const username = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const [upcomingReservations, setUpcomingReservations] = useState([])
     const [recentReservations, setRecentReservations] = useState([])
+    const [offers, setOffers] = useState([])
 
     const fetchUpcomingReservations = async () => {
         try {
@@ -44,9 +48,24 @@ const UserHomeScreen = ({ navigation }) => {
         }
     }
 
+    const fetchOffers = async () => {
+        try {
+            const response = await getAllOffers()
+
+            if (response.status === 200) {
+                console.log(response.data.data);
+                setOffers(response.data.data)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't get offers. Please try again later.")
+        }
+    }
+
     useEffect(() => {
         fetchUpcomingReservations()
         fetchRecentReservations()
+        fetchOffers()
     }, [])
 
     return (
@@ -66,13 +85,29 @@ const UserHomeScreen = ({ navigation }) => {
                 <PoppinsText style={styles.sectionTitle}>Offers</PoppinsText>
                 <View style={styles.cardView}>
                     <FlatList
-                        style={{ marginBottom: 32 }}
-                        data={[]}
+                        data={offers}
+                        renderItem={({ item }) => <OfferFlatlistItem
+                            item={item}
+                            onPress={() => navigation.dispatch(
+                                CommonActions.reset({
+                                    index: 1,
+                                    routes: [
+                                        { name: 'RC-Stack' },
+                                        {
+                                            name: 'RC-Stack',
+                                            params: {
+                                                screen: 'selectedRc',
+                                                params: { id: 'sampleRepairCenterId' }
+                                            }
+                                        }
+                                    ]
+                                })
+                            )}
+                        />}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoOffers />}
-                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <PoppinsText style={styles.sectionTitle}>Upcoming reservations</PoppinsText>
