@@ -452,14 +452,35 @@ const EmergencyScreen = ({ navigation }) => {
                 <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
                     <PoppinsText>Previous emergencies</PoppinsText>
                     <TouchableOpacity onPress={() => {
-                        navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                        navigation.navigate('Profile-stack',
+                            {
+                                screen: 'History-stack',
+                                initial: false,
+                                params: { screen: 'Emergency' }
+                            })
                     }}>
                         <PoppinsText style={{ color: '#666666' }}>See all</PoppinsText>
                     </TouchableOpacity>
                 </View>
                 <FlatList
                     data={recentHistory}
-                    renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack', { screen: 'selectedHistory', params: { item } })} />}
+                    renderItem={({ item }) => <HistoryFlatListItem
+                        style={{ width: 200 }}
+                        item={item}
+                        onPress={() => navigation.navigate('Profile-stack',
+                            {
+                                screen: 'History-stack',
+                                initial: false,
+                                params: {
+                                    screen: 'Emergency',
+                                    initial: false,
+                                    params: {
+                                        screen: 'selectedHistory',
+                                        initial: false,
+                                        params: { item }
+                                    }
+                                }
+                            })} />}
                     keyExtractor={(item, _) => item._id}
                     ListFooterComponent={<View style={{ height: 80 }} />}
                     ListEmptyComponent={isHistoryLoading ?

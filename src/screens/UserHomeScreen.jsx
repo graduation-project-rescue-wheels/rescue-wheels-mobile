@@ -88,20 +88,12 @@ const UserHomeScreen = ({ navigation }) => {
                         data={offers}
                         renderItem={({ item }) => <OfferFlatlistItem
                             item={item}
-                            onPress={() => navigation.dispatch(
-                                CommonActions.reset({
-                                    index: 1,
-                                    routes: [
-                                        { name: 'RC-Stack' },
-                                        {
-                                            name: 'RC-Stack',
-                                            params: {
-                                                screen: 'selectedRc',
-                                                params: { id: 'sampleRepairCenterId' }
-                                            }
-                                        }
-                                    ]
-                                })
+                            onPress={() => navigation.navigate('RC-Stack',
+                                {
+                                    screen: 'selectedRc',
+                                    initial: false,
+                                    params: { id: item.RepairCenterId }
+                                }
                             )}
                         />}
                         keyExtractor={(item) => item._id}
@@ -131,7 +123,12 @@ const UserHomeScreen = ({ navigation }) => {
                     <View style={styles.historySectionTitleView}>
                         <PoppinsText>Previous repair center visits</PoppinsText>
                         <TouchableOpacity onPress={() => {
-                            navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                            navigation.navigate('Profile-stack',
+                                {
+                                    screen: 'History-stack',
+                                    initial: false,
+                                    params: { screen: 'Repair centers' }
+                                })
                         }}>
                             <PoppinsText style={styles.seeAllText}>see all</PoppinsText>
                         </TouchableOpacity>

@@ -21,14 +21,14 @@ const UserProfileStack = () => {
             <Stack.Screen name="Settings" component={UserSettingsScreen} />
             <Stack.Screen name="Your vehicles" component={UserVehiclesScreen} />
             <Stack.Screen name="History-stack" component={UserHistoryStack} options={{ title: 'History' }} />
-            <Stack.Screen
+            {/* <Stack.Screen
                 name="selectedHistory"
                 component={SelectedHistoryScreen}
                 options={{
                     headerTransparent: true,
                     headerTitle: ''
                 }}
-            />
+            /> */}
         </Stack.Navigator>
     )
 }
