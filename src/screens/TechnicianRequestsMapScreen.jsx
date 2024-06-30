@@ -37,8 +37,6 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const [backgroundLocationAccessModalVisible, setBackgroundLocationAccessModalVisible] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingFSBTN, setIsLoadingFSBTN] = useState(false)
-    const userMarkerImage = require('../assets/images/broken-car.png')
-    const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
         return [0.28, 0.7].map(percentage => percentage * height);
@@ -351,7 +349,8 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                     <Marker
                         coordinate={nearbyRequests[0].coordinates}
                         ref={markerRef}
-                        image={userMarkerImage}>
+                    >
+                        <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
                         <Callout>
                             <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
                         </Callout>
@@ -364,7 +363,8 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                     <Marker
                         coordinate={request.coordinates}
                         ref={markerRef}
-                        image={userMarkerImage}>
+                    >
+                        <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
                         <Callout>
                             <PoppinsText>{request.type}</PoppinsText>
                         </Callout>
@@ -385,7 +385,9 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                             strokeWidth={4}
                             lineDashPattern={[4, 4]}
                         />
-                        <Marker coordinate={request.dropOffLocation} image={userDropOffMarkerImage} />
+                        <Marker coordinate={request.dropOffLocation}>
+                            <Image source={require('../assets/images/flag-marker.png')} style={{ width: 50, height: 50 }} />
+                        </Marker>
                     </>}
                 </>}
             </MapView>
