@@ -12,7 +12,6 @@ import { getRecentReservationHistory, getUpcomingReservationsForCurrentUser } fr
 import showToast from '../components/Toast'
 import { getAllOffers } from '../api/Offer'
 import OfferFlatlistItem from '../components/OfferFlatlistItem'
-import { CommonActions } from '@react-navigation/native'
 
 const UserHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -53,7 +52,6 @@ const UserHomeScreen = ({ navigation }) => {
             const response = await getAllOffers()
 
             if (response.status === 200) {
-                console.log(response.data.data);
                 setOffers(response.data.data)
             }
         } catch (err) {
