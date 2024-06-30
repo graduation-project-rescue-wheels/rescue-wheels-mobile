@@ -182,7 +182,6 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
         })
 
         socket.on('request:responder-coord-update', payload => {
-            console.log("updated", payload);
             setResponderCoordinate(payload)
         })
 

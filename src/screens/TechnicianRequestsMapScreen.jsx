@@ -306,7 +306,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
         socket.on('request:add', async payload => {
             if ((await Location.getForegroundPermissionsAsync()).granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
-                console.log(calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude));
+
                 if (calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude) <= 5) {
                     setNearbyRequests(prev => [...prev, payload])
                 }
@@ -351,9 +351,6 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                         ref={markerRef}
                     >
                         <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
-                        <Callout>
-                            <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
-                        </Callout>
                     </Marker>
                     {
                         nearbyRequests[0].dropOffLocation && <Marker coordinate={nearbyRequests[0].dropOffLocation} image={userDropOffMarkerImage} />
@@ -365,9 +362,6 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                         ref={markerRef}
                     >
                         <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
-                        <Callout>
-                            <PoppinsText>{request.type}</PoppinsText>
-                        </Callout>
                     </Marker>
                     <MapViewDirections
                         apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
