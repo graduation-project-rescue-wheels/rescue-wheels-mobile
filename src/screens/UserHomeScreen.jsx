@@ -109,6 +109,7 @@ const UserHomeScreen = ({ navigation }) => {
                             item={item}
                             onPress={() => navigation.navigate('RC-Stack', {
                                 screen: 'selectedRc',
+                                initial: false,
                                 params: { id: item.RepairCenterId }
                             })}
                             showCancelBTN={false}
