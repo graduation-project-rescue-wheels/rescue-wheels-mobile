@@ -1,7 +1,7 @@
 import { ActivityIndicator, Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from 'react-native'
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import MapView, { Callout, Marker } from 'react-native-maps'
+import MapView, { Marker } from 'react-native-maps'
 import { acceptRequest, cancelResponder, getNearbyRequests, getRequestById, inProgressRequest, rateRequest } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
