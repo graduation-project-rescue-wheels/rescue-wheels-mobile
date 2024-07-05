@@ -13,8 +13,8 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
         <Index />
-        <StatusBar style="auto" />
       </SafeAreaView>
+      <StatusBar style="auto" />
     </GestureHandlerRootView>
   );
 }

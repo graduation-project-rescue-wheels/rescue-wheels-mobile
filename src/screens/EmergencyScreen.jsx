@@ -17,7 +17,7 @@ import MapView, { Marker } from 'react-native-maps'
 import { getAddress } from '../utils/locations'
 import { mainColor, secondryColor } from '../colors'
 import LoadingModal from '../components/LoadingModal'
-import { getRecentRequestHistory } from '../api/EmergencyRequest'
+import { getEstimatedServicePrice, getRecentRequestHistory } from '../api/EmergencyRequest'
 import HistoryFlatListItem from '../components/HistoryFlatListItem'
 import HistoryFlatListEmptyComponent from '../components/HistoryFlatListEmptyComponent'
 
@@ -58,6 +58,7 @@ const EmergencyScreen = ({ navigation }) => {
     const [confirmRequestModalVisible, setConfirmRequestModalVisible] = useState(false)
     const [recentHistory, setRecentHistory] = useState(null)
     const [isHistoryLoading, setIsHistoryLoading] = useState(false)
+    const [estimatedPrice, setEstimatedPrice] = useState(0)
 
     const containerRef = useRef()
     const mapRef = useRef()
@@ -68,7 +69,7 @@ const EmergencyScreen = ({ navigation }) => {
             Icon: () => <MaterialIcons name='tire-repair' style={{ ...styles.icon, color: 'black' }} />,
         },
         {
-            label: 'Out of fuel/Dead battery',
+            label: 'Out of fuel-Dead battery',
             Icon: () => <MaterialCommunityIcons name='fuel-cell' style={{ ...styles.icon, color: 'black' }} />,
         },
         {
@@ -109,6 +110,23 @@ const EmergencyScreen = ({ navigation }) => {
         }
     }
 
+    const fetchEstimatedPrice = async (coords) => {
+        try {
+            setIsLoading(true)
+            const response = await getEstimatedServicePrice({ coords, type: selectedEmergency.label, vehicleId: selectedVehicle._id, dropOffCoords: dropOffMarkerCoordinates })
+
+            if (response.status === 200) {
+                setEstimatedPrice(response.data.estimatedPrice)
+                setConfirmRequestModalVisible(true)
+            }
+        } catch (err) {
+            console.log(err.response.data);
+            showToast("Couldn't get service estimated price. Please try again later.")
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     const handleRequestHelpBtnOnPress = async () => {
         const res = await Location.requestForegroundPermissionsAsync()
         const vehicleValidationResult = validateSelectedVehicle(selectedVehicle)
@@ -134,11 +152,11 @@ const EmergencyScreen = ({ navigation }) => {
                 setAddressValidation({ validation: addressValidationResult })
 
                 if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid && addressValidationResult.isValid) {
-                    setConfirmRequestModalVisible(true)
+                    await fetchEstimatedPrice(location.coords)
                 }
             } else {
                 if (res.granted && vehicleValidationResult.isValid && emergencyValidationResult.isValid) {
-                    setConfirmRequestModalVisible(true)
+                    await fetchEstimatedPrice(location.coords)
                 }
             }
         }
@@ -330,22 +348,22 @@ const EmergencyScreen = ({ navigation }) => {
                         }}
                         onPress={handleGooglePlacesAutoCompleteOnPress}
                         textInputProps={{
-                            cursorColor: '#E48700'
+                            cursorColor: mainColor
                         }}
                         fetchDetails
                     />
                 </View>
                 <View style={{ ...styles.modalAbsoluteView, bottom: 40 }}>
                     <TouchableOpacity
-                        style={{ ...styles.btn, backgroundColor: '#E48700', flexDirection: 'row' }}
+                        style={{ ...styles.btn, backgroundColor: secondryColor, flexDirection: 'row' }}
                         onPress={handleConfirmDropOffBtn}
                     >
-                        <AntDesign name='checkcircleo' style={{ ...styles.icon, color: 'white' }} />
-                        <PoppinsText style={{ color: 'white' }}>Confirm drop off location</PoppinsText>
+                        <AntDesign name='checkcircleo' style={{ ...styles.icon, color: mainColor }} />
+                        <PoppinsText style={{ color: mainColor }}>Confirm drop off location</PoppinsText>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity style={styles.myLocationBtn} onPress={handleMyLocationBtn}>
-                    <MaterialIcons name='my-location' style={{ color: 'white', fontSize: 30 }} />
+                    <MaterialIcons name='my-location' style={{ color: mainColor, fontSize: 30 }} />
                 </TouchableOpacity>
             </Modal>
             {/* request confirmation modal */}
@@ -356,7 +374,7 @@ const EmergencyScreen = ({ navigation }) => {
                 <PoppinsText style={styles.modalTitle}>Confirm your request</PoppinsText>
                 {selectedVehicle && <PoppinsText style={styles.requestConfirmModalText}>Vehicle: {selectedVehicle.make} {selectedVehicle.model}</PoppinsText>}
                 {selectedEmergency && <PoppinsText style={styles.requestConfirmModalText}>Emergency type: {selectedEmergency.label}</PoppinsText>}
-                <PoppinsText style={styles.requestConfirmModalText}>Estimated price: 50EGP</PoppinsText>
+                <PoppinsText style={styles.requestConfirmModalText}>Estimated price: {estimatedPrice} EGP</PoppinsText>
                 <View style={{ borderRadius: 16, overflow: 'hidden', marginVertical: 8 }}>
                     <MapView
                         style={{ ...styles.requestConfirmModalMapView, width: width - 63 }}
@@ -434,14 +452,41 @@ const EmergencyScreen = ({ navigation }) => {
                 <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'space-between' }}>
                     <PoppinsText>Previous emergencies</PoppinsText>
                     <TouchableOpacity onPress={() => {
-                        navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                        navigation.navigate('Profile-stack',
+                            {
+                                screen: 'History-stack',
+                                initial: false,
+                                params: {
+                                    screen: 'EmergencyStack',
+                                    initial: false,
+                                    params: {
+                                        screen: 'Emergency'
+                                    }
+                                }
+                            })
                     }}>
                         <PoppinsText style={{ color: '#666666' }}>See all</PoppinsText>
                     </TouchableOpacity>
                 </View>
                 <FlatList
                     data={recentHistory}
-                    renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack', { screen: 'selectedHistory', params: { item } })} />}
+                    renderItem={({ item }) => <HistoryFlatListItem
+                        style={{ width: 200 }}
+                        item={item}
+                        onPress={() => navigation.navigate('Profile-stack',
+                            {
+                                screen: 'History-stack',
+                                initial: false,
+                                params: {
+                                    screen: 'EmergencyStack',
+                                    initial: false,
+                                    params: {
+                                        screen: 'SelectedHistory',
+                                        initial: false,
+                                        params: { item }
+                                    }
+                                }
+                            })} />}
                     keyExtractor={(item, _) => item._id}
                     ListFooterComponent={<View style={{ height: 80 }} />}
                     ListEmptyComponent={isHistoryLoading ?
@@ -452,6 +497,7 @@ const EmergencyScreen = ({ navigation }) => {
                     contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}
                 />
             </View>
+            <View style={{ height: 85 }} />
         </ScrollView>
     )
 }
@@ -527,7 +573,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8
     },
     myLocationBtn: {
-        backgroundColor: '#E48700',
+        backgroundColor: secondryColor,
         padding: 12,
         borderRadius: 50,
         justifyContent: 'center',

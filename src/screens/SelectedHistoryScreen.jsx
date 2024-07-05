@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import MapView, { Marker } from 'react-native-maps'
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import showToast from '../components/Toast'
 import { useSelector } from 'react-redux'
 import { mainColor, secondryColor } from '../colors'
@@ -36,7 +36,7 @@ const SelectedHistoryScreen = ({ route }) => {
   }, [])
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
@@ -107,22 +107,22 @@ const SelectedHistoryScreen = ({ route }) => {
           </View>
         }
         <PoppinsText style={{ color: mainColor, fontSize: 16, marginTop: 12, marginHorizontal: 8 }}>Request information</PoppinsText>
-        <View style={{ marginHorizontal: 6 }}>
+        <View>
           <View style={styles.rowView}>
             <MaterialCommunityIcons name="car-emergency" style={styles.rInfoIcon} />
             <PoppinsText>{item.type}</PoppinsText>
           </View>
           <View style={styles.rowView}>
             <Ionicons name='location-outline' style={styles.rInfoIcon} />
-            <PoppinsText style={styles.infoText}>{address}</PoppinsText>
+            <PoppinsText style={{ flex: 0.9 }}>{address}</PoppinsText>
           </View>
           <View style={styles.rowView}>
             <Ionicons name='calendar-outline' style={styles.rInfoIcon} />
-            <PoppinsText style={styles.infoText}>{dateAndTime}</PoppinsText>
+            <PoppinsText>{dateAndTime}</PoppinsText>
           </View>
           <View style={styles.rowView}>
             <FontAwesome name="money" style={styles.rInfoIcon} />
-            <PoppinsText style={styles.infoText}>50 EGP</PoppinsText>
+            <PoppinsText>50 EGP</PoppinsText>
           </View>
         </View>
       </View>
@@ -132,7 +132,8 @@ const SelectedHistoryScreen = ({ route }) => {
       >
         <PoppinsText style={{ color: mainColor }}>Report</PoppinsText>
       </TouchableOpacity>
-    </View>
+      <View style={{ height: 85 }} />
+    </ScrollView>
   )
 }
 
@@ -141,14 +142,16 @@ export default SelectedHistoryScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 8
+    padding: 8,
+    backgroundColor: 'white'
   },
   mapContainer: {
     elevation: 5,
     borderRadius: 16,
     backgroundColor: 'white',
-    height: "35%",
-    overflow: 'hidden'
+    height: 200,
+    overflow: 'hidden',
+    margin: 4
   },
   map: {
     borderRadius: 16,
@@ -188,5 +191,5 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 25,
     margin: 10,
-  },
+  }
 })

@@ -10,6 +10,8 @@ import NoUpcomingReservations from '../components/NoUpcomingReservations'
 import UpcomingReservationFlatListItem from '../components/UpcomingReservationFlatListItem'
 import { getRecentReservationHistory, getUpcomingReservationsForCurrentUser } from '../api/reservation'
 import showToast from '../components/Toast'
+import { getAllOffers } from '../api/Offer'
+import OfferFlatlistItem from '../components/OfferFlatlistItem'
 
 const UserHomeScreen = ({ navigation }) => {
     const { user } = useSelector(state => state.user)
@@ -17,6 +19,7 @@ const UserHomeScreen = ({ navigation }) => {
     const username = useMemo(() => `${user?.firstName} ${user?.lastName}`, [user?.firstName, user?.lastName])
     const [upcomingReservations, setUpcomingReservations] = useState([])
     const [recentReservations, setRecentReservations] = useState([])
+    const [offers, setOffers] = useState([])
 
     const fetchUpcomingReservations = async () => {
         try {
@@ -44,9 +47,23 @@ const UserHomeScreen = ({ navigation }) => {
         }
     }
 
+    const fetchOffers = async () => {
+        try {
+            const response = await getAllOffers()
+
+            if (response.status === 200) {
+                setOffers(response.data.data)
+            }
+        } catch (err) {
+            console.log(err);
+            showToast("Couldn't get offers. Please try again later.")
+        }
+    }
+
     useEffect(() => {
         fetchUpcomingReservations()
         fetchRecentReservations()
+        fetchOffers()
     }, [])
 
     return (
@@ -66,13 +83,21 @@ const UserHomeScreen = ({ navigation }) => {
                 <PoppinsText style={styles.sectionTitle}>Offers</PoppinsText>
                 <View style={styles.cardView}>
                     <FlatList
-                        style={{ marginBottom: 32 }}
-                        data={[]}
+                        data={offers}
+                        renderItem={({ item }) => <OfferFlatlistItem
+                            item={item}
+                            onPress={() => navigation.navigate('RC-Stack',
+                                {
+                                    screen: 'selectedRc',
+                                    initial: false,
+                                    params: { id: item.RepairCenterId }
+                                }
+                            )}
+                        />}
                         keyExtractor={(item) => item._id}
                         horizontal={true}
                         showsHorizontalScrollIndicator={false}
                         ListEmptyComponent={<NoOffers />}
-                        contentContainerStyle={{ alignItems: 'center', flex: 1 }}
                     />
                 </View>
                 <PoppinsText style={styles.sectionTitle}>Upcoming reservations</PoppinsText>
@@ -84,6 +109,7 @@ const UserHomeScreen = ({ navigation }) => {
                             item={item}
                             onPress={() => navigation.navigate('RC-Stack', {
                                 screen: 'selectedRc',
+                                initial: false,
                                 params: { id: item.RepairCenterId }
                             })}
                             showCancelBTN={false}
@@ -96,7 +122,12 @@ const UserHomeScreen = ({ navigation }) => {
                     <View style={styles.historySectionTitleView}>
                         <PoppinsText>Previous repair center visits</PoppinsText>
                         <TouchableOpacity onPress={() => {
-                            navigation.navigate('Profile-stack', { screen: 'History-stack' })
+                            navigation.navigate('Profile-stack',
+                                {
+                                    screen: 'History-stack',
+                                    initial: false,
+                                    params: { screen: 'Repair centers' }
+                                })
                         }}>
                             <PoppinsText style={styles.seeAllText}>see all</PoppinsText>
                         </TouchableOpacity>

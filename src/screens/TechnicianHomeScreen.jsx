@@ -162,7 +162,24 @@ const TechnicianHomeScreen = ({ navigation }) => {
                     </View>
                     <FlatList
                         data={recentHistory}
-                        renderItem={({ item }) => <HistoryFlatListItem item={item} onPress={() => navigation.navigate('Profile-stack', { screen: 'selectedHistory', params: { item } })} />}
+                        renderItem={({ item }) => <HistoryFlatListItem
+                            item={item}
+                            onPress={() => navigation.navigate('Profile-stack',
+                                {
+                                    screen: 'History-stack',
+                                    initial: false,
+                                    params: {
+                                        screen: 'EmergencyStack',
+                                        initial: false,
+                                        params: {
+                                            screen: 'SelectedHistory',
+                                            initial: false,
+                                            params: { item }
+                                        }
+                                    }
+                                })}
+                            style={{ width: 200 }}
+                        />}
                         keyExtractor={(item, _) => item._id}
                         ListFooterComponent={<View style={{ height: 80 }} />}
                         ListEmptyComponent={isHistoryLoading ?

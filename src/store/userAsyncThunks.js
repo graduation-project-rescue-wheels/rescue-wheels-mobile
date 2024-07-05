@@ -66,7 +66,6 @@ export const loadUserAsync = createAsyncThunk('user/loadUserAsync', async () => 
             await SecureStore.setItemAsync('currentUser', JSON.stringify(response.data.data))
             rwClient.defaults.headers.common['accesstoken'] = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + await SecureStore.getItemAsync('accessToken')
             socket.auth.token = process.env.EXPO_PUBLIC_ACCESS_TOKEN_PREFIX + await SecureStore.getItemAsync('accessToken')
-            console.log(await SecureStore.getItemAsync('accessToken'));
 
             return {
                 userData: response.data.data,

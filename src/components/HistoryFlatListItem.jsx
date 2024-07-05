@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { getAddress } from '../utils/locations'
 import { useSelector } from 'react-redux'
 
-const HistoryFlatListItem = ({ item, onPress }) => {
+const HistoryFlatListItem = ({ item, onPress, style }) => {
     const { user } = useSelector(state => state.user)
     const [address, setAddress] = useState('')
     const [dateAndTime, setDateAndTime] = useState('')
@@ -29,7 +29,7 @@ const HistoryFlatListItem = ({ item, onPress }) => {
 
     return (
         <Pressable
-            style={styles.container}
+            style={{...styles.container, ...style}}
             onPress={onPress}
         >
             <MapView
@@ -58,7 +58,7 @@ const HistoryFlatListItem = ({ item, onPress }) => {
                 </View>
                 <View style={styles.rowView}>
                     <Ionicons name='location-outline' style={{ ...styles.icon, alignSelf: 'flex-start' }} />
-                    <PoppinsText style={styles.infoText}>{address}</PoppinsText>
+                    <PoppinsText style={styles.infoText} numberOfLines={1}>{address}</PoppinsText>
                 </View>
                 <View style={styles.rowView}>
                     <Ionicons name='calendar-outline' style={styles.icon} />

@@ -5,7 +5,7 @@ import { mainColor } from '../colors';
 
 const ReservationHistoryFlatListItem = ({ item }) => {
     const date = useMemo(() => new Date(Date.parse(item.startDate)).toLocaleString(), [])
-    console.log(item);
+    
     return (
         <View style={styles.container}>
             <Image

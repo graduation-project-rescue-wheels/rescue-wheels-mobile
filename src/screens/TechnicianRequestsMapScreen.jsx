@@ -1,7 +1,7 @@
 import { ActivityIndicator, Animated, Dimensions, Image, Linking, Platform, StyleSheet, View } from 'react-native'
 import * as Location from 'expo-location'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import MapView, { Callout, Marker } from 'react-native-maps'
+import MapView, { Marker } from 'react-native-maps'
 import { acceptRequest, cancelResponder, getNearbyRequests, getRequestById, inProgressRequest, rateRequest } from '../api/EmergencyRequest'
 import PoppinsText from '../components/PoppinsText'
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler'
@@ -37,8 +37,6 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
     const [backgroundLocationAccessModalVisible, setBackgroundLocationAccessModalVisible] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingFSBTN, setIsLoadingFSBTN] = useState(false)
-    const userMarkerImage = require('../assets/images/broken-car.png')
-    const userDropOffMarkerImage = require('../assets/images/flag-marker.png')
 
     const snappingPoints = useMemo(() => {
         return [0.28, 0.7].map(percentage => percentage * height);
@@ -308,7 +306,7 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
         socket.on('request:add', async payload => {
             if ((await Location.getForegroundPermissionsAsync()).granted) {
                 const currentLocation = await Location.getCurrentPositionAsync()
-                console.log(calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude));
+
                 if (calculateDistance(currentLocation.coords.longitude, currentLocation.coords.latitude, payload.coordinates.longitude, payload.coordinates.latitude) <= 5) {
                     setNearbyRequests(prev => [...prev, payload])
                 }
@@ -351,10 +349,8 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                     <Marker
                         coordinate={nearbyRequests[0].coordinates}
                         ref={markerRef}
-                        image={userMarkerImage}>
-                        <Callout>
-                            <PoppinsText>{nearbyRequests[0].type}</PoppinsText>
-                        </Callout>
+                    >
+                        <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
                     </Marker>
                     {
                         nearbyRequests[0].dropOffLocation && <Marker coordinate={nearbyRequests[0].dropOffLocation} image={userDropOffMarkerImage} />
@@ -364,10 +360,8 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                     <Marker
                         coordinate={request.coordinates}
                         ref={markerRef}
-                        image={userMarkerImage}>
-                        <Callout>
-                            <PoppinsText>{request.type}</PoppinsText>
-                        </Callout>
+                    >
+                        <Image source={require('../assets/images/broken-car.png')} style={{ width: 50, height: 50 }} />
                     </Marker>
                     <MapViewDirections
                         apikey={process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}
@@ -385,7 +379,9 @@ const TechnicianRequestsMapScreen = ({ route, navigation }) => {
                             strokeWidth={4}
                             lineDashPattern={[4, 4]}
                         />
-                        <Marker coordinate={request.dropOffLocation} image={userDropOffMarkerImage} />
+                        <Marker coordinate={request.dropOffLocation}>
+                            <Image source={require('../assets/images/flag-marker.png')} style={{ width: 50, height: 50 }} />
+                        </Marker>
                     </>}
                 </>}
             </MapView>

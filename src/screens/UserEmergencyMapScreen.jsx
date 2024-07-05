@@ -40,7 +40,6 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
     const bottomSheetRef = useRef();
     const myLocationBtnBottom = useRef(new Animated.Value(0)).current
     const barOpacity = useRef(new Animated.Value(1)).current
-    const techIcon = require('../assets/images/tow-truck.png')
 
     const handleSheetChanges = useCallback(index => {
         Animated.spring(myLocationBtnBottom, {
@@ -58,7 +57,6 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
 
         if (locationPermission.granted) {
             const location = await Location.getCurrentPositionAsync({})
-            console.log(location.coords);
 
             setRegion({
                 longitude: location.coords.longitude,
@@ -184,7 +182,6 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
         })
 
         socket.on('request:responder-coord-update', payload => {
-            console.log("updated", payload);
             setResponderCoordinate(payload)
         })
 
@@ -250,8 +247,8 @@ const UserEmergencyMapScreen = ({ route, navigation }) => {
                     />
                     <Marker
                         coordinate={responderCoordinate}
-                        image={techIcon}
                     >
+                        <Image source={require('../assets/images/tow-truck.png')} style={{ width: 50, height: 50 }} />
                     </Marker>
                 </>}
             </MapView>

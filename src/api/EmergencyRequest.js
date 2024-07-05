@@ -52,3 +52,10 @@ export async function getRecentRequestHistory() {
 export async function getUserHistory() {
     return await rwClient.get('/emrgencyRequest/getUserHistory')
 }
+
+export async function getEstimatedServicePrice({ type, coords, dropOffCoords = null, vehicleId }) {
+    const stringifiedCoords = JSON.stringify(coords)
+    const stringifiedDropOffCoords = JSON.stringify(dropOffCoords)
+    
+    return await rwClient.get(`/emrgencyRequest/getEstimatedPrice/${type}/${stringifiedCoords}/${vehicleId}/${stringifiedDropOffCoords}`)
+}
